@@ -1,0 +1,506 @@
+jobcomp: ligne 12: module : commande introuvable
+OPERATING SYSTEM IS: Linux
+PROCESSOR IS: x86_64
+/bin/cp: impossible d'évaluer «../Roms_Agrif/*.h90»: Aucun fichier ou dossier de ce type
+  file namelist_pisces exists in Run directory
+/bin/cp: impossible d'évaluer «*.h90»: Aucun fichier ou dossier de ce type
+Checking COMPILEAGRIF...
+Checking COMPILEMPI...
+ => MPI activated
+Checking COMPILENBQ...
+Checking COMPILEXIOS...
+Checking COMPILEOASIS...
+/bin/rm -rf core *.o AGRIF/AGRIF_YOURFILES/*.o *.i *.s *.f *.f90 *.trace *.mod 
+/bin/rm -rf roms mpc cross_matrix cppcheck srcscheck checkkwds partit ncjoin ncrename ./rii_files
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include mpc.F > mpc_.f
+mpif90 -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include  -o mpc mpc_.f
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include module_nh.F90 > module_nh_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include module_nh_.f90 -o module_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include module_nbq.F90 > module_nbq_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include module_nbq_.f90 -o module_nbq.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include module_qsort.F90 > module_qsort_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include module_qsort_.f90 -o module_qsort.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include module_parallel_nbq.F90 > module_parallel_nbq_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include module_parallel_nbq_.f90 -o module_parallel_nbq.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include module_tracetxt_out.F90 > module_tracetxt_out_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include module_tracetxt_out_.f90 -o module_tracetxt_out.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include module_param.F | ./mpc > module_param_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include module_param_.f -o module_param.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include nump_nh.F90 > nump_nh_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include nump_nh_.f90 -o nump_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include mat_cont_init_nh.F90 > mat_cont_init_nh_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include mat_cont_init_nh_.f90 -o mat_cont_init_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include mat_cont_nh.F90 > mat_cont_nh_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include mat_cont_nh_.f90 -o mat_cont_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include mat_mom_init_nh.F90 > mat_mom_init_nh_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include mat_mom_init_nh_.f90 -o mat_mom_init_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include mat_mom_nh.F90 > mat_mom_nh_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include mat_mom_nh_.f90 -o mat_mom_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include initial_nh.F90 > initial_nh_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include initial_nh_.f90 -o initial_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include grid_coef_nh.F90 > grid_coef_nh_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include grid_coef_nh_.f90 -o grid_coef_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include ru_nbq.F90 > ru_nbq_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include ru_nbq_.f90 -o ru_nbq.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include viscous_nbq.F90 > viscous_nbq_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include viscous_nbq_.f90 -o viscous_nbq.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include step3d_nbq.F90 > step3d_nbq_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include step3d_nbq_.f90 -o step3d_nbq.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include density_nbq.F90 > density_nbq_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include density_nbq_.f90 -o density_nbq.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include spkitlocal_nh.F90 > spkitlocal_nh_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include spkitlocal_nh_.f90 -o spkitlocal_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include MPI_setup_nbq.F90 > MPI_setup_nbq_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include MPI_setup_nbq_.f90 -o MPI_setup_nbq.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include parallele_nbq.F90 > parallele_nbq_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include parallele_nbq_.f90 -o parallele_nbq.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include grid_exchange.F90 > grid_exchange_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include grid_exchange_.f90 -o grid_exchange.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include implicit_nbq.F90 > implicit_nbq_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include implicit_nbq_.f90 -o implicit_nbq.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include amub2_tri.F90 > amub2_tri_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include amub2_tri_.f90 -o amub2_tri.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include numuvw_nh.F90 > numuvw_nh_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include numuvw_nh_.f90 -o numuvw_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include grid_def_nh.F90 > grid_def_nh_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include grid_def_nh_.f90 -o grid_def_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include par_pisces.F90 > par_pisces_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include par_pisces_.f90 -o par_pisces.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include ocean2pisces.F90 > ocean2pisces_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include ocean2pisces_.f90 -o ocean2pisces.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include trc.F90 > trc_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include trc_.f90 -o trc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include sms_pisces.F90 > sms_pisces_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include sms_pisces_.f90 -o sms_pisces.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zche.F90 > p4zche_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zche_.f90 -o p4zche.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zint.F90 > p4zint_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zint_.f90 -o p4zint.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zlys.F90 > p4zlys_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zlys_.f90 -o p4zlys.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zflx.F90 > p4zflx_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zflx_.f90 -o p4zflx.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zlim.F90 > p4zlim_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zlim_.f90 -o p4zlim.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zsink.F90 > p4zsink_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zsink_.f90 -o p4zsink.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zmicro.F90 > p4zmicro_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zmicro_.f90 -o p4zmicro.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zmeso.F90 > p4zmeso_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zmeso_.f90 -o p4zmeso.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zmort.F90 > p4zmort_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zmort_.f90 -o p4zmort.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zopt.F90 > p4zopt_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zopt_.f90 -o p4zopt.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zprod.F90 > p4zprod_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zprod_.f90 -o p4zprod.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zrem.F90 > p4zrem_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zrem_.f90 -o p4zrem.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zsed.F90 > p4zsed_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zsed_.f90 -o p4zsed.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include p4zbio.F90 > p4zbio_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include p4zbio_.f90 -o p4zbio.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include trcwri_pisces.F90 > trcwri_pisces_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include trcwri_pisces_.f90 -o trcwri_pisces.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include trcsms_pisces.F90 > trcsms_pisces_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include trcsms_pisces_.f90 -o trcsms_pisces.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include trcini_pisces.F90 > trcini_pisces_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include trcini_pisces_.f90 -o trcini_pisces.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include pisces_ini.F90 > pisces_ini_.f90
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include pisces_ini_.f90 -o pisces_ini.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include main.F | ./mpc > main_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include main_.f -o main.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include step.F | ./mpc > step_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include step_.f -o step.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include read_inp.F | ./mpc > read_inp_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include read_inp_.f -o read_inp.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include timers_roms.F | ./mpc > timers_roms_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include timers_roms_.f -o timers_roms.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include init_scalars.F | ./mpc > init_scalars_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include init_scalars_.f -o init_scalars.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include init_arrays.F | ./mpc > init_arrays_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include init_arrays_.f -o init_arrays.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include set_weights.F | ./mpc > set_weights_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include set_weights_.f -o set_weights.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include set_scoord.F | ./mpc > set_scoord_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include set_scoord_.f -o set_scoord.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include ana_grid.F | ./mpc > ana_grid_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include ana_grid_.f -o ana_grid.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include setup_grid1.F | ./mpc > setup_grid1_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include setup_grid1_.f -o setup_grid1.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include setup_grid2.F | ./mpc > setup_grid2_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include setup_grid2_.f -o setup_grid2.o
+setup_grid2_.f(434): remark #8291: Recommended relationship between field width 'W' and the number of fractional digits 'D' in this edit descriptor is 'W>=D+7'.
+     &        '(F12.6,F13.6,2(1x,E14.9),2F12.8)')
+----------------------------------^
+setup_grid2_.f(436): remark #8291: Recommended relationship between field width 'W' and the number of fractional digits 'D' in this edit descriptor is 'W>=D+7'.
+          if (mynode.eq.0) write( stdout,'(2(3x,A,1PE27.21)/)')
+-----------------------------------------------------^
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include set_nudgcof.F | ./mpc > set_nudgcof_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include set_nudgcof_.f -o set_nudgcof.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include ana_initial.F | ./mpc > ana_initial_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include ana_initial_.f -o ana_initial.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include analytical.F | ./mpc > analytical_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include analytical_.f -o analytical.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include zonavg.F | ./mpc > zonavg_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include zonavg_.f -o zonavg.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include step2d.F | ./mpc > step2d_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include step2d_.f -o step2d.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include u2dbc.F | ./mpc > u2dbc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include u2dbc_.f -o u2dbc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include v2dbc.F | ./mpc > v2dbc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include v2dbc_.f -o v2dbc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include zetabc.F | ./mpc > zetabc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include zetabc_.f -o zetabc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include obc_volcons.F | ./mpc > obc_volcons_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include obc_volcons_.f -o obc_volcons.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include pre_step3d.F | ./mpc > pre_step3d_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include pre_step3d_.f -o pre_step3d.o
+pre_step3d_.f(360): remark #7713: This statement function has not been used.   [FLUX1]
+      REAL    :: flux1, flux2, flux3, flux4, flux5, flux6
+-----------------^
+pre_step3d_.f(360): remark #7713: This statement function has not been used.   [FLUX3]
+      REAL    :: flux1, flux2, flux3, flux4, flux5, flux6
+-------------------------------^
+pre_step3d_.f(360): remark #7713: This statement function has not been used.   [FLUX5]
+      REAL    :: flux1, flux2, flux3, flux4, flux5, flux6
+---------------------------------------------^
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include step3d_t.F | ./mpc > step3d_t_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include step3d_t_.f -o step3d_t.o
+step3d_t_.f(335): remark #7713: This statement function has not been used.   [FLUX5]
+      REAL    :: flux1, flux2, flux3, flux4, flux5, flux6
+---------------------------------------------^
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include step3d_uv1.F | ./mpc > step3d_uv1_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include step3d_uv1_.f -o step3d_uv1.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include step3d_uv2.F | ./mpc > step3d_uv2_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include step3d_uv2_.f -o step3d_uv2.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include prsgrd.F | ./mpc > prsgrd_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include prsgrd_.f -o prsgrd.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include rhs3d.F | ./mpc > rhs3d_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include rhs3d_.f -o rhs3d.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include set_depth.F | ./mpc > set_depth_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include set_depth_.f -o set_depth.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include omega.F | ./mpc > omega_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include omega_.f -o omega.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include uv3dmix.F | ./mpc > uv3dmix_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include uv3dmix_.f -o uv3dmix.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include uv3dmix_spg.F | ./mpc > uv3dmix_spg_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include uv3dmix_spg_.f -o uv3dmix_spg.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include t3dmix.F | ./mpc > t3dmix_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include t3dmix_.f -o t3dmix.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include t3dmix_spg.F | ./mpc > t3dmix_spg_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include t3dmix_spg_.f -o t3dmix_spg.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include hmix_coef.F | ./mpc > hmix_coef_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include hmix_coef_.f -o hmix_coef.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wetdry.F | ./mpc > wetdry_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wetdry_.f -o wetdry.o
+wetdry_.f: remark #5133: The input stream is empty
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include u3dbc.F | ./mpc > u3dbc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include u3dbc_.f -o u3dbc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include v3dbc.F | ./mpc > v3dbc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include v3dbc_.f -o v3dbc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include t3dbc.F | ./mpc > t3dbc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include t3dbc_.f -o t3dbc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include rho_eos.F | ./mpc > rho_eos_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include rho_eos_.f -o rho_eos.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include ab_ratio.F | ./mpc > ab_ratio_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include ab_ratio_.f -o ab_ratio.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include alfabeta.F | ./mpc > alfabeta_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include alfabeta_.f -o alfabeta.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include ana_vmix.F | ./mpc > ana_vmix_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include ana_vmix_.f -o ana_vmix.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include bvf_mix.F | ./mpc > bvf_mix_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include bvf_mix_.f -o bvf_mix.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include lmd_vmix.F | ./mpc > lmd_vmix_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include lmd_vmix_.f -o lmd_vmix.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include gls_mixing.F | ./mpc > gls_mixing_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include gls_mixing_.f -o gls_mixing.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include lmd_skpp.F | ./mpc > lmd_skpp_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include lmd_skpp_.f -o lmd_skpp.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include lmd_bkpp.F | ./mpc > lmd_bkpp_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include lmd_bkpp_.f -o lmd_bkpp.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include lmd_swfrac.F | ./mpc > lmd_swfrac_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include lmd_swfrac_.f -o lmd_swfrac.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include lmd_wscale.F | ./mpc > lmd_wscale_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include lmd_wscale_.f -o lmd_wscale.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include gls_prestep.F | ./mpc > gls_prestep_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include gls_prestep_.f -o gls_prestep.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include diag.F | ./mpc > diag_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include diag_.f -o diag.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wvlcty.F | ./mpc > wvlcty_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wvlcty_.f -o wvlcty.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include checkdims.F | ./mpc > checkdims_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include checkdims_.f -o checkdims.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include grid_stiffness.F | ./mpc > grid_stiffness_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include grid_stiffness_.f -o grid_stiffness.o
+grid_stiffness_.f(300): remark #8290: Recommended relationship between field width 'W' and the number of fractional digits 'D' in this edit descriptor is 'W>=D+3'.
+          if (mynode.eq.0) write(stdout,'(/1x,A,F12.10,2x,A,F14.10/)')
+-------------------------------------------------^
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include bio_diag.F | ./mpc > bio_diag_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include bio_diag_.f -o bio_diag.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include checkkwds.F | ./mpc > checkkwds_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include checkkwds_.f -o checkkwds.o
+mpif90 -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include  -o checkkwds checkkwds.o
+./checkkwds
+
+ This is CHECKKWDS: Creating new version of "setup_kwds.F".
+
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include setup_kwds.F | ./mpc > setup_kwds_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include setup_kwds_.f -o setup_kwds.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include check_kwds.F | ./mpc > check_kwds_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include check_kwds_.f -o check_kwds.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include srcscheck.F | ./mpc > srcscheck_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include srcscheck_.f -o srcscheck.o
+mpif90 -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include  -o srcscheck srcscheck.o
+./srcscheck
+
+ This is SRCSCHECK: Creating new version of check_srcs.F.
+
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include check_srcs.F | ./mpc > check_srcs_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include check_srcs_.f -o check_srcs.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include cppcheck.F | ./mpc > cppcheck_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include cppcheck_.f -o cppcheck.o
+mpif90 -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include  -o cppcheck cppcheck.o
+cat cppdefs.h cppdefs_dev.h > mergcpp.txt
+./cppcheck
+
+ This is CPPCHECK: Creating new version of check_switches1.F.
+
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include check_switches1.F | ./mpc > check_switches1_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include check_switches1_.f -o check_switches1.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include check_switches2.F | ./mpc > check_switches2_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include check_switches2_.f -o check_switches2.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include debug.F | ./mpc > debug_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include debug_.f -o debug.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include output.F | ./mpc > output_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include output_.f -o output.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include put_global_atts.F | ./mpc > put_global_atts_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include put_global_atts_.f -o put_global_atts.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include nf_fread.F | ./mpc > nf_fread_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include nf_fread_.f -o nf_fread.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include nf_fread_x.F | ./mpc > nf_fread_x_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include nf_fread_x_.f -o nf_fread_x.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include nf_fread_y.F | ./mpc > nf_fread_y_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include nf_fread_y_.f -o nf_fread_y.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include nf_read_bry.F | ./mpc > nf_read_bry_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include nf_read_bry_.f -o nf_read_bry.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_date.F | ./mpc > get_date_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_date_.f -o get_date.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include lenstr.F | ./mpc > lenstr_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include lenstr_.f -o lenstr.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include closecdf.F | ./mpc > closecdf_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include closecdf_.f -o closecdf.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include insert_node.F | ./mpc > insert_node_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include insert_node_.f -o insert_node.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include fillvalue.F | ./mpc > fillvalue_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include fillvalue_.f -o fillvalue.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include nf_add_attribute.F | ./mpc > nf_add_attribute_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include nf_add_attribute_.f -o nf_add_attribute.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include set_cycle.F | ./mpc > set_cycle_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include set_cycle_.f -o set_cycle.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include def_grid_2d.F | ./mpc > def_grid_2d_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include def_grid_2d_.f -o def_grid_2d.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include def_grid_3d.F | ./mpc > def_grid_3d_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include def_grid_3d_.f -o def_grid_3d.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include def_his.F | ./mpc > def_his_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include def_his_.f -o def_his.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include def_rst.F | ./mpc > def_rst_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include def_rst_.f -o def_rst.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include def_diags.F | ./mpc > def_diags_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include def_diags_.f -o def_diags.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include def_diagsM.F | ./mpc > def_diagsM_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include def_diagsM_.f -o def_diagsM.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include def_bio_diags.F | ./mpc > def_bio_diags_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include def_bio_diags_.f -o def_bio_diags.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_grid.F | ./mpc > wrt_grid_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_grid_.f -o wrt_grid.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_his.F | ./mpc > wrt_his_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_his_.f -o wrt_his.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_avg.F | ./mpc > wrt_avg_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_avg_.f -o wrt_avg.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_rst.F | ./mpc > wrt_rst_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_rst_.f -o wrt_rst.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_diags.F | ./mpc > wrt_diags_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_diags_.f -o wrt_diags.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_diags_avg.F | ./mpc > wrt_diags_avg_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_diags_avg_.f -o wrt_diags_avg.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_diagsM.F | ./mpc > wrt_diagsM_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_diagsM_.f -o wrt_diagsM.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_diagsM_avg.F | ./mpc > wrt_diagsM_avg_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_diagsM_avg_.f -o wrt_diagsM_avg.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_bio_diags.F | ./mpc > wrt_bio_diags_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_bio_diags_.f -o wrt_bio_diags.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_bio_diags_avg.F | ./mpc > wrt_bio_diags_avg_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_bio_diags_avg_.f -o wrt_bio_diags_avg.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include set_avg.F | ./mpc > set_avg_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include set_avg_.f -o set_avg.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include set_diags_avg.F | ./mpc > set_diags_avg_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include set_diags_avg_.f -o set_diags_avg.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include set_diagsM_avg.F | ./mpc > set_diagsM_avg_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include set_diagsM_avg_.f -o set_diagsM_avg.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include set_bio_diags_avg.F | ./mpc > set_bio_diags_avg_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include set_bio_diags_avg_.f -o set_bio_diags_avg.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_grid.F | ./mpc > get_grid_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_grid_.f -o get_grid.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_initial.F | ./mpc > get_initial_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_initial_.f -o get_initial.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_vbc.F | ./mpc > get_vbc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_vbc_.f -o get_vbc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_wwave.F | ./mpc > get_wwave_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_wwave_.f -o get_wwave.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_tclima.F | ./mpc > get_tclima_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_tclima_.f -o get_tclima.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_uclima.F | ./mpc > get_uclima_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_uclima_.f -o get_uclima.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_ssh.F | ./mpc > get_ssh_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_ssh_.f -o get_ssh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_sss.F | ./mpc > get_sss_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_sss_.f -o get_sss.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_smflux.F | ./mpc > get_smflux_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_smflux_.f -o get_smflux.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_stflux.F | ./mpc > get_stflux_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_stflux_.f -o get_stflux.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_srflux.F | ./mpc > get_srflux_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_srflux_.f -o get_srflux.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_sst.F | ./mpc > get_sst_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_sst_.f -o get_sst.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_tides.F | ./mpc > get_tides_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_tides_.f -o get_tides.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include clm_tides.F | ./mpc > clm_tides_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include clm_tides_.f -o clm_tides.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_bulk.F | ./mpc > get_bulk_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_bulk_.f -o get_bulk.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include bulk_flux.F | ./mpc > bulk_flux_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include bulk_flux_.f -o bulk_flux.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_bry.F | ./mpc > get_bry_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_bry_.f -o get_bry.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_bry_bio.F | ./mpc > get_bry_bio_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_bry_bio_.f -o get_bry_bio.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include sstskin.F | ./mpc > sstskin_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include sstskin_.f -o sstskin.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_psource.F | ./mpc > get_psource_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_psource_.f -o get_psource.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_psource_ts.F | ./mpc > get_psource_ts_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_psource_ts_.f -o get_psource_ts.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include mrl_wci.F | ./mpc > mrl_wci_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include mrl_wci_.f -o mrl_wci.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wkb_wwave.F | ./mpc > wkb_wwave_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wkb_wwave_.f -o wkb_wwave.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wkbbc.F | ./mpc > wkbbc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wkbbc_.f -o wkbbc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_bry_wkb.F | ./mpc > get_bry_wkb_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_bry_wkb_.f -o get_bry_wkb.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include online_bulk_var.F | ./mpc > online_bulk_var_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include online_bulk_var_.f -o online_bulk_var.o
+online_bulk_var_.f: remark #5133: The input stream is empty
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include online_get_bulk.F | ./mpc > online_get_bulk_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include online_get_bulk_.f -o online_get_bulk.o
+online_get_bulk_.f: remark #5133: The input stream is empty
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include online_interp.F | ./mpc > online_interp_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include online_interp_.f -o online_interp.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include online_interpolate_bulk.F | ./mpc > online_interpolate_bulk_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include online_interpolate_bulk_.f -o online_interpolate_bulk.o
+online_interpolate_bulk_.f: remark #5133: The input stream is empty
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include online_set_bulk.F | ./mpc > online_set_bulk_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include online_set_bulk_.f -o online_set_bulk.o
+online_set_bulk_.f: remark #5133: The input stream is empty
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include init_floats.F | ./mpc > init_floats_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include init_floats_.f -o init_floats.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_floats.F | ./mpc > wrt_floats_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_floats_.f -o wrt_floats.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include step_floats.F | ./mpc > step_floats_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include step_floats_.f -o step_floats.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include rhs_floats.F | ./mpc > rhs_floats_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include rhs_floats_.f -o rhs_floats.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include interp_rho.F | ./mpc > interp_rho_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include interp_rho_.f -o interp_rho.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include def_floats.F | ./mpc > def_floats_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include def_floats_.f -o def_floats.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include init_arrays_floats.F | ./mpc > init_arrays_floats_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include init_arrays_floats_.f -o init_arrays_floats.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include random_walk.F | ./mpc > random_walk_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include random_walk_.f -o random_walk.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include get_initial_floats.F | ./mpc > get_initial_floats_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include get_initial_floats_.f -o get_initial_floats.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include init_sta.F | ./mpc > init_sta_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include init_sta_.f -o init_sta.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wrt_sta.F | ./mpc > wrt_sta_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wrt_sta_.f -o wrt_sta.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include step_sta.F | ./mpc > step_sta_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include step_sta_.f -o step_sta.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include interp_sta.F | ./mpc > interp_sta_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include interp_sta_.f -o interp_sta.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include def_sta.F | ./mpc > def_sta_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include def_sta_.f -o def_sta.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include init_arrays_sta.F | ./mpc > init_arrays_sta_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include init_arrays_sta_.f -o init_arrays_sta.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include biology.F | ./mpc > biology_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include biology_.f -o biology.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include o2sato.F | ./mpc > o2sato_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include o2sato_.f -o o2sato.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include sediment.F | ./mpc > sediment_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include sediment_.f -o sediment.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include bbl.F | ./mpc > bbl_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include bbl_.f -o bbl.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include MPI_Setup.F | ./mpc > MPI_Setup_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include MPI_Setup_.f -o MPI_Setup.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include MessPass2D.F | ./mpc > MessPass2D_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include MessPass2D_.f -o MessPass2D.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include MessPass3D.F | ./mpc > MessPass3D_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include MessPass3D_.f -o MessPass3D.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include exchange.F | ./mpc > exchange_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include exchange_.f -o exchange.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include autotiling.F | ./mpc > autotiling_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include autotiling_.f -o autotiling.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include zoom.F | ./mpc > zoom_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include zoom_.f -o zoom.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include update2D.F | ./mpc > update2D_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include update2D_.f -o update2D.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include set_nudgcof_fine.F | ./mpc > set_nudgcof_fine_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include set_nudgcof_fine_.f -o set_nudgcof_fine.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include zoombc_2D.F | ./mpc > zoombc_2D_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include zoombc_2D_.f -o zoombc_2D.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include zoombc_3D.F | ./mpc > zoombc_3D_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include zoombc_3D_.f -o zoombc_3D.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include uv3dpremix.F | ./mpc > uv3dpremix_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include uv3dpremix_.f -o uv3dpremix.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include t3dpremix.F | ./mpc > t3dpremix_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include t3dpremix_.f -o t3dpremix.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include update3D.F | ./mpc > update3D_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include update3D_.f -o update3D.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include Agrif2Model.F | ./mpc > Agrif2Model_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include Agrif2Model_.f -o Agrif2Model.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include init_xios.F | ./mpc > init_xios_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include init_xios_.f -o init_xios.o
+init_xios_.f: remark #5133: The input stream is empty
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include send_xios_diags.F | ./mpc > send_xios_diags_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include send_xios_diags_.f -o send_xios_diags.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include step3d_w.F | ./mpc > step3d_w_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include step3d_w_.f -o step3d_w.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include rhs3d_w_nh.F | ./mpc > rhs3d_w_nh_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include rhs3d_w_nh_.f -o rhs3d_w_nh.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include w3dbc.F | ./mpc > w3dbc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include w3dbc_.f -o w3dbc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include unbq_bc.F | ./mpc > unbq_bc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include unbq_bc_.f -o unbq_bc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include vnbq_bc.F | ./mpc > vnbq_bc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include vnbq_bc_.f -o vnbq_bc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include wnbq_bc.F | ./mpc > wnbq_bc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include wnbq_bc_.f -o wnbq_bc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include rnbq_bc.F | ./mpc > rnbq_bc_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include rnbq_bc_.f -o rnbq_bc.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_define.F | ./mpc > cpl_prism_define_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_define_.f -o cpl_prism_define.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_put.F | ./mpc > cpl_prism_put_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_put_.f -o cpl_prism_put.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_init.F | ./mpc > cpl_prism_init_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_init_.f -o cpl_prism_init.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_get.F | ./mpc > cpl_prism_get_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_get_.f -o cpl_prism_get.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_getvar.F | ./mpc > cpl_prism_getvar_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_getvar_.f -o cpl_prism_getvar.o
+cpp -traditional -DLinux -DIfort -P -I/opt/linux/netcdf/4.1.3-intel12/64/include -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_getlistvals.F | ./mpc > cpl_prism_getlistvals_.f
+mpif90 -c -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include cpl_prism_getlistvals_.f -o cpl_prism_getlistvals.o
+mpif90 -O3 -72 -fno-alias -i4 -r8 -fp-model precise -I/opt/linux/mpich2/1.5-intel12.1/include  -o a.out module_nh.o module_nbq.o module_qsort.o module_parallel_nbq.o module_tracetxt_out.o module_param.o nump_nh.o mat_cont_init_nh.o mat_cont_nh.o mat_mom_init_nh.o mat_mom_nh.o initial_nh.o grid_coef_nh.o ru_nbq.o viscous_nbq.o step3d_nbq.o density_nbq.o spkitlocal_nh.o MPI_setup_nbq.o parallele_nbq.o grid_exchange.o implicit_nbq.o amub2_tri.o numuvw_nh.o grid_def_nh.o par_pisces.o ocean2pisces.o trc.o sms_pisces.o p4zche.o p4zint.o p4zlys.o p4zflx.o p4zlim.o p4zsink.o p4zmicro.o p4zmeso.o p4zmort.o p4zopt.o p4zprod.o p4zrem.o p4zsed.o p4zbio.o trcwri_pisces.o trcsms_pisces.o trcini_pisces.o pisces_ini.o main.o step.o read_inp.o timers_roms.o init_scalars.o init_arrays.o set_weights.o set_scoord.o ana_grid.o setup_grid1.o setup_grid2.o set_nudgcof.o ana_initial.o analytical.o zonavg.o step2d.o u2dbc.o v2dbc.o zetabc.o obc_volcons.o pre_step3d.o step3d_t.o step3d_uv1.o step3d_uv2.o prsgrd.o rhs3d.o set_depth.o omega.o uv3dmix.o uv3dmix_spg.o t3dmix.o t3dmix_spg.o hmix_coef.o wetdry.o u3dbc.o v3dbc.o t3dbc.o rho_eos.o ab_ratio.o alfabeta.o ana_vmix.o bvf_mix.o lmd_vmix.o gls_mixing.o lmd_skpp.o lmd_bkpp.o lmd_swfrac.o lmd_wscale.o gls_prestep.o diag.o wvlcty.o checkdims.o grid_stiffness.o bio_diag.o setup_kwds.o check_kwds.o check_srcs.o check_switches1.o check_switches2.o debug.o output.o put_global_atts.o nf_fread.o nf_fread_x.o nf_fread_y.o nf_read_bry.o get_date.o lenstr.o closecdf.o insert_node.o fillvalue.o nf_add_attribute.o set_cycle.o def_grid_2d.o def_grid_3d.o def_his.o def_rst.o def_diags.o def_diagsM.o def_bio_diags.o wrt_grid.o wrt_his.o wrt_avg.o wrt_rst.o wrt_diags.o wrt_diags_avg.o wrt_diagsM.o wrt_diagsM_avg.o wrt_bio_diags.o wrt_bio_diags_avg.o set_avg.o set_diags_avg.o set_diagsM_avg.o set_bio_diags_avg.o get_grid.o get_initial.o get_vbc.o get_wwave.o get_tclima.o get_uclima.o get_ssh.o get_sss.o get_smflux.o get_stflux.o get_srflux.o get_sst.o get_tides.o clm_tides.o get_bulk.o bulk_flux.o get_bry.o get_bry_bio.o sstskin.o get_psource.o get_psource_ts.o mrl_wci.o wkb_wwave.o wkbbc.o get_bry_wkb.o online_bulk_var.o online_get_bulk.o online_interp.o online_interpolate_bulk.o online_set_bulk.o init_floats.o wrt_floats.o step_floats.o rhs_floats.o interp_rho.o def_floats.o init_arrays_floats.o random_walk.o get_initial_floats.o init_sta.o wrt_sta.o step_sta.o interp_sta.o def_sta.o init_arrays_sta.o biology.o o2sato.o sediment.o bbl.o MPI_Setup.o MessPass2D.o MessPass3D.o exchange.o autotiling.o zoom.o update2D.o set_nudgcof_fine.o zoombc_2D.o zoombc_3D.o uv3dpremix.o t3dpremix.o update3D.o Agrif2Model.o init_xios.o send_xios_diags.o step3d_w.o rhs3d_w_nh.o w3dbc.o unbq_bc.o vnbq_bc.o wnbq_bc.o rnbq_bc.o cpl_prism_define.o cpl_prism_put.o cpl_prism_init.o cpl_prism_get.o cpl_prism_getvar.o cpl_prism_getlistvals.o -Vaxlib -L/opt/linux/netcdf/4.1.3-intel12/64/lib -lnetcdff -L/opt/linux/mpich2/1.5-intel12.1/lib -lmpich  
+ifort: command line remark #10010: option '-Vaxlib' is deprecated and will be removed in a future release. See '-help deprecated'
+mv a.out roms
