@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_intergrids
 
   use mg_mpi
@@ -453,3 +455,7 @@ contains
   end subroutine coarse2fine_3D_linear
 
 end module mg_intergrids
+#else
+        module mg_intergrids_empty
+        end module
+#endif

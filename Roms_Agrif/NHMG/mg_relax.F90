@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_relax
 
   use mg_mpi
@@ -490,3 +492,7 @@ contains
   end subroutine compute_residual_3D_8
 
 end module mg_relax
+#else
+        module mg_relax_empty
+        end module
+#endif

@@ -1,8 +1,10 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_mpi
 
   use mpi
 
-  implicit none
+  implicit nonempi
 
   integer(kind=4) :: myrank
   integer(kind=4) :: nprocs
@@ -36,3 +38,7 @@ contains
   end subroutine mpi_nprocs
 
 end module mg_mpi
+#else
+        module mg_mpi_empty
+        end module
+#endif

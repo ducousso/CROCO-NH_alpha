@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_define_matrix
 
   use mg_mpi
@@ -397,3 +399,7 @@ contains
   end subroutine define_matrix
 
 end module mg_define_matrix
+#else
+        module mg_define_matrix_empty
+        end module
+#endif

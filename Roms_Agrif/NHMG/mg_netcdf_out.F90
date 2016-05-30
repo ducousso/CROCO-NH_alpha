@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_netcdf_out
 
   !===================!
@@ -876,3 +878,7 @@ contains
   end subroutine sub_netcdf_write_fast_r4D
 
 end module mg_netcdf_out
+#else
+        module mg_netcdf_out_empty
+        end module
+#endif

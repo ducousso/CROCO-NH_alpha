@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_namelist
 
   use mg_tictoc
@@ -123,3 +125,7 @@ contains
   end subroutine read_nhnamelist
 
 end module mg_namelist
+#else
+        module mg_namelist_empty
+        end module
+#endif

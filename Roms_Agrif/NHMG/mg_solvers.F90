@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_solvers
 
   use mg_mpi
@@ -289,3 +291,7 @@ contains
   end subroutine testgalerkin
 
 end module mg_solvers
+#else
+        module mg_solvers_empty
+        end module
+#endif

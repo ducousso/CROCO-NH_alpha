@@ -6,7 +6,7 @@
 # set source, compilation and run directories
 #
 SOURCE=../Roms_Agrif
-SCRDIR=./Compile
+SCRDIR=/local/tmp/1/ducousso/CROCO-NH/Compile
 RUNDIR=`pwd`
 
 module list

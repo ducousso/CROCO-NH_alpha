@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_zr_zw
 
   implicit none
@@ -196,3 +198,7 @@ contains
   end subroutine setup_zr_zw_croco
 
 end module mg_zr_zw
+#else
+        module mg_zr_zw_empty
+        end module
+#endif

@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_mpi_exchange
 
   use mg_mpi
@@ -1200,3 +1202,7 @@ contains
 
 
 end module mg_mpi_exchange
+#else
+        module mg_mpi_exchange_empty
+        end module
+#endif

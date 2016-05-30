@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module nhydro
 
   use mg_mpi
@@ -76,3 +78,7 @@ contains
   end subroutine nhydro_clean
 
 end module nhydro
+#else
+        module nhydro_empty
+        end module
+#endif

@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_grids
 
   use mg_mpi
@@ -526,3 +528,7 @@ contains
   end subroutine grids_dealloc
 
 end module mg_grids
+#else
+        module mg_grids_empty
+        end module
+#endif

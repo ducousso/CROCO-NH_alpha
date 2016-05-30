@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_gather
 
   use mg_mpi
@@ -218,3 +220,7 @@ contains
   end subroutine split
 
 end module mg_gather
+#else
+        module mg_gather_empty
+        end module
+#endif

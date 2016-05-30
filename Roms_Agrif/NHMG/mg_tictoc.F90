@@ -1,3 +1,5 @@
+#include "cppdefs.h"
+#ifdef NHMG
 module mg_tictoc
   ! intrinsec fortran funciton
   ! cpu_time(time)  time in second
@@ -174,3 +176,7 @@ contains
   end subroutine print_tictoc_old
 
 end module mg_tictoc
+#else
+        module mg_tictoc_empty
+        end module
+#endif

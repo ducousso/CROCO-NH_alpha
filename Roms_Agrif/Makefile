@@ -125,7 +125,21 @@ include Makedefs
 	p4zlim.F90	p4zsink.F90		p4zmicro.F90	p4zmeso.F90\
 	p4zmort.F90	p4zopt.F90		p4zprod.F90	p4zrem.F90\
 	p4zsed.F90	p4zbio.F90		trcwri_pisces.F90\
-	trcsms_pisces.F90	trcini_pisces.F90	pisces_ini.F90
+	trcsms_pisces.F90	trcini_pisces.F90	pisces_ini.F90 \
+\
+	mg_mpi.F90           \
+	mg_tictoc.F90        \
+	mg_zr_zw.F90         \
+	mg_namelist.F90      \
+	mg_netcdf_out.F90    \
+	mg_grids.F90         \
+	mg_mpi_exchange.F90  \
+	mg_gather.F90        \
+	mg_define_matrix.F90 \
+	mg_relax.F90         \
+	mg_intergrids.F90    \
+	mg_solvers.F90       \
+	nhydro.F90           \
 
 AMRDIR = AGRIF/AGRIF_YOURFILES
 
