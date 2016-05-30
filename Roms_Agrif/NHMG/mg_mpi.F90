@@ -4,7 +4,7 @@ module mg_mpi
 
   use mpi
 
-  implicit nonempi
+  implicit none
 
   integer(kind=4) :: myrank
   integer(kind=4) :: nprocs

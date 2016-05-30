@@ -405,7 +405,7 @@
 # else
 #  define UV_VIS2
 # endif
-# undef  NHMG
+# define NHMG
 # define SOLVE3D
 # define NEW_S_COORD
 # define UV_ADV

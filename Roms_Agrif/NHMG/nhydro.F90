@@ -5,7 +5,6 @@ module nhydro
   use mg_mpi
   use mg_grids
   use mg_namelist
-  use mg_setup_tests
   use mg_solvers
   use mg_mpi_exchange
   use mg_netcdf_out
@@ -35,19 +34,19 @@ contains
 
     call print_grids()
 
-    if (present(test)) then
-
-       if (trim(test)=='cuc') then
-          call setup_cuc(inc)                  ! call define matrices !
-       elseif (trim(test)=='seamount') then
-          bench = 'seamount'
-          call setup_seamount()                ! call define matrices !
-       else
-          write(*,*)'Error: nhydro: please enter a valid test name!', trim(test)
-          stop
-       endif
-
-    endif
+!!$    if (present(test)) then
+!!$
+!!$       if (trim(test)=='cuc') then
+!!$          call setup_cuc(inc)                  ! call define matrices !
+!!$       elseif (trim(test)=='seamount') then
+!!$          bench = 'seamount'
+!!$          call setup_seamount()                ! call define matrices !
+!!$       else
+!!$          write(*,*)'Error: nhydro: please enter a valid test name!', trim(test)
+!!$          stop
+!!$       endif
+!!$
+!!$    endif
 
   end subroutine nhydro_init
 
