@@ -116,6 +116,7 @@ AGRIF_SRC=${SOURCE}/AGRIF
 /bin/cp -f ${SOURCE}/XIOS/*.F $SCRDIR
 /bin/cp -f ${SOURCE}/PISCES/* $SCRDIR
 /bin/cp -f ${SOURCE}/PISCES/kRGB61* $RUNDIR
+/bin/cp -f ${SOURCE}/NHMG/* $SCRDIR
 if [[ -e "namelist_pisces" ]] ; then
 	echo "  file namelist_pisces exists in Run directory"
 else
