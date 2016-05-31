@@ -567,8 +567,7 @@
 !
         do i=IstrU,Iend
           DC(i,0)=pm_u(i,j)*pn_u(i,j)
-        enddo
-        
+        enddo       
         if (FIRST_TIME_STEP) then
           do k=1,N
             do i=IstrU,Iend
@@ -628,7 +627,7 @@
 # endif
             enddo
           enddo          
-         endif
+        endif
 !
 !======================================================================
 !
@@ -706,7 +705,7 @@
               enddo
             enddo               !--> discard DC(:,0)
           endif
-        endif
+       endif
 !
 !======================================================================
 !
@@ -723,7 +722,7 @@
 !
       enddo     !<-- j
       
-# ifdef NBQ
+# if defined NBQ || defined NHMG
 !----------------------------------------------------------
 !<-- at this point 
 !<-- rw            contains internal 3D advection + Coriolis
@@ -738,34 +737,39 @@
           do i=Istr,Iend
             wz(i,j,k,nnew)=( wz(i,j,k,nstp)*(Hz(i,j,k)+Hz(i,j,k+1))
      &                                          +dt*pn(i,j)*pm(i,j)
-     &                              *(rw(i,j,k)+rw_nbq_avg1(i,j,k))
+     &                              *(rw(i,j,k)
+#  ifdef NBQ
+     &                                         +rw_nbq_avg1(i,j,k)
+#  endif
+     &                                                            )
      &                     )   /  (Hz_half(i,j,k)+Hz_half(i,j,k+1)) !<-- wz has units m.s-1
-
             wz(i,j,k,indx)=wz(i,j,k,nstp)*0.5*(Hz(i,j,k  )+
      &                                         Hz(i,j,k+1)) !<-- wz(indx) has units kg.m-1.s-1
-
+#  ifdef NBQ
             rwint_nbq(i,j,k)=pm(i,j)*pn(i,j)*rw(i,j,k) !<-- rwint_nbq has units kg.m-1.s-2
-
+#  endif
           enddo
         enddo
-!== Special treatment for k=N because the control volume at the top is Hz/2       
+        ! Special treatment for k=N because the control volume at the top is Hz/2       
         do i=Istr,Iend
             wz(i,j,N,nnew)=( wz(i,j,N,nstp)*Hz(i,j,N)
      &                            +dt*pn(i,j)*pm(i,j)
-     &                *(rw(i,j,N)+rw_nbq_avg1(i,j,N))
+     &                *(rw(i,j,N)
+#  ifdef NBQ
+     &                            +rw_nbq_avg1(i,j,N)
+#  endif
+     &                                               )
      &                     )        /  Hz_half(i,j,N) !<-- wz has units m.s-1
-
             wz(i,j,N,indx)=wz(i,j,N,nstp)*0.5*Hz(i,j,N) !<-- wz(indx) has units kg.m-1.s-1
-
+#  ifdef NBQ
             rwint_nbq(i,j,N)=pm(i,j)*pn(i,j)*rw(i,j,N) !<-- rwint_nbq has units kg.m-1.s-2
- 
+#  endif
         enddo        
 !==        
       else
 !==      
         cff1=0.5+gamma
         cff2=0.5-gamma
-!==        
         do k=1,N-1
           do i=Istr,Iend
              wz(i,j,k,nnew)=( cff1*wz(i,j,k,nstp)*(Hz(i,j,k  )+
@@ -773,34 +777,41 @@
      &                       +cff2*wz(i,j,k,indx)*(Hz_bak(i,j,k  )+
      &                                             Hz_bak(i,j,k+1))
      &                       +2.*cdt*pn(i,j)*pm(i,j)
-     &                              *(rw(i,j,k)+rw_nbq_avg1(i,j,k))
+     &                              *(rw(i,j,k)
+#  ifdef NBQ
+     &                                       +rw_nbq_avg1(i,j,k)
+#  endif
+     &                                                          )
      &                      ) / (Hz_half(i,j,k)+Hz_half(i,j,k+1))  !<-- wz has units m.s-1
-
              wz(i,j,k,indx)=wz(i,j,k,nstp)*0.5*(Hz(i,j,k  )+
      &                                          Hz(i,j,k+1)) !<-- wz(indx) has units kg.m-1.s-1
-
+#  ifdef NBQ
              rwint_nbq(i,j,k)=pm(i,j)*pn(i,j)*rw(i,j,k) !<-- rwint_nbq has units kg.m-1.s-2
-
+#  endif
           enddo
        enddo              
-
-!== Special treatment for k=N because the control volume at the top is Hz/2             
+       ! Special treatment for k=N because the control volume at the top is Hz/2             
        do i=Istr,Iend
              wz(i,j,N,nnew)=( cff1*wz(i,j,N,nstp)*Hz    (i,j,N)
      &                       +cff2*wz(i,j,N,indx)*Hz_bak(i,j,N)
      &                       +2.*cdt*pn(i,j)*pm(i,j)
-     &                          *(rw(i,j,N)+rw_nbq_avg1(i,j,N))
+     &                          *(rw(i,j,N)
+#  ifdef NBQ
+     &                                     +rw_nbq_avg1(i,j,N)
+#  endif
+     &                                                        )
      &                      )/ Hz_half(i,j,N)                !<-- wz has units m.s-1
-
              wz(i,j,N,indx)=wz(i,j,N,nstp)*0.5*Hz(i,j,N)   !<-- wz(indx) has units kg.m-1.s-1
-
+#  ifdef NBQ
              rwint_nbq(i,j,N)=pm(i,j)*pn(i,j)*rw(i,j,N) !<-- rwint_nbq has units kg.m-1.s-2
+#  endif
        enddo            
 !==                  
       endif
       enddo
 !==
-# endif /* NBQ */     
+# endif /* NBQ */   
+  
 !
 !======================================================================
 ! Set PHYSICAL lateral boundary conditions for tracers.
@@ -821,9 +832,18 @@
 
       call u3dbc_tile (Istr,Iend,Jstr,Jend, WORK)
       call v3dbc_tile (Istr,Iend,Jstr,Jend, WORK)
-# ifdef NBQ
+# ifdef NBQ || NHMG
       call w3dbc_tile (Istr,Iend,Jstr,Jend, WORK)      
 # endif
+
+
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+!# ifdef NHMG
+!      call nhydro_solve(u(:,:,:,nnew),v(:,:,:,nnew),wz(:,:,:,nnew))
+!# endif
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
 !
 !======================================================================
 ! Coupling, include ghost points associated with PHYSICAL
@@ -954,7 +974,7 @@
      &                        u(START_2D_ARRAY,1,nnew))
       call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
      &                        v(START_2D_ARRAY,1,nnew))
-#  ifdef NBQ    
+#  if defined NBQ || defined NHMG
       call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
      &                        wz(START_2D_ARRAY,0,nnew))     
 #  endif

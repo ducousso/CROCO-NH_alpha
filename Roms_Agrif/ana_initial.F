@@ -487,7 +487,7 @@ C$    integer omp_get_thread_num
             enddo
           enddo
         enddo
-#   endif /* GRAV_ADJ_SOLITON */
+#   endif /* GRAVADJ_SOLITON */
 
 #  elif defined ACOUSTIC
         do j=JstrR,JendR

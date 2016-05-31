@@ -1,5 +1,5 @@
 #include "cppdefs.h"
-#if defined SOLVE3D && defined NBQ
+#if defined SOLVE3D && (defined NBQ || defined NHMG)
 
       subroutine rhs3d_w_nh(tile)
 !====================================================================

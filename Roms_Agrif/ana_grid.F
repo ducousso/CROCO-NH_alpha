@@ -198,7 +198,8 @@ C$    integer omp_get_thread_num
                      Length_ETA=0.1
 #  else
                      Length_XI =64.0E+3
-                     Length_ETA=2.0E+3
+!                     Length_ETA=2.0E+3
+                     Length_ETA=64.0E+3
 #  endif
 # elif defined ACOUSTIC
                      Length_XI =128.0

@@ -48,7 +48,8 @@
 #  endif
 # else
 !     parameter (LLm0=32,   MMm0=4,    N=10)   !   2 km resolution
-      parameter (LLm0=128,  MMm0=4,    N=40)   ! 500  m resolution
+!      parameter (LLm0=128,  MMm0=4,    N=40)   ! 500  m resolution
+      parameter (LLm0=128,  MMm0=128,    N=40)   ! 500  m resolution
 !     parameter (LLm0=512,  MMm0=4,   N=160)   ! 125  m resolution
 # endif
 #elif defined INNERSHELF

@@ -35,6 +35,9 @@
           USE pisces_ini     ! PISCES modules
           USE trcini_pisces 
 #endif
+#ifdef NHMG
+          USE nhydro, only : nhydro_init
+#endif
 !     implicit none
       integer tile, subs, trd, ierr
 #include "param.h"
@@ -275,6 +278,20 @@ C$OMP PARALLEL DO PRIVATE(tile)
       do tile=0,NSUB_X*NSUB_E-1
         call grid_stiffness (tile)
       enddo
+#endif
+
+#ifdef NHMG
+!
+!----------------------------------------------------------------------
+!  Setup of the NHMG grids and matrices
+!  from the horizontal and vertical grid variables
+!----------------------------------------------------------------------
+!
+      call nhydro_init(
+     & Lm,Mm,N,
+     & NP_XI,NP_ETA,
+     & 1._8/pm,1._8/pn,
+     & h,hc,theta_b,theta_s)
 #endif
 !
 !----------------------------------------------------------------------
