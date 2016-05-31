@@ -41,7 +41,7 @@ contains
 
     call print_grids()
 
-    call define_matrices(dx, dy, h)
+    call define_matrices(dx,dy,h)
 
   end subroutine nhydro_init
 
@@ -51,16 +51,20 @@ contains
     real(kind=rp), dimension(:,:,:), pointer, intent(inout) :: u,v,w
 
     real(kind=rp)    :: tol = 1.e-12
-    integer(kind=ip) :: maxite = 50
+    integer(kind=ip) :: maxite = 10
 
+    ! compute nhydro rhs
+
+    ! solve for nhydro pressure
     grid(1)%p(:,:,:) = 0._rp
-
     call solve(tol,maxite)
 
     if (netcdf_output) then
        call write_netcdf(grid(1)%p,vname='p',netcdf_file_name='p_end.nc',rank=myrank)
        call write_netcdf(grid(1)%r,vname='r',netcdf_file_name='r_end.nc',rank=myrank)
     endif
+
+    ! correct u,v,w
 
   end subroutine nhydro_solve
 

@@ -290,8 +290,10 @@ C$OMP PARALLEL DO PRIVATE(tile)
       call nhydro_init(
      & Lm,Mm,N,
      & NP_XI,NP_ETA,
-     & 1._8/pm,1._8/pn,
-     & h,hc,theta_b,theta_s)
+     & transpose(1._8/pm),
+     & transpose(1._8/pn),
+     & transpose(h),
+     & hc,theta_b,theta_s)
 #endif
 !
 !----------------------------------------------------------------------
