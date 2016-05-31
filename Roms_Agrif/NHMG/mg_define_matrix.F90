@@ -28,9 +28,9 @@ contains
 
   !-------------------------------------------------------------------------  
   subroutine define_matrices_topo(dx, dy, h)
-    real(kind=rp), dimension(:,:), pointer, intent(in) :: dx
-    real(kind=rp), dimension(:,:), pointer, intent(in) :: dy
-    real(kind=rp), dimension(:,:), pointer, intent(in) :: h
+    real(kind=rp), dimension(:,:), intent(in) :: dx
+    real(kind=rp), dimension(:,:), intent(in) :: dy
+    real(kind=rp), dimension(:,:), intent(in) :: h
 
     integer(kind=ip)::  lev
 
@@ -148,7 +148,7 @@ contains
           !!     grid(lev)%zr, grid(lev)%zw      )    ! output args
        else
           call setup_zr_zw                     ( & 
-               hlim,theta_b,theta_s,grid(lev)%h, &  ! input args
+               hlim,nhtheta_b,nhtheta_s,grid(lev)%h, &  ! input args
                grid(lev)%zr, grid(lev)%zw      , &  ! output args
                coord_type='new_s_coord'        )    ! optional
        endif

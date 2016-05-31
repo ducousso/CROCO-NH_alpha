@@ -12,7 +12,7 @@ module mg_tictoc
 
   real(kind = lg)  , dimension(levmax,submax) :: ntic
   real(kind = lg)  , dimension(levmax,submax) :: ntoc
-  real(kind = lg)  , dimension(levmax,submax) :: time
+  real(kind = lg)  , dimension(levmax,submax) :: time_tt
   integer(kind=st) , dimension(levmax,submax) :: calls
   character(len=32),dimension(submax)         :: subname
   integer(kind=st) :: nblev = 0, nbsub = 0
@@ -48,7 +48,7 @@ contains
           nbsub = nbsub + 1
           subname(nbsub)=TRIM(string)
           call cpu_time(ntic(lev,nbsub))
-          time(lev,nbsub)  = 0._8
+          time_tt(lev,nbsub)  = 0._8
           calls(lev,nbsub) = 0
        endif
 
@@ -59,7 +59,7 @@ contains
        nbsub = 1
        subname(nbsub)=TRIM(string)
        call cpu_time(ntic(lev,nbsub))
-       time(lev,nbsub)  = 0._8
+       time_tt(lev,nbsub)  = 0._8
        calls(lev,nbsub) = 0
     endif
 
@@ -82,7 +82,7 @@ contains
        do ns=1, nbsub
           if (TRIM(string) == subname(ns)) then
              call cpu_time(ntoc(lev,ns))
-             time(lev,ns) = time(lev,ns) + ntoc(lev,ns) - ntic(lev,ns)
+             time_tt(lev,ns) = time_tt(lev,ns) + ntoc(lev,ns) - ntic(lev,ns)
              calls(lev,ns) = calls(lev,ns) + 1
              if (lev > nblev) nblev = lev
              flag = .false.
@@ -133,8 +133,8 @@ contains
 
     do ii=1, nbsub
        write(lun,'(x,A20)' , ADVANCE="no" ) TRIM(subname(ii))
-       write(lun,'(x,E9.3)', ADVANCE="no" ) sum(time(1:nblev,ii))
-       write(lun,FMT=cmftf , ADVANCE="no" ) time(1:nblev,ii)
+       write(lun,'(x,E9.3)', ADVANCE="no" ) sum(time_tt(1:nblev,ii))
+       write(lun,FMT=cmftf , ADVANCE="no" ) time_tt(1:nblev,ii)
        write(lun,'(x)'     , ADVANCE="yes")
        write(lun,'(t22)'   , ADVANCE="no" )
        write(lun,'(x,I9)'  , ADVANCE="no" ) sum(calls(1:nblev,ii))
@@ -166,7 +166,7 @@ contains
     end do
 
     do lev=1, nblev
-       write(lun,'(I2,x,7f10.2)', ADVANCE="yes")lev, time(lev,1:nbsub)
+       write(lun,'(I2,x,7f10.2)', ADVANCE="yes")lev, time_tt(lev,1:nbsub)
     enddo
     write(lun,'(I2,x,I10)', ADVANCE="yes")''
     do lev=1, nblev

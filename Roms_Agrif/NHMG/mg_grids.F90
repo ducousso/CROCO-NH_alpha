@@ -42,10 +42,10 @@ module mg_grids
 
   type(grid_type), dimension(:), pointer :: grid
 
-  real(kind=rp) :: hlim, theta_b, theta_s
+  real(kind=rp) :: hlim, nhtheta_b, nhtheta_s
 
-  real(kind=8), dimension(:,:)  , pointer :: dx, dy
-  real(kind=8), dimension(:,:)  , pointer :: h
+!!$  real(kind=8), dimension(:,:)  , pointer :: dx, dy
+!!$  real(kind=8), dimension(:,:)  , pointer :: h
 
   real(kind=8) :: Lx,Ly,Htot
 

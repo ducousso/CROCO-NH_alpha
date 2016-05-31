@@ -5,6 +5,7 @@ module nhydro
   use mg_mpi
   use mg_grids
   use mg_namelist
+  use mg_define_matrix
   use mg_solvers
   use mg_mpi_exchange
   use mg_netcdf_out
@@ -14,15 +15,21 @@ module nhydro
 contains
 
   !--------------------------------------------------------------
-  subroutine nhydro_init(nx, ny, nz, npxg, npyg, test)
+  subroutine nhydro_init(nx,ny,nz,npxg,npyg,dx,dy,h,hc,theta_b,theta_s)
 
     integer(kind=ip), intent(in) :: nx, ny, nz
     integer(kind=ip), intent(in) :: npxg, npyg
-    character(len=*), optional :: test
+
+    real(kind=rp), dimension(:,:), intent(in) :: dx, dy, h
+    real(kind=rp),  intent(in) :: hc, theta_b, theta_s
 
     integer(kind=ip) :: inc=1
 
     call mg_mpi_init()
+
+    hlim      = hc
+    nhtheta_b = theta_b
+    nhtheta_s = theta_s
 
     !- read the NonHydro namelist file if it is present 
     !- else default values and print them (or not).
@@ -34,19 +41,7 @@ contains
 
     call print_grids()
 
-!!$    if (present(test)) then
-!!$
-!!$       if (trim(test)=='cuc') then
-!!$          call setup_cuc(inc)                  ! call define matrices !
-!!$       elseif (trim(test)=='seamount') then
-!!$          bench = 'seamount'
-!!$          call setup_seamount()                ! call define matrices !
-!!$       else
-!!$          write(*,*)'Error: nhydro: please enter a valid test name!', trim(test)
-!!$          stop
-!!$       endif
-!!$
-!!$    endif
+    call define_matrices(dx, dy, h)
 
   end subroutine nhydro_init
 
