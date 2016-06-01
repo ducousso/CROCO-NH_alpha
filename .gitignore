@@ -1,6 +1,7 @@
 # Line starting with '#' are commented.
 # Ignore roms
 roms
+roms_dbg
 # Ignore all files *~
 *~
 # Ignore all files *.mod
