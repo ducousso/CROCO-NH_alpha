@@ -17,7 +17,7 @@
 #undef  CANYON_A        /* Canyon_A Example */
 #undef  CANYON_B        /* Canyon_B Example */
 #undef  EQUATOR         /* Equator Example  */
-#undef  GRAV_ADJ        /* Graviational Adjustment Example */
+#define  GRAV_ADJ        /* Graviational Adjustment Example */
 #undef  INNERSHELF      /* Inner Shelf Example */
 #undef  RIVER           /* River run-off Example */
 #undef  OVERFLOW        /* Graviational/Overflow Example */
@@ -34,7 +34,7 @@
 #undef  SWASH           /* Swash Test Case on a Planar Beach */
 #undef  THACKER         /* Thacker wetting-drying Example */
 #undef  TANK            /* Tank Example */
-#define REGIONAL        /* REGIONAL Applications */
+#undef  REGIONAL        /* REGIONAL Applications */
 
 
 #if defined REGIONAL
@@ -398,14 +398,14 @@
 !
 */
 # undef  OPENMP
-# undef  MPI
+# define  MPI
 # undef  NBQ
-
 # ifdef NBQ
 #  define GRAV_ADJ_SOLITON
 # else
 #  define UV_VIS2
 # endif
+# define NHMG
 # define SOLVE3D
 # define NEW_S_COORD
 # define UV_ADV
