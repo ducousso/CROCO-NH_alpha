@@ -46,9 +46,12 @@ contains
   end subroutine nhydro_init
 
   !--------------------------------------------------------------
-  subroutine nhydro_solve(u,v,w)
+  subroutine nhydro_solve(nx,ny,nz,u,v,w)
 
-    real(kind=rp), dimension(:,:,:), intent(inout) :: u,v,w
+    integer(kind=ip), intent(in) :: nx, ny, nz
+    real(kind=rp), dimension(1:nx+1,0:ny+1,1:nz), intent(inout) :: u
+    real(kind=rp), dimension(0:nx+1,1:ny+1,1:nz), intent(inout) :: v
+    real(kind=rp), dimension(0:nx+1,0:ny+1,0:nz), intent(inout) :: w
 
     real(kind=rp)    :: tol = 1.e-12
     integer(kind=ip) :: maxite = 10
@@ -58,7 +61,8 @@ contains
     real(kind=rp), dimension(:,:,:), pointer :: zy,zx,zyw,zxw
     real(kind=rp), dimension(:,:,:), pointer :: uf,vf,wf
 
-    integer(kind=ip) :: nz,ny,nx,nh
+!!$    integer(kind=ip) :: nz,ny,nx
+    integer(kind=ip) :: nh
     integer(kind=ip) :: i,j,k
 
     ! compute nhydro rhs
@@ -71,9 +75,11 @@ contains
     !!         - CROCO z is indexed from 0 to nz while we choose 
     !!           index from 1 to nz+1 in NHMG 
 
-    nx = grid(1)%nx
-    ny = grid(1)%ny
-    nz = grid(1)%nz
+    write(*,*)'l u:', lbound(u), ' u u:', ubound(u)
+
+!!$    nx = grid(1)%nx
+!!$    ny = grid(1)%ny
+!!$    nz = grid(1)%nz
     nh = grid(1)%nh
 
     dx => grid(1)%dx
@@ -103,6 +109,10 @@ contains
        enddo
     enddo
 
+
+    allocate(uf(nz,0:ny+1,0:nx+1))
+    allocate(vf(nz,0:ny+1,0:nx+1))
+    allocate(wf(nz+1,0:ny+1,0:nx+1))
     do i = 1,nx
        do j = 1,ny
           do k = 1,nz
