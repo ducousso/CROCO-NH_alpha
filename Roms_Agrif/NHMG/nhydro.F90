@@ -69,7 +69,12 @@ contains
     !!
     !!  care : - arrays are reshaped from (i,j,k) to (k,j,i)
     !!         - CROCO z is indexed from 0 to nz while we choose 
-    !!           index from 1 to nz+1 in NHMG 
+    !!           index from 1 to nz+1 in NHMG (but when passing 
+    !!           w as argument, it is mapped on 1 to nz+1)
+
+    write(*,*) 'l u', lbound(u), 'u u', ubound(u)
+    write(*,*) 'l v', lbound(v), 'u v', ubound(v)
+    write(*,*) 'l w', lbound(w), 'u w', ubound(w)
 
     nx = grid(1)%nx
     ny = grid(1)%ny
@@ -107,18 +112,18 @@ contains
        do j = 1,ny
           do k = 1,nz
              uf(k,j,i) = u(i,j,k) &
-                  - 0.25*(zx(k,j,i  )*w(i,j,k-1  ) + zx(k,j,i  )*w(i,j,k  ) &
-                  + zx(k,j,i-1)*w(i-1,j,k-1) + zx(k,j,i-1)*w(i-1,j,k) )
+                  - 0.25*( zx(k,j,i  )*w(i,j,k  ) + zx(k,j,i  )*w(i,j,k+1  ) &
+                         + zx(k,j,i-1)*w(i-1,j,k) + zx(k,j,i-1)*w(i-1,j,k+1) )
 
              vf(k,j,i) = v(i,j,k) &
-                  - 0.25*(zy(k,j  ,i)*w(i,j,k-1) + zy(k,j  ,i)*w(i,j,k) &
-                  + zy(k,j-1,i)*w(i,j-1,k-1) + zy(k,j-1,i)*w(i,j-1,k) )
+                  - 0.25*( zy(k,j  ,i)*w(i,j,k) + zy(k,j  ,i)*w(i,j,k+1) &
+                         + zy(k,j-1,i)*w(i,j-1,k) + zy(k,j-1,i)*w(i,j-1,k+1) )
 
-             wf(k,j,i) = - 0.25*(zx(k,j,i  )*u(i,j,k  ) + zx(k,j,i  )*u(i+1,j,k ) &
-                  + zx(k-1,j,i)*u(i,j,k-1) + zx(k-1,j,i)*u(i+1,j,k-1) ) &
-                  - 0.25*(zy(k,j,i  )*v(i,j,k  ) + zy(k,j  ,i)*v(i,j+1,k) &
-                  + zy(k-1,j,i)*v(i,j,k-1) + zy(k-1,j,i)*v(i,j+1,k-1) ) &
-                  + w(i,j,k-1)*(1._8 + zxw(k,j,i)*zxw(k,j,i)+zyw(k,j,i)*zyw(k,j,i))
+             wf(k,j,i) = - 0.25*( zx(k,j,i  )*u(i,j,k  ) + zx(k,j,i  )*u(i+1,j,k ) &
+                                + zx(k-1,j,i)*u(i,j,k-1) + zx(k-1,j,i)*u(i+1,j,k-1) ) &
+                  - 0.25*( zy(k,j,i  )*v(i,j,k  ) + zy(k,j  ,i)*v(i,j+1,k) &
+                         + zy(k-1,j,i)*v(i,j,k-1) + zy(k-1,j,i)*v(i,j+1,k-1) ) &
+                  + w(i,j,k)*(1._8 + zxw(k,j,i)*zxw(k,j,i)+zyw(k,j,i)*zyw(k,j,i))
           enddo
           wf(nz+1,j,i) = 0._8
        enddo
@@ -147,6 +152,11 @@ contains
     endif
 
     ! correct u,v,w
+    !!
+    !!  um = um - dxp
+    !!  
+    !!  
+    !!  care : - arrays shape
 
   end subroutine nhydro_solve
 
