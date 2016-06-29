@@ -835,7 +835,7 @@
 
       call u3dbc_tile (Istr,Iend,Jstr,Jend, WORK)
       call v3dbc_tile (Istr,Iend,Jstr,Jend, WORK)
-# ifdef NBQ || NHMG
+# if defined NBQ || defined NHMG
       call w3dbc_tile (Istr,Iend,Jstr,Jend, WORK)      
 # endif
 
