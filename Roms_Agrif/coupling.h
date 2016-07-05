@@ -27,6 +27,12 @@
       common /coup_rufrc/rufrc         /coup_rvfrc/rvfrc
      &       /coup_rufrc_bak/rufrc_bak /coup_rvfrc_bak/rvfrc_bak
 
+# if defined NHMG
+      real ru_nhmg(GLOBAL_2D_ARRAY)
+      real rv_nhmg(GLOBAL_2D_ARRAY)
+      common /coup_ru_nhmg/ru_nhmg     /coup_rv_nhmg/rv_nhmg
+# endif
+
       real Zt_avg1(GLOBAL_2D_ARRAY)
       real DU_avg1(GLOBAL_2D_ARRAY,5)
       real DV_avg1(GLOBAL_2D_ARRAY,5)

@@ -16,7 +16,7 @@ module mg_solvers
 contains
 
   !---------------------------------------------------------------------
-  subroutine solve(tol,maxite)
+  subroutine solve_p(tol,maxite)
 
     real(kind=rp)   , intent(in) :: tol
     integer(kind=ip), intent(in) :: maxite
@@ -25,13 +25,16 @@ contains
     real(kind=rp)    :: rnorm,bnorm,res0,conv,rnorm0
     integer(kind=ip) :: nite
 
-    integer(kind=ip) :: nx,ny,nz,nh
-    real(kind=rp), dimension(:,:,:), allocatable :: p0,b0
+    integer(kind=ip) :: nx,ny,nz
     real(kind=rp), dimension(:,:,:), pointer :: p,b,r
 
     real(kind = lg) :: tstart,tend,perf
     real(kind=rp) :: rnxg,rnyg,rnzg
     real(kind=rp) :: rnpxg,rnpyg
+
+    if (myrank==0) write(*,*)'- solve p:'
+
+    grid(1)%p(:,:,:) = 0._rp
 
     p  => grid(1)%p
     b  => grid(1)%b
@@ -40,13 +43,6 @@ contains
     nx = grid(1)%nx
     ny = grid(1)%ny
     nz = grid(1)%nz
-    nh = grid(1)%nh
-
-    allocate(p0(nz,1-nh:ny+nh,1-nh:nx+nh))
-    allocate(b0(nz,1-nh:ny+nh,1-nh:nx+nh))
-
-    p0 = p
-    b0 = b
 
     call tic(1,'solve')
     call cpu_time(tstart)
@@ -77,10 +73,10 @@ contains
        if (myrank == 0) write(*,10) nite, rnorm, conv
        if (myrank == 0) write(100,*) rnorm, conv
 
-       if (netcdf_output) then
-          call write_netcdf(grid(1)%p,vname='p',netcdf_file_name='p.nc',rank=myrank,iter=nite)
-          call write_netcdf(grid(1)%r,vname='r',netcdf_file_name='r.nc',rank=myrank,iter=nite)
-       endif
+!!$       if (netcdf_output) then
+!!$          call write_netcdf(grid(1)%p,vname='p',netcdf_file_name='p.nc',rank=myrank,iter=nite)
+!!$          call write_netcdf(grid(1)%r,vname='r',netcdf_file_name='r.nc',rank=myrank,iter=nite)
+!!$       endif
 
     enddo
 
@@ -104,7 +100,7 @@ contains
 
 10  format("ite = ",I2,": res = ",E10.3," / conv = ",F10.3)
 
-  end subroutine solve
+  end subroutine solve_p
 
   !---------------------------------------------------------------------
   subroutine Fcycle()
@@ -205,7 +201,7 @@ contains
   subroutine testgalerkin(lev)
 
     real(kind=8) :: norm_c,norm_f,dummy
-    integer(kind=4) :: lev,nx,ny,nz,nh,i,j,k
+    integer(kind=4) :: lev,nx,ny,nz,i,j,k
     character(len = 16) :: filen
 
 
@@ -215,7 +211,6 @@ contains
     nx = grid(lev)%nx
     ny = grid(lev)%ny
     nz = grid(lev)%nz
-    nh = grid(lev)%nh
 
     npx = grid(1)%npx
     npy = grid(1)%npy
@@ -233,7 +228,7 @@ contains
              z=(1._8*k-0.5)/nz-0.2
              cff = exp( - (x*x+y*y+z*z)*30 )
              !             grid(lev)%p(k,j,i)= cff
-             grid(lev)%p(k,j,i)= grid(lev)%p(k,j,i)*grid(lev)%rmask(j,i)
+             !!NG grid(lev)%p(k,j,i)= grid(lev)%p(k,j,i)*grid(lev)%rmask(j,i)
              !             grid(lev)%p(k,j,i)= 1._8*grid(lev)%rmask(j,i)
              !             grid(lev)%p(k,j,i)= (i)*(nz+0.5-k)*1._8*grid(lev)%rmask(j,i)
           enddo
@@ -278,7 +273,7 @@ contains
     nx = grid(lev-1)%nx
     ny = grid(lev-1)%ny
     nz = grid(lev-1)%nz
-    nh = grid(lev-1)%nh
+
     call norm(lev-1,grid(lev-1)%p,grid(lev-1)%r,nx,ny,nz,norm_f)
 
     if (myrank==0) then

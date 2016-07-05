@@ -27,7 +27,7 @@ contains
     real(kind=rp),dimension(:,:),pointer,intent(in) :: x
     real(kind=rp),dimension(:,:),pointer,intent(out) :: y
 
-    integer(kind=ip):: nx,ny,nh
+    integer(kind=ip):: nx,ny
     integer(kind=ip):: ngx,ngy,Ng
     integer(kind=ip):: i,j,l,m,ii,jj
     integer(kind=ip):: i0,i1
@@ -40,7 +40,6 @@ contains
 
     nx = grid(lev)%nx
     ny = grid(lev)%ny
-    nh = grid(lev)%nh
 
     ! numel(x)
     Ng = grid(lev)%Ng2D
@@ -71,12 +70,12 @@ contains
        do l=0,ngx-1
           !
           if(l==0)then
-             i0=1-nh
+             i0=0
           else
              i0=1
           endif
           if(l==ngx-1)then
-             i1=nx+nh
+             i1=nx+1
           else
              i1=nx
           endif
@@ -106,7 +105,7 @@ contains
     real(kind=rp),dimension(:,:,:),pointer,intent(in) :: x
     real(kind=rp),dimension(:,:,:),pointer,intent(out) :: y
 
-    integer(kind=ip):: nx,ny,nz,nh
+    integer(kind=ip):: nx,ny,nz
     integer(kind=ip):: ngx,ngy,Ng
     integer(kind=ip):: i,j,k,l,m,ii,jj
     integer(kind=ip):: i0,i1
@@ -120,7 +119,6 @@ contains
     nx = grid(lev)%nx
     ny = grid(lev)%ny
     nz = grid(lev)%nz
-    nh = grid(lev)%nh
 
     ! numel(x)
     Ng = grid(lev)%Ng
@@ -151,12 +149,12 @@ contains
        do l=0,ngx-1
           !
           if(l==0)then
-             i0=1-nh
+             i0=0
           else
              i0=1
           endif
           if(l==ngx-1)then
-             i1=nx+nh
+             i1=nx+1
           else
              i1=nx
           endif
@@ -187,7 +185,7 @@ contains
     real(kind=rp),dimension(:,:,:),pointer,intent(in) :: x
     real(kind=rp),dimension(:,:,:),pointer,intent(out) :: y
 
-    integer(kind=ip):: nx,ny,nz,nh
+    integer(kind=ip):: nx,ny,nz
     integer(kind=ip):: ngx,ngy
     integer(kind=ip):: i,j,k,l,m,ii,jj,key
 
@@ -198,23 +196,27 @@ contains
     nx = grid(lev)%nx / ngx
     ny = grid(lev)%ny / ngy
     nz = grid(lev)%nz
-    nh = grid(lev)%nh
 
     key = grid(lev)%key
 
     l = mod(key,2)
     m = key/2
 
-    ii = 1-nh+l*nx
-    do i=1-nh,nx+nh
-       jj = 1-nh+m*ny
-       do j=1-nh,ny+nh
+    ii = l*nx
+
+    do i= 0,nx+1
+
+       jj = 0+m*ny
+       do j= 0,ny+1
+
           do k=1,nz
              y(k,j,i) = x(k,jj,ii)
           enddo
           jj=jj+1
+
        enddo
        ii=ii+1
+
     enddo
 
   end subroutine split

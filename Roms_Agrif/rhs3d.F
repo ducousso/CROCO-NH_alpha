@@ -1041,15 +1041,20 @@ ccc            dvde =0.5*( v(i,j-1,k,nrhs) -v(i,j+1,k,nrhs) )
 # ifndef BODYFORCE
      &        +(sustr(i,j)-bustr(i,j))*om_u(i,j)*on_u(i,j)
 # endif
-#  if defined MRL_WCI && defined WAVE_SFC_BREAK
+# if defined MRL_WCI && defined WAVE_SFC_BREAK
      &                    +brk2dx(i,j)*om_u(i,j)*on_u(i,j)
-#  endif
+# endif
         enddo
         do k=2,N
           do i=IstrU,Iend
             rufrc(i,j)=rufrc(i,j)+ru(i,j,k)
           enddo
         enddo
+# ifdef NHMG
+        do i=IstrU,Iend
+          rufrc(i,j)=rufrc(i,j)+ru_nhmg(i,j)
+        enddo
+# endif
         if (j.ge.JstrV) then
           do i=Istr,Iend
             rvfrc(i,j)=rv(i,j,1)
@@ -1065,6 +1070,11 @@ ccc            dvde =0.5*( v(i,j-1,k,nrhs) -v(i,j+1,k,nrhs) )
               rvfrc(i,j)=rvfrc(i,j)+rv(i,j,k)
             enddo
           enddo
+# ifdef NHMG
+          do i=Istr,Iend
+            rvfrc(i,j)=rvfrc(i,j)+rv_nhmg(i,j)
+          enddo
+# endif
         endif
       enddo      !<-- j
 

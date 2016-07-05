@@ -8,76 +8,139 @@ module mg_grids
 
   implicit none
 
+  !-
+  !- Derived type are created to place all grid information in one structure.
+  !- The array memory allocation is called only one time for each grid level
+  !- at the begining of the program. This avoid memory allocation and deallocation 
+  !- during the execution of the program.
+  !- Pointers are used to simplify the readability of the code.
+  !- In subroutines which use grids arrays, we use this tip to improve readability:
+  !-     real(kind=rp),dimension(:,:,:), pointer:: p
+  !-     p  => grid(lev)%p
+  !-
+
+  !-
+  !- GRID_TYPE is a derived type which has the function 
+  !- to reserve memory space for all the main variables of the multigrid solver.
+  !-
   type grid_type
-     real(kind=rp),dimension(:,:,:)  ,pointer :: p,b,r,dummy3
-     integer(kind=1),dimension(:,:),pointer :: rmask
-     real(kind=rp),dimension(:,:,:,:),pointer :: cA
-     real(kind=rp),dimension(:,:),pointer :: dx
-     real(kind=rp),dimension(:,:),pointer :: dy
-     real(kind=rp),dimension(:,:),pointer :: h
-     real(kind=rp),dimension(:,:,:),pointer :: zr
-     real(kind=rp),dimension(:,:,:),pointer :: zw
-     integer(kind=ip) :: nx,ny, nz
-     integer(kind=ip) :: npx, npy, incx, incy
-     integer(kind=ip) :: nh                ! number of points in halo
-     integer(kind=ip) :: gather
-     integer(kind=ip) :: Ng2D, Ng, ngx, ngy
-     integer(kind=ip) :: localcomm ! should be integer (output of MPI_SPLIT)
-     integer(kind=ip) :: coarsening_method, smoothing_method
-     integer(kind=ip) :: color,family,key
-     integer(kind=ip),dimension(8)::neighb
-     real(kind=rp), dimension(:,:,:,:),pointer :: gatherbuffer2D
-     real(kind=rp), dimension(:,:,:,:,:),pointer :: gatherbuffer
-     real(kind=rp), dimension(:,:)  , pointer :: sendN2D1,recvN2D1,sendS2D1,recvS2D1
-     real(kind=rp), dimension(:,:)  , pointer :: sendE2D1,recvE2D1,sendW2D1,recvW2D1
-     real(kind=rp), dimension(:,:)  , pointer :: sendN2D2,recvN2D2,sendS2D2,recvS2D2
-     real(kind=rp), dimension(:,:)  , pointer :: sendE2D2,recvE2D2,sendW2D2,recvW2D2
-     real(kind=rp), dimension(:,:)  , pointer :: sendSW2D2,recvSW2D2,sendSE2D2,recvSE2D2
-     real(kind=rp), dimension(:,:)  , pointer :: sendNW2D2,recvNW2D2,sendNE2D2,recvNE2D2
-     real(kind=rp), dimension(:,:,:), pointer :: sendN,recvN,sendS,recvS
-     real(kind=rp), dimension(:,:,:), pointer :: sendE,recvE,sendW,recvW
-     real(kind=rp), dimension(:,:,:), pointer :: sendSW,recvSW,sendSE,recvSE
-     real(kind=rp), dimension(:,:,:), pointer :: sendNW,recvNW,sendNE,recvNE
+     integer(kind=ip) :: nx,ny,nz                     ! Subdomain dimensions (whithout halo points)
+     integer(kind=ip) :: npx, npy                     ! Number of processes
+     integer(kind=ip) :: incx, incy                   ! ??
+     integer(kind=ip) :: Ng2D, Ng                     ! Size for 2D and 3D arrays (included halo)
+     integer(kind=ip) :: gather                       ! Gathering activated (1) or not (0)
+     integer(kind=ip) :: ngx, ngy                     ! Gathering in x and y (is 1 or 2 (and generally 2))
+     integer(kind=ip) :: key                          ! Gathering key
+     integer(kind=ip) :: localcomm                    ! Gathering MPI comm (should be integer (output of MPI_SPLIT))
+     integer(kind=ip),dimension(8)::neighb            ! MPI: neighbours
+
+     real(kind=rp),dimension(:,:,:,:),pointer :: cA   ! Matrix of coefficients
+
+     real(kind=rp),dimension(:,:,:),pointer :: p      ! Pressure
+     real(kind=rp),dimension(:,:,:),pointer :: b      ! Right-hand side
+     real(kind=rp),dimension(:,:,:),pointer :: r      ! Residual
+
+     real(kind=rp),dimension(:,:)  ,pointer :: dx     ! Mesh in x  (1 halo point)
+     real(kind=rp),dimension(:,:)  ,pointer :: dy     ! Mesh in y  (1 halo point)
+     real(kind=rp),dimension(:,:)  ,pointer :: h      ! Topography (2 halo points)
+     real(kind=rp),dimension(:,:,:),pointer :: zr     ! Mesh in z at rho point (nz  , 2 halo points)
+     real(kind=rp),dimension(:,:,:),pointer :: zw     ! Mesh in z at w point   (nz+1, 2 halo points)
+
+     ! Gathering buffers, allocated only if gathering is activated (coarsen grids!)
+     real(kind=rp),dimension(:,:,:)    ,pointer :: dummy3         ! A dummy 3D array for gathering
+     real(kind=rp),dimension(:,:,:,:)  ,pointer :: gatherbuffer2D ! 2D
+     real(kind=rp),dimension(:,:,:,:,:),pointer :: gatherbuffer   ! 3D
+
   end type grid_type
 
-  type(grid_type), dimension(:), pointer :: grid
+  !-
+  !- MPI_BUFFERS is a derived type which has the function 
+  !- to reserve memory for MPI exchanges at the boundaries
+  !-
+  type mpi_buffers
+     ! MPI: 2D array buffers (halo=1 and halo=2 => h, zr, zw)
+     real(kind=rp),dimension(:,:),pointer :: sendN2D1,recvN2D1,sendS2D1,recvS2D1
+     real(kind=rp),dimension(:,:),pointer :: sendE2D1,recvE2D1,sendW2D1,recvW2D1
+     real(kind=rp),dimension(:,:),pointer :: sendN2D2,recvN2D2,sendS2D2,recvS2D2
+     real(kind=rp),dimension(:,:),pointer :: sendE2D2,recvE2D2,sendW2D2,recvW2D2
+     real(kind=rp),dimension(:,:),pointer :: sendSW2D2,recvSW2D2,sendSE2D2,recvSE2D2
+     real(kind=rp),dimension(:,:),pointer :: sendNW2D2,recvNW2D2,sendNE2D2,recvNE2D2
+
+     ! MPI: 3D array buffers (nz and nz+1) (halo=1)
+     real(kind=rp),dimension(:,:),pointer :: sendN,recvN,sendS,recvS
+     real(kind=rp),dimension(:,:),pointer :: sendE,recvE,sendW,recvW
+     real(kind=rp),dimension(:)  ,pointer :: sendSW,recvSW,sendSE,recvSE
+     real(kind=rp),dimension(:)  ,pointer :: sendNW,recvNW,sendNE,recvNE
+     real(kind=rp),dimension(:,:),pointer :: sendNp,recvNp,sendSp,recvSp
+     real(kind=rp),dimension(:,:),pointer :: sendEp,recvEp,sendWp,recvWp
+     real(kind=rp),dimension(:)  ,pointer :: sendSWp,recvSWp,sendSEp,recvSEp
+     real(kind=rp),dimension(:)  ,pointer :: sendNWp,recvNWp,sendNEp,recvNEp
+
+     ! MPI: 4D matrix coefficient buffers (halo=1)
+     real(kind=rp),dimension(:,:,:),pointer :: sendN4D,recvN4D,sendS4D,recvS4D
+     real(kind=rp),dimension(:,:,:),pointer :: sendE4D,recvE4D,sendW4D,recvW4D
+     real(kind=rp),dimension(:,:)  ,pointer :: sendSW4D,recvSW4D,sendSE4D,recvSE4D
+     real(kind=rp),dimension(:,:)  ,pointer :: sendNW4D,recvNW4D,sendNE4D,recvNE4D
+
+  end type mpi_buffers
+
+
+  !-
+  !- GRID is an vector of grid_type (derived type) which stores the informations of
+  !- all the different grid levels of the multigrid solver.
+  !- It is the main array of this application.
+  !- It is the most important to :-)
+  !-
+  type(grid_type)  , dimension(:), pointer :: grid
+  type(mpi_buffers), dimension(:), pointer :: gbuffers
+
+  ! Number of grid levels of the multigrid solver
+  integer(kind=ip):: nlevs ! index of the coarsest level (1 is the finest)q
 
   real(kind=rp) :: hlim, nhtheta_b, nhtheta_s
 
-!!$  real(kind=8), dimension(:,:)  , pointer :: dx, dy
-!!$  real(kind=8), dimension(:,:)  , pointer :: h
-
-  real(kind=8) :: Lx,Ly,Htot
-
-  integer(kind=ip):: nlevs ! index of the coarsest level (1 is the finest)
-
-  integer(kind=ip),dimension(27,3) :: loc
+!!$  ! Parameters of the CROCO vertical mesh definition
+!!$  real(kind=rp) :: hlim, theta_b, theta_s
+!!$  ! CROCO mesh 
+!!$  real(kind=8), dimension(:,:)  , pointer :: dx ! Croco Mesh grid in x ( halo = 1)
+!!$  real(kind=8), dimension(:,:)  , pointer :: dy ! Croco Mesh grid in y ( halo = 1)
+!!$  real(kind=8), dimension(:,:)  , pointer :: h  ! Croco topography     ( halo = 1)
+!!$
+!!$  ! Analytical test parameters (for example testseamount)
+!!$  real(kind=8) :: Lx, Ly, Htot
 
 contains
 
   !----------------------------------------
   subroutine define_grids(npxg, npyg, nxl, nyl, nzl)
 
-    integer(kind=ip), intent(in) :: npxg,npyg  ! global CPU topology
-    integer(kind=ip), intent(in) :: nxl, nyl, nzl ! local dims
+    integer(kind=ip), intent(in) :: npxg,npyg     ! Number of processes in x and y
+    integer(kind=ip), intent(in) :: nxl, nyl, nzl ! Subdomain dimensions
 
-    integer(kind=ip) :: nh, nd
-    integer(kind=ip) :: tmp_nh
+    ! Number of matrix coefficient
+    ! The matrix coefficient is symmetric and compact
+    ! 2D : nd = 5
+    ! 3D : nd = 8 (equivalent to 15 points = 7 + 7' + 1 where 7 and 7' are symmetric)
+    integer(kind=ip) :: nd 
 
     integer(kind=ip) :: nx, ny, nz
 
-    integer(kind=ip) :: lev
+    integer(kind=ip) :: lev ! loop's variable on levels
 
     if (myrank==0) write(*,*)'- define grids:'
     if (myrank==0) write(*,*)'  - define grid levels'
+
+    ! Calculate the number of levels of the multigrid solver method
     call find_grid_levels(npxg, npyg, nxl, nyl, nzl)
 
+    ! Allocate the memory for the nlevs grids
     allocate(grid(nlevs))
+    allocate(gbuffers(nlevs))
 
+    ! At lev = 1
     grid(1)%nx = nxl 
     grid(1)%ny = nyl
     grid(1)%nz = nzl
-    grid(1)%nh = nhalo
 
     grid(1)%npx = npxg
     grid(1)%npy = npyg
@@ -89,126 +152,249 @@ contains
     ! define grid dimensions at each level
     call define_grid_dims()
 
-    ! Allocate memory
+    !-
+    !- Allocate memory for grids at each level
+    !- We use a lot of loops to reduce the compilation time which can be very long
+    !- if we use only one loop for these memory allocations.
+    !-
     do lev=1,nlevs
-
        nx = grid(lev)%nx
        ny = grid(lev)%ny
        nz = grid(lev)%nz
-       nh = grid(lev)%nh
-
-       if ((trim(interp_type)=='nearest') .and. (trim(restrict_type)=='avg')) then
-
-          if (nz == 1) then
-             nd = 5
-          else
-             nd = 8
-          endif
-
-       elseif (( trim(interp_type)=='linear') .and. (trim(restrict_type)=='avg')) then
-
-          if (nz == 1) then
-             nd = 5
-          else
-             nd = 8
-          endif
-
-       elseif (( trim(interp_type)=='nearest') .and. (trim(restrict_type)=='linear')) then
-          ! todo 
-       endif
-
-       allocate(grid(lev)%p(    nz,1-nh:ny+nh,1-nh:nx+nh))
-       allocate(grid(lev)%b(    nz,1-nh:ny+nh,1-nh:nx+nh))
-       allocate(grid(lev)%r(    nz,1-nh:ny+nh,1-nh:nx+nh))
-       allocate(grid(lev)%cA(nd,nz,1-nh:ny+nh,1-nh:nx+nh))
-
-       allocate(grid(lev)%dx(1-nh:ny+nh,1-nh:nx+nh))
-       allocate(grid(lev)%dy(1-nh:ny+nh,1-nh:nx+nh))
-
-       tmp_nh=nh
-       nh=2
-       allocate(grid(lev)%h(1-nh:ny+nh,1-nh:nx+nh))
-       allocate(grid(lev)%zr(  nz,1-nh:ny+nh,1-nh:nx+nh))
-       allocate(grid(lev)%zw(nz+1,1-nh:ny+nh,1-nh:nx+nh))
-       nh=tmp_nh
-
-       allocate(grid(lev)%rmask(1-nh:ny+nh,1-nh:nx+nh))
-
-       allocate(grid(lev)%sendS2D1(1,nx))
-       allocate(grid(lev)%recvS2D1(1,nx))
-       allocate(grid(lev)%sendN2D1(1,nx))
-       allocate(grid(lev)%recvN2D1(1,nx))
-
-       allocate(grid(lev)%sendE2D1(ny,1))
-       allocate(grid(lev)%recvE2D1(ny,1))
-       allocate(grid(lev)%sendW2D1(ny,1))
-       allocate(grid(lev)%recvW2D1(ny,1))
-
-       allocate(grid(lev)%sendS2D2(2,nx))
-       allocate(grid(lev)%recvS2D2(2,nx))
-       allocate(grid(lev)%sendN2D2(2,nx))
-       allocate(grid(lev)%recvN2D2(2,nx))
-
-       allocate(grid(lev)%sendE2D2(ny,2))
-       allocate(grid(lev)%recvE2D2(ny,2))
-       allocate(grid(lev)%sendW2D2(ny,2))
-       allocate(grid(lev)%recvW2D2(ny,2))
-
-       allocate(grid(lev)%sendSW2D2(2,2))
-       allocate(grid(lev)%sendSE2D2(2,2))
-       allocate(grid(lev)%sendNW2D2(2,2))
-       allocate(grid(lev)%sendNE2D2(2,2))
-
-       allocate(grid(lev)%recvSW2D2(2,2))
-       allocate(grid(lev)%recvSE2D2(2,2))
-       allocate(grid(lev)%recvNW2D2(2,2))
-       allocate(grid(lev)%recvNE2D2(2,2))
-
-       allocate(grid(lev)%sendS(nz,nh,nx))
-       allocate(grid(lev)%recvS(nz,nh,nx))
-       allocate(grid(lev)%sendN(nz,nh,nx))
-       allocate(grid(lev)%recvN(nz,nh,nx))
-
-       allocate(grid(lev)%sendE(nz,ny,nh))
-       allocate(grid(lev)%recvE(nz,ny,nh))
-       allocate(grid(lev)%sendW(nz,ny,nh))
-       allocate(grid(lev)%recvW(nz,ny,nh))
-
-       allocate(grid(lev)%sendSW(nz,nh,nh))
-       allocate(grid(lev)%sendSE(nz,nh,nh))
-       allocate(grid(lev)%sendNW(nz,nh,nh))
-       allocate(grid(lev)%sendNE(nz,nh,nh))
-
-       allocate(grid(lev)%recvSW(nz,nh,nh))
-       allocate(grid(lev)%recvSE(nz,nh,nh))
-       allocate(grid(lev)%recvNW(nz,nh,nh))
-       allocate(grid(lev)%recvNE(nz,nh,nh))
+       ! Halo point is two for topography and vertical mesh !
+       allocate(grid(lev)%h(      -1:ny+2,-1:nx+2))
+       allocate(grid(lev)%zr(  nz,-1:ny+2,-1:nx+2))
+       allocate(grid(lev)%zw(nz+1,-1:ny+2,-1:nx+2))
     enddo
 
+    do lev=1,nlevs
+       nx = grid(lev)%nx
+       ny = grid(lev)%ny
+       nz = grid(lev)%nz
+       allocate(grid(lev)%p(nz,0:ny+1,0:nx+1))
+       allocate(grid(lev)%b(nz,0:ny+1,0:nx+1))
+       allocate(grid(lev)%r(nz,0:ny+1,0:nx+1))
+    enddo
+
+    do lev=1,nlevs
+       nx = grid(lev)%nx
+       ny = grid(lev)%ny
+       nz = grid(lev)%nz
+       if (nz == 1) then
+          nd = 5
+       else
+          nd = 8
+       endif
+       allocate(grid(lev)%cA(nd,nz,0:ny+1,0:nx+1))
+    enddo
+
+    do lev=1,nlevs
+       nx = grid(lev)%nx
+       ny = grid(lev)%ny
+       allocate(grid(lev)%dx(0:ny+1,0:nx+1))
+       allocate(grid(lev)%dy(0:ny+1,0:nx+1))
+    enddo
+
+    ! MPI exhanges for 2D arrays
+    do lev=1,nlevs
+       nx = grid(lev)%nx
+       allocate(gbuffers(lev)%sendS2D1(1,nx))
+       allocate(gbuffers(lev)%recvS2D1(1,nx))
+       allocate(gbuffers(lev)%sendN2D1(1,nx))
+       allocate(gbuffers(lev)%recvN2D1(1,nx))
+    enddo
+
+    do lev=1,nlevs
+       ny = grid(lev)%ny
+       allocate(gbuffers(lev)%sendE2D1(ny,1))
+       allocate(gbuffers(lev)%recvE2D1(ny,1))
+       allocate(gbuffers(lev)%sendW2D1(ny,1))
+       allocate(gbuffers(lev)%recvW2D1(ny,1))
+    enddo
+
+    do lev=1,nlevs
+       nx = grid(lev)%nx
+       allocate(gbuffers(lev)%sendS2D2(2,nx))
+       allocate(gbuffers(lev)%recvS2D2(2,nx))
+       allocate(gbuffers(lev)%sendN2D2(2,nx))
+       allocate(gbuffers(lev)%recvN2D2(2,nx))
+    enddo
+
+    do lev=1,nlevs
+       ny = grid(lev)%ny
+       allocate(gbuffers(lev)%sendE2D2(ny,2))
+       allocate(gbuffers(lev)%recvE2D2(ny,2))
+       allocate(gbuffers(lev)%sendW2D2(ny,2))
+       allocate(gbuffers(lev)%recvW2D2(ny,2))
+    enddo
+
+    do lev=1,nlevs
+       allocate(gbuffers(lev)%sendSW2D2(2,2))
+       allocate(gbuffers(lev)%sendSE2D2(2,2))
+       allocate(gbuffers(lev)%sendNW2D2(2,2))
+       allocate(gbuffers(lev)%sendNE2D2(2,2))
+    enddo
+
+    do lev=1,nlevs
+       allocate(gbuffers(lev)%recvSW2D2(2,2))
+       allocate(gbuffers(lev)%recvSE2D2(2,2))
+       allocate(gbuffers(lev)%recvNW2D2(2,2))
+       allocate(gbuffers(lev)%recvNE2D2(2,2))
+    enddo
+
+    ! MPI exhanges for 3D arrays
+    do lev=1,nlevs
+       nx = grid(lev)%nx
+       nz = grid(lev)%nz
+       allocate(gbuffers(lev)%sendS(nz,nx))
+       allocate(gbuffers(lev)%recvS(nz,nx))
+       allocate(gbuffers(lev)%sendN(nz,nx))
+       allocate(gbuffers(lev)%recvN(nz,nx))
+    enddo
+
+    do lev=1,nlevs
+       ny = grid(lev)%ny
+       nz = grid(lev)%nz
+       allocate(gbuffers(lev)%sendE(nz,ny))
+       allocate(gbuffers(lev)%recvE(nz,ny))
+       allocate(gbuffers(lev)%sendW(nz,ny))
+       allocate(gbuffers(lev)%recvW(nz,ny))
+    enddo
+
+    do lev=1,nlevs
+       nz = grid(lev)%nz
+       allocate(gbuffers(lev)%sendSW(nz))
+       allocate(gbuffers(lev)%sendSE(nz))
+       allocate(gbuffers(lev)%sendNW(nz))
+       allocate(gbuffers(lev)%sendNE(nz))
+    enddo
+
+    do lev=1,nlevs
+       nz = grid(lev)%nz
+       allocate(gbuffers(lev)%recvSW(nz))
+       allocate(gbuffers(lev)%recvSE(nz))
+       allocate(gbuffers(lev)%recvNW(nz))
+       allocate(gbuffers(lev)%recvNE(nz))
+    enddo
+
+    do lev=1,nlevs
+       nx = grid(lev)%nx
+       nz = grid(lev)%nz
+       allocate(gbuffers(lev)%sendSp(nz+1,nx))
+       allocate(gbuffers(lev)%recvSp(nz+1,nx))
+       allocate(gbuffers(lev)%sendNp(nz+1,nx))
+       allocate(gbuffers(lev)%recvNp(nz+1,nx))
+    enddo
+
+    do lev=1,nlevs
+       ny = grid(lev)%ny
+       nz = grid(lev)%nz
+       allocate(gbuffers(lev)%sendEp(nz+1,ny))
+       allocate(gbuffers(lev)%recvEp(nz+1,ny))
+       allocate(gbuffers(lev)%sendWp(nz+1,ny))
+       allocate(gbuffers(lev)%recvWp(nz+1,ny))
+    enddo
+
+    do lev=1,nlevs
+       nz = grid(lev)%nz
+       allocate(gbuffers(lev)%sendSWp(nz+1))
+       allocate(gbuffers(lev)%sendSEp(nz+1))
+       allocate(gbuffers(lev)%sendNWp(nz+1))
+       allocate(gbuffers(lev)%sendNEp(nz+1))
+    enddo
+
+    do lev=1,nlevs
+       nz = grid(lev)%nz
+       allocate(gbuffers(lev)%recvSWp(nz+1))
+       allocate(gbuffers(lev)%recvSEp(nz+1))
+       allocate(gbuffers(lev)%recvNWp(nz+1))
+       allocate(gbuffers(lev)%recvNEp(nz+1))
+    enddo
+
+    ! MPI exhanges for 4D CA array
+    do lev=1,nlevs
+       nx = grid(lev)%nx
+       nz = grid(lev)%nz
+       if (nz == 1) then
+          nd = 5
+       else
+          nd = 8
+       endif
+       allocate(gbuffers(lev)%sendS4D(nd,nz,nx))
+       allocate(gbuffers(lev)%recvS4D(nd,nz,nx))
+       allocate(gbuffers(lev)%sendN4D(nd,nz,nx))
+       allocate(gbuffers(lev)%recvN4D(nd,nz,nx))
+    enddo
+
+    do lev=1,nlevs
+       ny = grid(lev)%ny
+       nz = grid(lev)%nz
+       if (nz == 1) then
+          nd = 5
+       else
+          nd = 8
+       endif
+       allocate(gbuffers(lev)%sendE4D(nd,nz,ny))
+       allocate(gbuffers(lev)%recvE4D(nd,nz,ny))
+       allocate(gbuffers(lev)%sendW4D(nd,nz,ny))
+       allocate(gbuffers(lev)%recvW4D(nd,nz,ny))
+    enddo
+
+    do lev=1,nlevs
+       nz = grid(lev)%nz
+       if (nz == 1) then
+          nd = 5
+       else
+          nd = 8
+       endif
+       allocate(gbuffers(lev)%sendSW4D(nd,nz))
+       allocate(gbuffers(lev)%sendSE4D(nd,nz))
+       allocate(gbuffers(lev)%sendNW4D(nd,nz))
+       allocate(gbuffers(lev)%sendNE4D(nd,nz))
+    enddo
+
+    do lev=1,nlevs
+       nz = grid(lev)%nz
+       if (nz == 1) then
+          nd = 5
+       else
+          nd = 8
+       endif
+       allocate(gbuffers(lev)%recvSW4D(nd,nz))
+       allocate(gbuffers(lev)%recvSE4D(nd,nz))
+       allocate(gbuffers(lev)%recvNW4D(nd,nz))
+       allocate(gbuffers(lev)%recvNE4D(nd,nz))
+    enddo
+
+    ! Initialize pressure to zero
     grid(1)%p(:,:,:) = 0._8
 
     if (myrank==0) write(*,*)'  - define gather informations'
+    ! Call the routine which calculate gather informations
     call define_gather_informations()
 
   end subroutine define_grids
 
- !----------------------------------------
+  !------------------------------------------------------------!
+  !- Return the number of grid levels of the multigrid solver -!
+  !------------------------------------------------------------!
   subroutine find_grid_levels(npxg, npyg, nx,ny,nz)
 
-    integer(kind=ip) , intent(in) :: npxg, npyg
-    integer(kind=ip), intent(in) :: nx, ny, nz
+    integer(kind=ip), intent(in) :: npxg, npyg ! Number of processes in x and y
+    integer(kind=ip), intent(in) :: nx, ny, nz ! Subdomain dimensions (no halo points)
 
     integer(kind=ip) :: nxg, nyg, nzg
 
     integer(kind=ip) :: ncoarsest,nhoriz,nzmin, nl1,nl2
-    
-    nxg = npxg * nx
-    nyg = npyg * ny
-    nzg = nz
 
-    ! smallest horizontal dimension of the coarsest grid
+    nxg = npxg * nx ! Global domain dimension in x
+    nyg = npyg * ny ! Global domain dimension in y
+    nzg = nz        ! Global domain dimension in z
+
+    ! Smallest horizontal dimension of the coarsest grid
     ncoarsest = 4 ! TODO: put it into the namelist
 
+    ! Smallest vertical dimension of the coarsest grid
     nzmin = 2
 
     ! smallest horizontal dimension of the finest grid
@@ -221,23 +407,21 @@ contains
 
     nl2 = 1+floor( log( nzg*1._8 / nzmin*1._8) / log(2._8) )
 
-    nlevs=min(nl1,nl2)
-
-    return
+    ! NLEVS: global variable which store the number of grid levels
+    nlevs = min(nl1,nl2) 
 
   end subroutine find_grid_levels
 
   !----------------------------------------
   subroutine define_grid_dims()
 
-    integer(kind=ip) :: nx, ny, nz, nh
+    integer(kind=ip) :: nx, ny, nz
     integer(kind=ip) :: npx, npy
     integer(kind=ip) :: lev, incx, incy
 
     nx = grid(1)%nx
     ny = grid(1)%ny
     nz = grid(1)%nz
-    nh = grid(1)%nh
     npx = grid(1)%npx
     npy = grid(1)%npy
 
@@ -300,7 +484,6 @@ contains
        grid(lev)%npy  = npy
        grid(lev)%incx = incx
        grid(lev)%incy = incy
-       grid(lev)%nh   = nh
 
     enddo
 
@@ -394,7 +577,6 @@ contains
   subroutine define_gather_informations()
 
     integer(kind=ip) :: nx, ny, nz, nd
-    integer(kind=ip) :: nh
     integer(kind=ip) :: npx, npy
     integer(kind=ip) :: incx, incy
 
@@ -415,12 +597,12 @@ contains
     pi = mod(myrank,npx)
 
     do lev=2,nlevs
+
        if(grid(lev)%gather.eq.1)then
 
           nx = grid(lev)%nx
           ny = grid(lev)%ny
           nz = grid(lev)%nz
-          nh = grid(lev)%nh
           nd = size(grid(lev)%cA,1)
           incx=grid(lev)%incx / 2
           incy=grid(lev)%incy / 2          
@@ -443,8 +625,6 @@ contains
           N=incx*npx;
           key = mod(mod(family,N)/(incx*incy),2)+2*mod( (family/N),2)
 
-          grid(lev)%color=color
-          grid(lev)%family=nextfamily
           grid(lev)%key=key
 
           call MPI_COMM_SPLIT(MPI_COMM_WORLD, color, key, localcomm, ierr)
@@ -455,16 +635,17 @@ contains
 
           nx = nx/ngx ! ngx is 1 or 2 (and generally 2)
           ny = ny/ngy ! ngy is 1 or 2 (and generally 2)
-          allocate(grid(lev)%dummy3(nz,1-nh:ny+nh,1-nh:nx+nh))
+          allocate(grid(lev)%dummy3(nz,0:ny+1,0:nx+1))
 
-          allocate(grid(lev)%gatherbuffer2D(1-nh:ny+nh,1-nh:nx+nh,0:ngx-1,0:ngy-1))
-          allocate(grid(lev)%gatherbuffer(nz,1-nh:ny+nh,1-nh:nx+nh,0:ngx-1,0:ngy-1))
+          allocate(grid(lev)%gatherbuffer2D(0:ny+1,0:nx+1,0:ngx-1,0:ngy-1))
+          allocate(grid(lev)%gatherbuffer(nz,0:ny+1,0:nx+1,0:ngx-1,0:ngy-1))
 
           ! number of elements of dummy3
-          grid(lev)%Ng2D=(nx+2*nh)*(ny+2*nh)
-          grid(lev)%Ng  =(nx+2*nh)*(ny+2*nh)*nz
+          grid(lev)%Ng2D=(nx+2)*(ny+2)
+          grid(lev)%Ng  =(nx+2)*(ny+2)*nz
 
        endif
+
     enddo
 
   end subroutine define_gather_informations
@@ -491,39 +672,14 @@ contains
     endif
 100 format (A6,I2,A,I3,A,I3,A,I3,A,I3,A,I3,A)
 
-    end subroutine print_grids
+  end subroutine print_grids
 
   !---------------------------------------------------------------------
   subroutine grids_dealloc()
 
     integer(kind=ip) :: lev
 
-    do lev=1,nlevs
-       deallocate(grid(lev)%p)
-       deallocate(grid(lev)%b)
-       deallocate(grid(lev)%r)
-       deallocate(grid(lev)%cA)
-
-       deallocate(grid(lev)%sendS)
-       deallocate(grid(lev)%recvS)
-       deallocate(grid(lev)%sendN)
-       deallocate(grid(lev)%recvN)
-
-       deallocate(grid(lev)%sendE)
-       deallocate(grid(lev)%recvE)
-       deallocate(grid(lev)%sendW)
-       deallocate(grid(lev)%recvW)
-
-       deallocate(grid(lev)%sendSW)
-       deallocate(grid(lev)%sendSE)
-       deallocate(grid(lev)%sendNW)
-       deallocate(grid(lev)%sendNE)
-
-       deallocate(grid(lev)%recvSW)
-       deallocate(grid(lev)%recvSE)
-       deallocate(grid(lev)%recvNW)
-       deallocate(grid(lev)%recvNE) 
-    end do
+    ! TODO in coherence with the number of grids and the derived type type_grid
 
   end subroutine grids_dealloc
 

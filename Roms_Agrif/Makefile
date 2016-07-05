@@ -135,7 +135,10 @@ include Makedefs
 	mg_grids.F90         \
 	mg_mpi_exchange.F90  \
 	mg_gather.F90        \
+	mg_compute_rhs.F90   \
 	mg_define_matrix.F90 \
+	mg_correct_uvw.F90   \
+	mg_compute_barofrc.F90   \
 	mg_relax.F90         \
 	mg_intergrids.F90    \
 	mg_solvers.F90       \

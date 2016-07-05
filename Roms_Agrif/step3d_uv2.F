@@ -58,6 +58,9 @@
 ! using implicit backward time step.
 !-------------------------------------------------------------------- 
 !
+#ifdef NHMG
+          USE nhydro, only : nhydro_solve
+#endif
       implicit none
 # include "param.h"
 # include "grid.h"
@@ -456,6 +459,19 @@
 !
       call v3dbc_tile (Istr,Iend,Jstr,Jend, grad)   
       call u3dbc_tile (Istr,Iend,Jstr,Jend, grad)
+
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# ifdef NHMG
+      call nhydro_solve(
+     & Lm, Mm, N,
+     & u(1:Lm+1,0:Mm+1,1:N,nnew),
+     & v(0:Lm+1,1:Mm+1,1:N,nnew),
+     & wz(0:Lm+1,0:Mm+1,0:N,nnew),
+     & ru_nhmg(1:Lm+1,0:Mm+1),
+     & rv_nhmg(0:Lm+1,1:Mm+1) )
+# endif
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
 !
 !
 !--------------------------------------------------------------------
