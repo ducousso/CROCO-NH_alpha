@@ -976,10 +976,10 @@
 ! free-surface flows. 
 ! Int. J. Numer. Methods Fluids 42, 929–952.
 */
-# undef  MPI
+/*# undef  MPI
 # define NBQ
 # ifdef NBQ
-#  undef  NBQ_IMP /* under development */
+#  undef  NBQ_IMP
 #  undef  DEBUG_NBQ
 # endif
 # define SOLVE3D
@@ -992,7 +992,19 @@
 # define ANA_SMFLUX
 # define ANA_SRFLUX
 # define ANA_STFLUX
+*/
 
+# define MPI
+# define NHMG
+# define SOLVE3D
+# define NEW_S_COORD
+# define MASKING
+# define UV_ADV
+# define ANA_GRID
+# define ANA_INITIAL
+# define ANA_SMFLUX
+# define ANA_STFLUX
+# define ANA_BTFLUX
 
 #endif /* END OF CONFIGURATION CHOICE */
 
