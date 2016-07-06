@@ -183,6 +183,7 @@ C$    integer omp_get_thread_num
             vbar(i,j,2)=vbar(i,j,1)
           enddo
         enddo
+
 # else
         do j=JR_RANGE
           do i=IR_RANGE

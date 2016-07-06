@@ -259,7 +259,8 @@ C$    integer omp_get_thread_num
 #  ifndef MOVING_BATHY
 #   ifndef TANKY
                      Length_XI =10.0
-                     Length_ETA=0.20
+!                     Length_ETA=0.20
+                     Length_ETA=10.0
 #   else
                      Length_XI =0.20
                      Length_ETA=10.0
@@ -623,7 +624,7 @@ CR     &                                'x0=',x0, 'y0=',y0, mynode
             rmask(3,j)=1.                      ! <-- channel
         endif
       enddo
-#  elif defined TANK || defined GRAV_ADJ || defined ACOUSTIC\
+#  elif defined TANK || defined GRAV_ADJ || defined ACOUSTIC \
                      || defined INTERNAL || defined IGW
       gamma2=1.
       do j=JstrR,JendR
