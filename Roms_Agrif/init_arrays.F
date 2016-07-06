@@ -1114,6 +1114,23 @@ C$    integer omp_get_thread_num
       enddo
 # endif
 
+# ifdef NHMG
+      do k=0,N
+        do j=JstrR,JendR
+          do i=IstrR,IendR
+            wz(i,j,k,1)=init
+            wz(i,j,k,2)=init
+          enddo
+        enddo
+      enddo
+        do j=JstrR,JendR
+          do i=IstrR,IendR
+            ru_nhmg(i,j)=init
+            rv_nhmg(i,j)=init
+          enddo
+        enddo
+# endif
+
 #endif /* SOLVE3D */
 
       return
