@@ -16,6 +16,9 @@ module mg_namelist
   integer(kind=ip) :: ns_pre      =   3
   integer(kind=ip) :: ns_post     =   2
 
+  real(kind=rp)    :: solver_prec    = 1.d-6  !- solver precision 
+  integer(kind=ip) :: solver_maxiter = 50      !- maximum of solver iterations
+
   character(len=16) :: cmatrix='real'          !- 'real' or 'simple'
 
   logical           :: red_black = .true.      !- .false. or .true.
@@ -33,16 +36,18 @@ module mg_namelist
 
   character(len=16) :: bench =''               !- 'seamount'
 
-  namelist/nhparam/   &
-       nsmall       , &
-       ns_coarsest  , &
-       ns_pre       , &
-       ns_post      , &
-       cmatrix      , &
-       relax_method , &
-       interp_type  , &
-       restrict_type, &
-       netcdf_output, &
+  namelist/nhparam/    &
+       solver_prec   , &
+       solver_maxiter, &
+       nsmall        , &
+       ns_coarsest   , &
+       ns_pre        , &
+       ns_post       , &
+       cmatrix       , &
+       relax_method  , &
+       interp_type   , &
+       restrict_type , &
+       netcdf_output , &
        aggressive   
 
 contains
@@ -103,16 +108,18 @@ contains
 
        if (rank == 0) then
           write(*,*)'Non hydrostatic parameters:'
-          write(*,*)'  - nsmall       : ', nsmall 
-          write(*,*)'  - ns_coarsest  : ', ns_coarsest
-          write(*,*)'  - ns_pre       : ', ns_pre
-          write(*,*)'  - ns_post      : ', ns_post
-          write(*,*)'  - cmatrix      : ', trim(cmatrix)
-          write(*,*)'  - relax_method : ', trim(relax_method)
-          write(*,*)'  - interp_type  : ', trim(interp_type)
-          write(*,*)'  - restrict_type: ', trim(restrict_type)
-          write(*,*)'  - aggressive   : ', aggressive
-          write(*,*)'  - netcdf_output: ', netcdf_output
+          write(*,*)'  - solver_prec   : ', solver_prec
+          write(*,*)'  - solver_maxiter: ', solver_maxiter
+          write(*,*)'  - nsmall        : ', nsmall 
+          write(*,*)'  - ns_coarsest   : ', ns_coarsest
+          write(*,*)'  - ns_pre        : ', ns_pre
+          write(*,*)'  - ns_post       : ', ns_post
+          write(*,*)'  - cmatrix       : ', trim(cmatrix)
+          write(*,*)'  - relax_method  : ', trim(relax_method)
+          write(*,*)'  - interp_type   : ', trim(interp_type)
+          write(*,*)'  - restrict_type : ', trim(restrict_type)
+          write(*,*)'  - aggressive    : ', aggressive
+          write(*,*)'  - netcdf_output : ', netcdf_output
           write(*,*)'  '
        endif
     endif

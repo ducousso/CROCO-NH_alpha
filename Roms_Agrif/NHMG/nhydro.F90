@@ -71,8 +71,11 @@ contains
     real(kind=rp), dimension(:,:,:), pointer :: u, v, w
     real(kind=rp), dimension(:,:)  , pointer :: ru, rv
 
-    real(kind=rp)    :: tol = 1.e-12
-    integer(kind=ip) :: maxite = 10
+    real(kind=rp)    :: tol
+    integer(kind=ip) :: maxite
+
+    tol    = solver_prec    ! solver_prec    is defined in the namelist file
+    maxite = solver_maxiter ! solver_maxiter is defined in the namelist file
 
     u => ua
     v => va
