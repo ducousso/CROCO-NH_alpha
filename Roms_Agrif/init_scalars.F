@@ -108,12 +108,12 @@ C$OMP END PARALLEL
       first_time=0
       may_day_flag=0
 !
-! Reset process ID and CPU_time clocks (needed by timers).
+! Reset process ID and timer clocks (needed by timers).
 !
       do j=0,NPP
         do i=0,31
           proc(i,j)=0
-          CPU_time(i,j)=0.E0
+          timer(i,j)=0.E0
         enddo
       enddo
       trd_count=0

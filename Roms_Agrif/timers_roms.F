@@ -24,7 +24,7 @@
       if (proc(1,trd).eq.0) then
         proc(1,trd)=1
         proc(0,trd)=getpid()
-        CPU_time(0,trd)=etime(CPU_time(1,trd))
+        timer(0,trd)=etime(timer(1,trd))
 C$OMP CRITICAL (start_timers_cr_rgn)
 # ifdef MPI
         write(stdout,'(A8,I3,A7,I3,A5,i10,A12)') 'Process ',
@@ -54,25 +54,25 @@ C$OMP END CRITICAL (start_timers_cr_rgn)
       trd=omp_get_thread_num()
       if (proc(1,trd).eq.1) then
         proc(1,trd)=0
-        CPU_time(0,trd)=etime(CPU_time(1,trd))-CPU_time(0,trd)
+        timer(0,trd)=etime(timer(1,trd))-timer(0,trd)
 C$OMP CRITICAL (stop_timers_cr_rgn)
 # ifdef MPI
          write(stdout,'(A8,I3,A7,I3,A5,F12.3,A5,F10.3,A5,F12.5)')
-     &     'Process ',mynode,' thread',trd,' CPU:',CPU_time(1,trd),
-     &             ' sys:',CPU_time(2,trd),' net:',CPU_time(0,trd)
+     &     'Process ',mynode,' thread',trd,' CPU:',timer(1,trd),
+     &             ' sys:',timer(2,trd),' net:',timer(0,trd)
 # else
          write(stdout,'(A8,I3,A5,F12.3,A5,F10.3,A5,F12.5)')
-     &                      'Thread #',trd,' CPU:',CPU_time(1,trd),
-     &             ' sys:',CPU_time(2,trd),' net:',CPU_time(0,trd)
+     &                      'Thread #',trd,' CPU:',timer(1,trd),
+     &             ' sys:',timer(2,trd),' net:',timer(0,trd)
 # endif
          trd_count=trd_count+1
-         CPU_time(0,NPP)=CPU_time(0,NPP)+CPU_time(0,trd)
-         CPU_time(1,NPP)=CPU_time(1,NPP)+CPU_time(1,trd)
-         CPU_time(2,NPP)=CPU_time(2,NPP)+CPU_time(2,trd)
+         timer(0,NPP)=timer(0,NPP)+timer(0,trd)
+         timer(1,NPP)=timer(1,NPP)+timer(1,trd)
+         timer(2,NPP)=timer(2,NPP)+timer(2,trd)
          if (trd_count.eq.numthreads) then
            trd_count=0
            write(stdout,'(A6,8x,F14.3,3x,F12.3,1x,F14.3)') 'TOTAL:',
-     &               CPU_time(1,NPP),CPU_time(2,NPP),CPU_time(0,NPP)
+     &               timer(1,NPP),timer(2,NPP),timer(0,NPP)
          endif 
 C$OMP END CRITICAL (stop_timers_cr_rgn)
       endif
