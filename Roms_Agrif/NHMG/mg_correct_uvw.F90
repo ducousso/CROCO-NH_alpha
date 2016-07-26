@@ -54,7 +54,7 @@ contains
 
              dxu = hlf * (dx(j,i)+dx(j,i-1))
 
-             u(k,i,j) = u(k,j,i) - one / dxu * (p(k,j,i)-p(k,j,i-1))
+             u(k,j,i) = u(k,j,i) - one / dxu * (p(k,j,i)-p(k,j,i-1))
 
           enddo
        enddo

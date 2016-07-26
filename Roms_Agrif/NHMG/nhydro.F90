@@ -41,10 +41,11 @@ contains
   subroutine nhydro_matrices(nx,ny,nz,dxa,dya,zetaa,ha,hc,theta_b,theta_s)
 
     integer(kind=ip), intent(in) :: nx, ny, nz
-    real(kind=rp), dimension(0:nx+1,1:ny+1), intent(in) :: dxa, dya, zetaa, ha
+
+    real(kind=rp), dimension(0:nx+1,0:ny+1), intent(in) :: dxa, dya, zetaa, ha
     real(kind=rp),                           intent(in) :: hc, theta_b, theta_s
 
-    real(kind=rp), dimension(0:ny+1,1:nx+1), target :: dxb, dyb, zetab, hb
+    real(kind=rp), dimension(0:ny+1,0:nx+1), target :: dxb, dyb, zetab, hb
 
     real(kind=rp), dimension(:,:)  , pointer :: dx, dy, zeta, h
 
@@ -54,7 +55,6 @@ contains
     dyb = transpose(dya)
     zetab = transpose(zetaa)
     hb = transpose(ha)
-
 
     dx => dxb
     dy => dyb
@@ -73,6 +73,7 @@ contains
   subroutine nhydro_solve(nx,ny,nz,ua,va,wa,rua,rva)
 
     integer(kind=ip), intent(in) :: nx, ny, nz
+
     real(kind=rp), dimension(1:nx+1,0:ny+1,1:nz), target, intent(inout) :: ua
     real(kind=rp), dimension(0:nx+1,1:ny+1,1:nz), target, intent(inout) :: va
     real(kind=rp), dimension(0:nx+1,0:ny+1,0:nz), target, intent(inout) :: wa
@@ -83,7 +84,6 @@ contains
     real(kind=rp), dimension(:,:)  , pointer :: ru, rv
 
     real(kind=rp), dimension(:,:,:), allocatable, target :: ub, vb, wb
-
 
     real(kind=rp)    :: tol
     integer(kind=ip) :: maxite
@@ -99,10 +99,12 @@ contains
     tol    = solver_prec    ! solver_prec    is defined in the namelist file
     maxite = solver_maxiter ! solver_maxiter is defined in the namelist file
 
+!!
     ! Reshape u,v and w array indexing
-    allocate(ub(1:nz,0:ny+1,nx+1))
-    allocate(vb(1:nz,ny+1,0:nx+1))
-    allocate(wb(0:nz+1,0:ny+1,0:nx+1))
+    if (myrank==0) write(*,*)' ijk -> kji'
+    allocate(ub(1:nz,0:ny+1,  nx+1))
+    allocate(vb(1:nz,  ny+1,0:nx+1))
+    allocate(wb(0:nz,0:ny+1,0:nx+1))
 
     do i = 1, nx+1
       do j = 0,ny+1
@@ -131,6 +133,7 @@ contains
     u => ub
     v => vb
     w => wb
+!!
 
 !    u => ua
 !    v => va
@@ -178,8 +181,7 @@ contains
        call write_netcdf(rv,vname='rv',netcdf_file_name='rv.nc',rank=myrank,iter=iter_solve)
     endif
 
-    call toc(1,'nhydro_solve')
-
+!!
    if (myrank==0) write(*,*)' kji -> ijk'
    do i = 1, nx+1
       do j = 0,ny+1
@@ -205,13 +207,18 @@ contains
       enddo
     enddo
 
+    write(*,*)myrank,'imhere'
+
     if (myrank==0) write(*,*)'deallocate ub, vb and wb' 
-    u => null()
-    v => null()
-    w => null()
+    if (associated(u)) u => null()
+    if (associated(v)) v => null()
+    if (associated(w)) w => null()
+
     deallocate(ub)
     deallocate(vb)
     deallocate(wb)
+!!
+
     call toc(1,'nhydro_solve')	
 
     if (myrank==0) write(*,*)' nhydro_solve end !!!'
