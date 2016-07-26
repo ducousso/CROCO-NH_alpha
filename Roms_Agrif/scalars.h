@@ -472,9 +472,9 @@
 ! for diagnostic/performance measurements purposes and do not affect
 ! the model results.
 !
-      real*4 CPU_time(0:31,0:NPP)
+      real*4 timer(0:31,0:NPP)
       integer proc(0:31,0:NPP),trd_count
-      common /timers_roms/CPU_time,proc,trd_count
+      common /timers_roms/timer,proc,trd_count
 
 #ifdef MPI
 !

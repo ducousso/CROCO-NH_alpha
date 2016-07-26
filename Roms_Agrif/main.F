@@ -38,6 +38,7 @@
 #ifdef NHMG
           USE nhydro, only : nhydro_init
           USE nhydro, only : nhydro_matrices
+          USE nhydro, only : nhydro_clean
 #endif
 !     implicit none
       integer tile, subs, trd, ierr
@@ -790,6 +791,15 @@ C$OMP PARALLEL DO PRIVATE(tile)            ! Stop timers and
 #endif
 
  100  continue
+
+#ifdef NHMG
+!
+!----------------------------------------------------------------------
+!  Clean NHMG memory
+!----------------------------------------------------------------------
+!
+      call nhydro_clean()
+#endif
 
 #ifdef MPI
       call MPI_Barrier(MPI_COMM_WORLD, ierr)  ! XIOS

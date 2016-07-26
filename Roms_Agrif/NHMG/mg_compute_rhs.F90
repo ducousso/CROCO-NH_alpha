@@ -85,25 +85,30 @@ contains
                qrt                                                      * & 
                ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
                ( dy(j,i) + dy(j,i-1) ) &
-               * u(i,j,k) &
+               !               * u(i,j,k) &
+               * u(k,j,i) &
                - qrt * ( &
-               + zxdy(k,j,i  )*dzw(k+1,j,i  )*w(i  ,j,k+1-1)   &
-               + zxdy(k,j,i-1)*dzw(k+1,j,i-1)*w(i-1,j,k+1-1) ) &
-               
+               + zxdy(k,j,i  )*dzw(k+1,j,i  )*w(k+1-1,j,i)   &
+               + zxdy(k,j,i-1)*dzw(k+1,j,i-1)*w(k+1-1,j,i-1) ) &
                -( &
                + zxdy(k,j,i  )*zxdy(k,j,i  )/(cw(k,j,i  )+cw(k+1,j,i  )) &
                + zxdy(k,j,i-1)*zxdy(k,j,i-1)/(cw(k,j,i-1)+cw(k+1,j,i-1)) ) * &
-               (hlf * ( dx(j,i) + dx(j,i-1) )) * u(i,j,k) &
-               
+               (hlf * ( dx(j,i) + dx(j,i-1) )) * u(k,j,i) &
                -( & 
                + zxdy(k,j,i) * zydx(k,j,i)/(cw(k,j,i  )+cw(k+1,j,i  ))   &
                * hlf * ( &
-               hlf * ( dy(j  ,i) + dy(j-1,i) )*v(i,j,k ) + &
-               hlf * ( dy(j+1,i) + dy(j  ,i) )*v(i,j+1,k ))   & 
+               hlf * ( dy(j  ,i) + dy(j-1,i) )*v(k,j,i ) + &
+               hlf * ( dy(j+1,i) + dy(j  ,i) )*v(k,j+1,i ))   & 
                + zxdy(k,j,i-1) * zydx(k,j,i-1)/(cw(k,j,i-1)+cw(k+1,j,i-1))   &
                * hlf * ( &
-               hlf * ( dy(j  ,i-1) + dy(j-1,i-1) )*v(i-1,j,k) + &
-               hlf * ( dy(j+1,i-1) + dy(j  ,i-1) )*v(i-1,j+1,k)) )
+               hlf * ( dy(j  ,i-1) + dy(j-1,i-1) )*v(k,j,i-1) + &
+               hlf * ( dy(j+1,i-1) + dy(j  ,i-1) )*v(k,j+1,i-1)) )
+
+       enddo
+    enddo
+
+    do i = 1,nx+1  ! West  to East
+       do j = 1,ny ! South to North
 
        enddo
     enddo
@@ -115,12 +120,12 @@ contains
 
              uf(k,j,i) =  qrt                                               * & 
                   ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
-                  ( dy(j,i) + dy(j,i-1) ) * u(i,j,k)                          &
+                  ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
                   - qrt * ( &
-                  + zxdy(k,j,i  ) * dzw(k  ,j,i  ) * w(i  ,j,k  -1) &
-                  + zxdy(k,j,i  ) * dzw(k+1,j,i  ) * w(i  ,j,k+1-1) &
-                  + zxdy(k,j,i-1) * dzw(k  ,j,i-1) * w(i-1,j,k  -1) &
-                  + zxdy(k,j,i-1) * dzw(k+1,j,i-1) * w(i-1,j,k+1-1) &
+                  + zxdy(k,j,i  ) * dzw(k  ,j,i  ) * w(k-1,j,i) &
+                  + zxdy(k,j,i  ) * dzw(k+1,j,i  ) * w(k+1-1,j,i) &
+                  + zxdy(k,j,i-1) * dzw(k  ,j,i-1) * w(k-1,j,i-1) &
+                  + zxdy(k,j,i-1) * dzw(k+1,j,i-1) * w(k+1-1,j,i-1) &
                   )  ! umask
           enddo
 
@@ -136,12 +141,13 @@ contains
                qrt                                                       * & 
                ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
                ( dy(j,i) + dy(j,i-1) ) &
-               * u(i,j,k) &
+               !               * u(i,j,k) &
+               * u(k,j,i) &
                - qrt * ( &
-               + zxdy(k,j,i  )*       dzw(k  ,j,i  )*w(i  ,j,k  -1) &
-               + zxdy(k,j,i  )* two * dzw(k+1,j,i  )*w(i  ,j,k+1-1) &
-               + zxdy(k,j,i-1)*       dzw(k  ,j,i-1)*w(i-1,j,k  -1) &
-               + zxdy(k,j,i-1)* two * dzw(k+1,j,i-1)*w(i-1,j,k+1-1) &
+               + zxdy(k,j,i  )*       dzw(k  ,j,i  )*w(k-1,j,i) &
+               + zxdy(k,j,i  )* two * dzw(k+1,j,i  )*w(k+1-1,j,i) &
+               + zxdy(k,j,i-1)*       dzw(k  ,j,i-1)*w(k-1,j,i-1) &
+               + zxdy(k,j,i-1)* two * dzw(k+1,j,i-1)*w(k+1-1,j,i-1) &
                )  ! umask
 
        enddo
@@ -181,26 +187,27 @@ contains
                qrt                                                       * &
                ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
                ( dx(j,i) + dx(j-1,i) ) &
-               * v(i,j,k) &
+               !               * v(i,j,k) &
+               * v(k,j,i) &
                - qrt * ( &
-               + zydx(k,j  ,i) * dzw(k+1,j  ,i)*w(i,j  ,k+1-1) &
-               + zydx(k,j-1,i) * dzw(k+1,j-1,i)*w(i,j-1,k+1-1) &
+               + zydx(k,j  ,i) * dzw(k+1,j  ,i)*w(k+1-1,j,i) &
+               + zydx(k,j-1,i) * dzw(k+1,j-1,i)*w(k+1-1,j-1,i) &
                ) &
                
                -( &
                + zydx(k,j  ,i) * zydx(k,j  ,i)/(cw(k,j  ,i)+cw(k+1,j  ,i)) &
                + zydx(k,j-1,i) * zydx(k,j-1,i)/(cw(k,j-1,i)+cw(k+1,j-1,i)) ) * &
-               hlf * ( dy(j,i) + dy(j-1,i) ) * v(i,j,k) &
-               
+               !               hlf * ( dy(j,i) + dy(j-1,i) ) * v(i,j,k) &
+               hlf * ( dy(j,i) + dy(j-1,i) ) * v(k,j,i) &
                - ( &
                + zxdy(k,j  ,i) * zydx(k,j  ,i)/(cw(k,j  ,i)+cw(k+1,j  ,i))  &
                * hlf * ( &
-               hlf * ( dx(j,i  ) + dx(j,i-1) ) * u(i,j,k) + &
-               hlf * ( dx(j,i+1) + dx(j,i  ) ) * u(i+1,j,k)) &
+               hlf * ( dx(j,i  ) + dx(j,i-1) ) * u(k,j,i) + &
+               hlf * ( dx(j,i+1) + dx(j,i  ) ) * u(k,j,i+1)) &
                + zxdy(k,j-1,i) * zydx(k,j-1,i)/(cw(k,j-1,i)+cw(k+1,j-1,i))   &
                * hlf * ( &
-               hlf * ( dx(j-1,i  ) + dx(j-1,i-1) ) * u(i,j-1,k) + &
-               hlf * ( dx(j-1,i+1) + dx(j-1,i  ) ) * u(i+1,j-1,k)) &
+               hlf * ( dx(j-1,i  ) + dx(j-1,i-1) ) * u(k,j-1,i) + &
+               hlf * ( dx(j-1,i+1) + dx(j-1,i  ) ) * u(k,j-1,i+1)) &
                ) 
 
        enddo
@@ -211,14 +218,15 @@ contains
 
           do k = 2,nz-1 !interior levels
 
-             vf(k,j,i) = qrt * &
+             vf(k,j,i) = &
+                  qrt                                                       * &
                   ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
-                  ( dx(j,i) + dx(j-1,i) ) * v(i,j,k) &
+                  ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
                   - qrt * ( &
-                  + zydx(k,j  ,i) * dzw(k  ,j  ,i) * w(i,j  ,k  -1) &
-                  + zydx(k,j  ,i) * dzw(k+1,j  ,i) * w(i,j  ,k+1-1) &
-                  + zydx(k,j-1,i) * dzw(k  ,j-1,i) * w(i,j-1,k  -1) &
-                  + zydx(k,j-1,i) * dzw(k+1,j-1,i) * w(i,j-1,k+1-1) &
+                  + zydx(k,j  ,i) * dzw(k  ,j  ,i) * w(k-1,j,i) &
+                  + zydx(k,j  ,i) * dzw(k+1,j  ,i) * w(k+1-1,j,i) &
+                  + zydx(k,j-1,i) * dzw(k  ,j-1,i) * w(k-1,j-1,i) &
+                  + zydx(k,j-1,i) * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) &
                   )  !* vmask(j,i)
 
           enddo
@@ -235,12 +243,12 @@ contains
                qrt                                                       * &
                ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
                ( dx(j,i) + dx(j-1,i) ) &
-               * v(i,j,k) &
+               * v(k,j,i) &
                - qrt * ( &
-               + zydx(k,j  ,i)*       dzw(k  ,j  ,i) * w(i,j  ,k  -1) &
-               + zydx(k,j  ,i)* two * dzw(k+1,j  ,i) * w(i,j  ,k+1-1) &
-               + zydx(k,j-1,i)*       dzw(k  ,j-1,i) * w(i,j-1,k  -1) &
-               + zydx(k,j-1,i)* two * dzw(k+1,j-1,i) * w(i,j-1,k+1-1) &
+               + zydx(k,j  ,i)*       dzw(k  ,j  ,i) * w(k-1,j,i) &
+               + zydx(k,j  ,i)* two * dzw(k+1,j  ,i) * w(k+1-1,i,j) &
+               + zydx(k,j-1,i)*       dzw(k  ,j-1,i) * w(k-1,j-1,i) &
+               + zydx(k,j-1,i)* two * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) &
                ) !* vmask(j,i)
 
        enddo
@@ -286,28 +294,17 @@ contains
 
           do k = 2,nz !interior levels
 
-             wf(k,j,i) = cw(k,j,i) * dzw(k,j,i)* w(i,j,k-1) &
+             wf(k,j,i) = cw(k,j,i) * dzw(k,j,i) * w(k-1,j,i) &
                   - qrt * hlf * ( &
-                  + zxdy(k  ,j,i) * ( dx(j,i  ) + dx(j,i-1) ) * u(i  ,j,k  ) &
-                  + zxdy(k  ,j,i) * ( dx(j,i+1) + dx(j,i  ) ) * u(i+1,j,k  ) &
-                  + zxdy(k-1,j,i) * ( dx(j,i  ) + dx(j,i-1) ) * u(i  ,j,k-1) &
-                  + zxdy(k-1,j,i) * ( dx(j,i+1) + dx(j,i  ) ) * u(i+1,j,k-1) )
-          enddo
-
-       enddo
-    enddo
-
-    do i = 1,nx
-       do j = 1,ny
-
-          do k = 2,nz !interior levels
-
-             wf(k,j,i) = wf(k,j,i) &
+                  + zxdy(k  ,j,i) * ( dx(j,i  ) + dx(j,i-1) ) * u(k,j,i ) &
+                  + zxdy(k  ,j,i) * ( dx(j,i+1) + dx(j,i  ) ) * u(k,j,i+1) &
+                  + zxdy(k-1,j,i) * ( dx(j,i  ) + dx(j,i-1) ) * u(k-1,j,i) &
+                  + zxdy(k-1,j,i) * ( dx(j,i+1) + dx(j,i  ) ) * u(k-1,j,i+1) ) &
                   - qrt * hlf * ( &
-                  + zydx(k  ,j,i) * ( dy(j  ,i) + dy(j-1,i) ) * v(i,j  ,k  ) &
-                  + zydx(k  ,j,i) * ( dy(j+1,i) + dy(j  ,i) ) * v(i,j+1,k  ) &
-                  + zydx(k-1,j,i) * ( dy(j  ,i) + dy(j-1,i) ) * v(i,j  ,k-1) &
-                  + zydx(k-1,j,i) * ( dy(j+1,i) + dy(j  ,i) ) * v(i,j+1,k-1) )
+                  + zydx(k  ,j,i) * ( dy(j  ,i) + dy(j-1,i) ) * v(k,j,i) &
+                  + zydx(k  ,j,i) * ( dy(j+1,i) + dy(j  ,i) ) * v(k,j+1,i ) &
+                  + zydx(k-1,j,i) * ( dy(j  ,i) + dy(j-1,i) ) * v(k-1,j,i) &
+                  + zydx(k-1,j,i) * ( dy(j+1,i) + dy(j  ,i) ) * v(k-1,j+1,i) )
           enddo
 
        enddo
@@ -318,15 +315,13 @@ contains
     do i = 1,nx
        do j = 1,ny
 
-          wf(k,j,i) = cw(k,j,i) * dzw(k,j,i) * w(i,j,k-1)&
-               
+          wf(k,j,i) = cw(k,j,i) * dzw(k,j,i) * w(k-1,j,i)&
                - hlf * hlf *( &
-               + zxdy(k-1,j,i) * ( dx(j,i) + dx(j,i-1) ) * u(i  ,j,k-1) &
-               + zxdy(k-1,j,i) * ( dx(j,i+1) + dx(j,i) ) * u(i+1,j,k-1) ) &
-               
+               + zxdy(k-1,j,i) * ( dx(j,i) + dx(j,i-1) ) * u(k-1,j,i) &
+               + zxdy(k-1,j,i) * ( dx(j,i+1) + dx(j,i) ) * u(k-1,j,i+1) ) &
                - hlf * hlf * ( &
-               + zydx(k-1,j,i) * ( dy(j,i) + dy(j-1,i) ) * v(i,j  ,k-1) &
-               + zydx(k-1,j,i) * ( dy(j+1,i) + dy(j,i) ) * v(i,j+1,k-1) )
+               + zydx(k-1,j,i) * ( dy(j,i) + dy(j-1,i) ) * v(k-1,j,i) &
+               + zydx(k-1,j,i) * ( dy(j+1,i) + dy(j,i) ) * v(k-1,j+1,i) )
 
        enddo
     enddo
@@ -356,3 +351,4 @@ end module mg_compute_rhs
         module mg_compute_rhs_empty
         end module
 #endif
+

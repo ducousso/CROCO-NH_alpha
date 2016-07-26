@@ -62,6 +62,12 @@
 # ifdef MRL_WCI
       real vstu,dudx,dvdx,ustv,dude,dvde
 # endif
+!NG 8 july 2016
+# ifdef NHMG
+#  include "nbq.h"
+# endif
+      real(kind=8) :: tic, toc, rhs_time = 0._8
+!NG 8 july 2016
 !
 # include "compute_auxiliary_bounds.h"
 !
@@ -75,6 +81,7 @@
 #  define Uwrk UFx
 #  define Vwrk VFe
 #  define wrk UFe
+
 !
 !====================================================================
 !
@@ -173,6 +180,9 @@
 #  undef Vwrk
 #  undef Uwrk
 # endif /* BODYFORCE */
+
+      !NG time counter
+      call cpu_time(tic)
 
       do k=1,N
 !
@@ -649,6 +659,11 @@
         enddo
 # endif /* UV_ADV */
       enddo    ! <-- k
+
+      call cpu_time(toc)
+
+      rhs_time = rhs_time + (toc - tic)
+!NG      write(*,*)'NG -> rhs_time (iter, cumul) = ', (toc - tic), rhs_time
 
       do j=Jstr,Jend
 # ifdef UV_ADV

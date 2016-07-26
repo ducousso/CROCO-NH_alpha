@@ -48,8 +48,10 @@
 #  endif
 # else
 !     parameter (LLm0=32,   MMm0=4,    N=10)   !   2 km resolution
-!      parameter (LLm0=128,  MMm0=4,    N=40)   ! 500  m resolution
-      parameter (LLm0=128,  MMm0=128,    N=40)   ! 500  m resolution
+!      parameter (LLm0=128,  MMm0=4,    N=40)  ! 500  m resolution
+
+      parameter (LLm0=128,  MMm0=128, N=64)    ! 500  m resolution
+
 !     parameter (LLm0=512,  MMm0=4,   N=160)   ! 125  m resolution
 # endif
 #elif defined INNERSHELF
@@ -67,7 +69,9 @@
 #elif defined RIVER
       parameter (LLm0=40,   MMm0=80,   N=20)
 #elif defined SEAMOUNT
-      parameter (LLm0=64,   MMm0=64,   N=20)
+!      parameter (LLm0=64,   MMm0=64,   N=20)
+!       parameter (LLm0=128,   MMm0=128,   N=128)
+       parameter (LLm0=256,   MMm0=256,   N=128)
 #elif defined SHELFRONT
       parameter (LLm0=4,    MMm0=40,   N=10)
 #elif defined SOLITON

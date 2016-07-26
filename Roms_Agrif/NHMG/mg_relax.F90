@@ -175,6 +175,8 @@ contains
 
        do rb = 1, 2 ! Red black loop
           do i = 1, nx
+
+!!NG             !DIR$ SIMD
              do j = 1+mod(i+rb,2),ny,2
 
                 call relax_3D_8_heart(p,b,cA,i,j,nz)
@@ -276,6 +278,7 @@ contains
     d(k)   = cA(1,k,j,i)
     ud(k)  = cA(2,k+1,j,i)
 
+    !DEC$ VECTOR ALWAYS
     do k = 2,nz-1 !interior levels
        rhs(k) = b(k,j,i) &
             - cA(3,k,j,i)*p(k+1,j-1,i) - cA(3,k-1,j+1,i)*p(k-1,j+1,i) &

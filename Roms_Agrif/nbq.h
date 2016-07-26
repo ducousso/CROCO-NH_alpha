@@ -1,4 +1,3 @@
-#ifdef NBQ
 
       integer ndtnbq
       common /time_nbq1/ ndtnbq
@@ -85,5 +84,4 @@
       real sina(GLOBAL_2D_ARRAY)
       common /nbq_sina/ sina
 
-#endif
   
