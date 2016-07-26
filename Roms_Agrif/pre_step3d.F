@@ -67,6 +67,7 @@
 !--------------------------------------------------------------------
 !
 #ifdef NHMG
+          USE nhydro, only : nhydro_matrices
           USE nhydro, only : nhydro_solve
 #endif
       implicit none
@@ -842,13 +843,33 @@
 
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # ifdef NHMG
+
+c$$$      call nhydro_matrices(
+c$$$     & transpose(1._8/pm(0:Lm+1,0:Mm+1)),
+c$$$     & transpose(1._8/pn(0:Lm+1,0:Mm+1)),
+c$$$!which zeta?
+c$$$     & transpose(Zt_avg1(0:Lm+1,0:Mm+1)),
+c$$$!
+c$$$     & transpose(h(0:Lm+1,0:Mm+1)),
+c$$$     & hc,theta_b,theta_s)
+
+#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
+      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
+     &                        u(START_2D_ARRAY,1,nnew))
+      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
+     &                        v(START_2D_ARRAY,1,nnew))
+      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
+     &                        wz(START_2D_ARRAY,0,nnew))     
+#  endif
+
       call nhydro_solve(
      & Lm, Mm, N,
      & u(1:Lm+1,0:Mm+1,1:N,nnew),
      & v(0:Lm+1,1:Mm+1,1:N,nnew),
      & wz(0:Lm+1,0:Mm+1,0:N,nnew),
-     & ru_nhmg(1:Lm+1,0:Mm+1),
-     & rv_nhmg(0:Lm+1,1:Mm+1) )
+     & rufrc_nhmg(1:Lm+1,0:Mm+1),
+     & rvfrc_nhmg(0:Lm+1,1:Mm+1) )
+
 # endif
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
@@ -973,6 +994,44 @@
           enddo
         enddo
       enddo
+c$$$# ifdef NHMG
+c$$$!
+c$$$!--------------------------------------------------
+c$$$!  Couple s-component of velocity
+c$$$!--------------------------------------------------
+c$$$!
+c$$$#   if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
+c$$$      call exchange_r3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        Hz_half(START_2D_ARRAY,1))
+c$$$      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        u(START_2D_ARRAY,1,nnew))
+c$$$      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        v(START_2D_ARRAY,1,nnew))
+c$$$#   endif
+c$$$
+c$$$      do j=Jstr,Jend
+c$$$        do k=1,N
+c$$$          do i=Istr,Iend
+c$$$            wz(i,j,k,nnew)=wz(i,j,k-1,nnew) + (       
+c$$$     &         -0.5*(Hz_half(i+1,j,k)+Hz_half(i,j,k))
+c$$$     &         *on_u(i+1,j)*u(i+1,j,k,nnew)
+c$$$     &         +0.5*(Hz_half(i,j,k)+Hz_half(i-1,j,k))
+c$$$     &         *on_u(i,j)*u(i,j,k,nnew)
+c$$$     &         -0.5*(Hz_half(i,j+1,k)+Hz_half(i,j,k))
+c$$$     &         *om_v(i,j+1)*v(i,j+1,k,nnew)
+c$$$     &         +0.5*(Hz_half(i,j,k)+Hz_half(i,j-1,k))
+c$$$     &         *om_v(i,j)*v(i,j,k,nnew) )
+c$$$     &         / (on_r(i,j)*om_r(i,j))
+c$$$          enddo
+c$$$        enddo
+c$$$      enddo
+c$$$
+c$$$!      call nhydro_check_nondivergence(
+c$$$!     & Lm, Mm, N,
+c$$$!     & u(1:Lm+1,0:Mm+1,1:N,nnew),
+c$$$!     & v(0:Lm+1,1:Mm+1,1:N,nnew),
+c$$$!     & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
+c$$$# endif
 !
 !======================================================================
 ! Set PHYSICAL lateral boundary conditions for momentum.

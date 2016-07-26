@@ -199,10 +199,15 @@ C$    integer omp_get_thread_num
 #  else
 !                     Length_XI =64.0E+3
 !                     Length_ETA=2.0E+3
+!Graj_adj
+!                     Length_XI =64.0E+3
 !                     Length_ETA=64.0E+3
-!
-                     Length_XI =128.0
-                     Length_ETA=128.0
+!Graj_adj2
+!                     Length_XI =128.0
+!                     Length_ETA=128.0
+!Graj_adj3
+                     Length_XI =64.0
+                     Length_ETA=64.0
 #  endif
 # elif defined ACOUSTIC
                      Length_XI =128.0
@@ -258,8 +263,9 @@ C$    integer omp_get_thread_num
 # elif defined TANK
 #  ifndef MOVING_BATHY
 #   ifndef TANKY
-                     Length_XI =10.0
+!                     Length_XI =10.0
 !                     Length_ETA=0.20
+                     Length_XI =10.0
                      Length_ETA=10.0
 #   else
                      Length_XI =0.20

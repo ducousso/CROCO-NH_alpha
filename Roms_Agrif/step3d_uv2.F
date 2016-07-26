@@ -59,7 +59,9 @@
 !-------------------------------------------------------------------- 
 !
 #ifdef NHMG
+          USE nhydro, only : nhydro_matrices
           USE nhydro, only : nhydro_solve
+          USE nhydro, only : nhydro_check_nondivergence
 #endif
       implicit none
 # include "param.h"
@@ -220,26 +222,27 @@
           DC(i,N)=(DC(i,N)-aa*DC(i,N-1))
      &           /(BC(i,N)-aa*CF(i,N-1))
 
-          CF(i,0)=0.5*(Hz(i,j,N)+Hz(i-1,j,N))
-          DC(i,0)=CF(i,0)*DC(i,N)
+c$$$          CF(i,0)=0.5*(Hz(i,j,N)+Hz(i-1,j,N))
+c$$$          DC(i,0)=CF(i,0)*DC(i,N)
         enddo
         do k=N-1,1,-1
           do i=IstrU,Iend
               DC(i,k)=DC(i,k)-CF(i,k)*DC(i,k+1)
 
-            cff=0.5*(Hz(i,j,k)+Hz(i-1,j,k))
-            CF(i,0)=CF(i,0)+cff
-            DC(i,0)=DC(i,0)+cff*DC(i,k)
+c$$$            cff=0.5*(Hz(i,j,k)+Hz(i-1,j,k))
+c$$$            CF(i,0)=CF(i,0)+cff
+c$$$            DC(i,0)=DC(i,0)+cff*DC(i,k)
           enddo
         enddo      !--> discard FC,BC; keep DC,CF(:,0)
 
-        do i=IstrU,Iend
-          DC(i,0)=(DC(i,0)*on_u(i,j)-DU_avg1(i,j,nnew))
-     &                             /(CF(i,0)*on_u(i,j))
-        enddo
+c$$$        do i=IstrU,Iend
+c$$$          DC(i,0)=(DC(i,0)*on_u(i,j)-DU_avg1(i,j,nnew))
+c$$$     &                             /(CF(i,0)*on_u(i,j))
+c$$$        enddo
         do k=1,N
           do i=IstrU,Iend
-            u(i,j,k,nnew)=(DC(i,k)-DC(i,0)) SWITCH umask(i,j)
+c$$$            u(i,j,k,nnew)=(DC(i,k)-DC(i,0)) SWITCH umask(i,j)
+            u(i,j,k,nnew)=DC(i,k)
 # ifdef DIAGNOSTICS_UV
             MVmix(i,j,k,1)=-( MVmix(i,j,k,1) - u(i,j,k,nnew)*
      &                           0.5*(Hz(i,j,k)+Hz(i-1,j,k)) )
@@ -350,27 +353,27 @@
             DC(i,N)=(DC(i,N)-aa*DC(i,N-1))
      &             /(BC(i,N)-aa*CF(i,N-1))
 
-            CF(i,0)=0.5*(Hz(i,j,N)+Hz(i,j-1,N))
-            DC(i,0)=CF(i,0)*DC(i,N)
+c$$$            CF(i,0)=0.5*(Hz(i,j,N)+Hz(i,j-1,N))
+c$$$            DC(i,0)=CF(i,0)*DC(i,N)
           enddo
           do k=N-1,1,-1
             do i=Istr,Iend
               DC(i,k)=DC(i,k)-CF(i,k)*DC(i,k+1)
 
-              cff=0.5*(Hz(i,j,k)+Hz(i,j-1,k))
-              CF(i,0)=CF(i,0)+cff
-              DC(i,0)=DC(i,0)+cff*DC(i,k)
+c$$$              cff=0.5*(Hz(i,j,k)+Hz(i,j-1,k))
+c$$$              CF(i,0)=CF(i,0)+cff
+c$$$              DC(i,0)=DC(i,0)+cff*DC(i,k)
             enddo
           enddo      !--> discard FC,BC; keep DC,CF(:,0)
 
-          do i=Istr,Iend
-            DC(i,0)=(DC(i,0)*om_v(i,j)-DV_avg1(i,j,nnew))
-     &                               /(CF(i,0)*om_v(i,j))
-          enddo
+c$$$          do i=Istr,Iend
+c$$$            DC(i,0)=(DC(i,0)*om_v(i,j)-DV_avg1(i,j,nnew))
+c$$$     &                               /(CF(i,0)*om_v(i,j))
+c$$$          enddo
           do k=1,N
             do i=Istr,Iend
-              v(i,j,k,nnew)=(DC(i,k)-DC(i,0)) SWITCH vmask(i,j)
-!
+c$$$              v(i,j,k,nnew)=(DC(i,k)-DC(i,0)) SWITCH vmask(i,j)
+              v(i,j,k,nnew)=DC(i,k)
 # ifdef DIAGNOSTICS_UV
               MVmix(i,j,k,2)=-( MVmix(i,j,k,2) - v(i,j,k,nnew)*
      &                             0.5*(Hz(i,j,k)+Hz(i,j-1,k)) )
@@ -457,20 +460,114 @@
 ! Set PHYSICAL lateral boundary conditions.
 !--------------------------------------------------------------------
 !
-      call v3dbc_tile (Istr,Iend,Jstr,Jend, grad)   
-      call u3dbc_tile (Istr,Iend,Jstr,Jend, grad)
+!      call v3dbc_tile (Istr,Iend,Jstr,Jend, grad)   
+!      call u3dbc_tile (Istr,Iend,Jstr,Jend, grad)
 
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # ifdef NHMG
+
+c$$$      call nhydro_matrices(
+c$$$     & transpose(1._8/pm(0:Lm+1,0:Mm+1)),
+c$$$     & transpose(1._8/pn(0:Lm+1,0:Mm+1)),
+c$$$!which zeta?
+c$$$     & transpose(Zt_avg1(0:Lm+1,0:Mm+1)),
+c$$$!
+c$$$     & transpose(h(0:Lm+1,0:Mm+1)),
+c$$$     & hc,theta_b,theta_s)
+
+#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
+      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
+     &                        u(START_2D_ARRAY,1,nnew))
+      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
+     &                        v(START_2D_ARRAY,1,nnew))
+      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
+     &                        wz(START_2D_ARRAY,0,nnew))     
+#  endif
+
       call nhydro_solve(
      & Lm, Mm, N,
      & u(1:Lm+1,0:Mm+1,1:N,nnew),
      & v(0:Lm+1,1:Mm+1,1:N,nnew),
      & wz(0:Lm+1,0:Mm+1,0:N,nnew),
-     & ru_nhmg(1:Lm+1,0:Mm+1),
-     & rv_nhmg(0:Lm+1,1:Mm+1) )
+     & rufrc_nhmg(1:Lm+1,0:Mm+1),
+     & rvfrc_nhmg(0:Lm+1,1:Mm+1) )
+
+!      call nhydro_check_nondivergence(
+!     & Lm, Mm, N,
+!     & u(1:Lm+1,0:Mm+1,1:N,nnew),
+!     & v(0:Lm+1,1:Mm+1,1:N,nnew),
+!     & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
+
 # endif
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+c$$$# ifdef EW_PERIODIC
+c$$$#  define IU_RANGE Istr,Iend
+c$$$#  define IV_RANGE Istr,Iend
+c$$$# else
+c$$$#  define IU_RANGE Istr,IendR
+c$$$#  define IV_RANGE IstrR,IendR
+c$$$# endif
+c$$$!
+c$$$# ifdef NS_PERIODIC
+c$$$#  define JU_RANGE Jstr,Jend
+c$$$#  define JV_RANGE Jstr,Jend
+c$$$# else
+c$$$#  define JU_RANGE JstrR,JendR
+c$$$#  define JV_RANGE Jstr,JendR
+c$$$# endif
+c$$$      do j=JU_RANGE 
+c$$$        do i=IU_RANGE
+c$$$          DC(i,0)=0.
+c$$$          CF(i,0)=0.
+c$$$          FC(i,0)=0.
+c$$$        enddo
+c$$$        do k=1,N,+1
+c$$$          do i=IU_RANGE
+c$$$            DC(i,k)=0.5*(Hz(i,j,k)+Hz(i-1,j,k))*on_u(i,j)
+c$$$            DC(i,0)=DC(i,0)+DC(i,k)
+c$$$            CF(i,0)=CF(i,0)+DC(i,k)*u(i,j,k,nnew)
+c$$$          enddo
+c$$$        enddo
+c$$$        do i=IU_RANGE
+c$$$          DC(i,0)=1./DC(i,0)
+c$$$          CF(i,0)=DC(i,0)*(CF(i,0)-DU_avg1(i,j,nnew))
+c$$$        enddo
+c$$$        do k=N,1,-1
+c$$$          do i=IU_RANGE
+c$$$            u(i,j,k,nnew)=(u(i,j,k,nnew)-CF(i,0)) 
+c$$$          enddo
+c$$$        enddo
+c$$$        if (j.ge.Jstr) then
+c$$$          do i=IV_RANGE
+c$$$            DC(i,0)=0.
+c$$$            CF(i,0)=0.
+c$$$            FC(i,0)=0.
+c$$$          enddo
+c$$$          do k=1,N,+1
+c$$$            do i=IV_RANGE
+c$$$              DC(i,k)=0.5*(Hz(i,j,k)+Hz(i,j-1,k))*om_v(i,j)
+c$$$              DC(i,0)=DC(i,0)+DC(i,k)
+c$$$              CF(i,0)=CF(i,0)+DC(i,k)*v(i,j,k,nnew)
+c$$$            enddo
+c$$$          enddo
+c$$$          do i=IV_RANGE
+c$$$            DC(i,0)=1./DC(i,0)
+c$$$            CF(i,0)=DC(i,0)*(CF(i,0)-DV_avg1(i,j,nnew))
+c$$$          enddo
+c$$$          do k=N,1,-1
+c$$$            do i=IV_RANGE
+c$$$              v(i,j,k,nnew)=(v(i,j,k,nnew)-CF(i,0)) 
+c$$$            enddo
+c$$$          enddo
+c$$$        endif
+c$$$      enddo   
+
+      call v3dbc_tile (Istr,Iend,Jstr,Jend, grad)   
+      call u3dbc_tile (Istr,Iend,Jstr,Jend, grad)
+# ifdef NHMG
+      call w3dbc_tile (Istr,Iend,Jstr,Jend, grad)   
+# endif
 
 !
 !
@@ -793,7 +890,39 @@
 !
         endif  !<-- j.ge.Jstr
       enddo    !<-- j loop
+
+# ifdef NHMG
 !
+!--------------------------------------------------
+!  Couple s-component of velocity
+!--------------------------------------------------
+!
+#   if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
+      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
+     &                                 u(START_2D_ARRAY,1,nnew))
+      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
+     &                                 v(START_2D_ARRAY,1,nnew))
+#   endif
+
+      do j=Jstr,Jend
+        do k=1,N
+          do i=Istr,Iend
+            wz(i,j,k,nnew)=wz(i,j,k-1,nnew) + (       
+     &         -0.5*(Hz(i+1,j,k)+Hz(i,j,k))*on_u(i+1,j)*u(i+1,j,k,nnew)
+     &         +0.5*(Hz(i,j,k)+Hz(i-1,j,k))*on_u(i,j)*u(i,j,k,nnew)
+     &         -0.5*(Hz(i,j+1,k)+Hz(i,j,k))*om_v(i,j+1)*v(i,j+1,k,nnew)
+     &         +0.5*(Hz(i,j,k)+Hz(i,j-1,k))*om_v(i,j)*v(i,j,k,nnew) )
+     &         / (on_r(i,j)*om_r(i,j))
+          enddo
+        enddo
+      enddo
+
+!      call nhydro_check_nondivergence(
+!     & Lm, Mm, N,
+!     & u(1:Lm+1,0:Mm+1,1:N,nnew),
+!     & v(0:Lm+1,1:Mm+1,1:N,nnew),
+!     & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
+# endif
 !
 !--------------------------------------------------------------------
 ! Apply mass point sources
@@ -922,6 +1051,10 @@
 
       call exchange_v2d_tile (Istr,Iend,Jstr,Jend,
      &                                   vbar(START_2D_ARRAY,knew))
+#   if defined NHMG
+      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
+     &                        wz(START_2D_ARRAY,0,nnew)) 
+#  endif
 #   if defined TS_MIX_ISO || defined TS_MIX_GEO
       call exchange_u3d_tile (istr,iend,jstr,jend, dRdx  )
       call exchange_v3d_tile (istr,iend,jstr,jend, dRde  )

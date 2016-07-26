@@ -17,7 +17,7 @@
 #undef  CANYON_A        /* Canyon_A Example */
 #undef  CANYON_B        /* Canyon_B Example */
 #undef  EQUATOR         /* Equator Example  */
-#define  GRAV_ADJ        /* Graviational Adjustment Example */
+#undef  GRAV_ADJ        /* Gravitational Adjustment Example */
 #undef  INNERSHELF      /* Inner Shelf Example */
 #undef  RIVER           /* River run-off Example */
 #undef  OVERFLOW        /* Graviational/Overflow Example */
@@ -33,7 +33,7 @@
 #undef  SHOREFACE       /* Shoreface Test Case on a Planar Beach */
 #undef  SWASH           /* Swash Test Case on a Planar Beach */
 #undef  THACKER         /* Thacker wetting-drying Example */
-#undef  TANK            /* Tank Example */
+#define  TANK            /* Tank Example */
 #undef  REGIONAL        /* REGIONAL Applications */
 
 
@@ -976,32 +976,25 @@
 ! free-surface flows. 
 ! Int. J. Numer. Methods Fluids 42, 929–952.
 */
-/*# undef  MPI
-# define NBQ
+# define  MPI
+# undef NBQ
 # ifdef NBQ
 #  undef  NBQ_IMP
 #  undef  DEBUG_NBQ
 # endif
+# define NHMG
 # define SOLVE3D
-# undef  MASKING
-# undef  UV_ADV
 # define NEW_S_COORD
+# undef  MASKING
+# define  UV_ADV
 # define ANA_GRID
 # define ANA_INITIAL
 # define ANA_BTFLUX
 # define ANA_SMFLUX
 # define ANA_SRFLUX
 # define ANA_STFLUX
-*/
 
-# define MPI
-# define NHMG
-# define SOLVE3D
-# define NEW_S_COORD
-# define MASKING
-# define UV_ADV
-# define ANA_GRID
-# define ANA_INITIAL
+
 # define ANA_SMFLUX
 # define ANA_STFLUX
 # define ANA_BTFLUX

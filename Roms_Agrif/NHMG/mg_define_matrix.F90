@@ -20,16 +20,18 @@ module mg_define_matrix
 
   !NG comment: constants in a mg_cst.f90 file ?
   real(kind=rp), parameter :: one  = 1._rp
-  real(kind=rp), parameter :: eigh = one/8._8
+  real(kind=rp), parameter :: eigh = one/8._rp
   real(kind=rp), parameter :: qrt  = 0.25_rp
   real(kind=rp), parameter :: hlf  = 0.5_rp
 
 contains
 
   !-------------------------------------------------------------------------  
-  subroutine define_matrices_topo(dx, dy, h)
+  subroutine define_matrices_topo(dx, dy, zeta, h)
+
     real(kind=rp), dimension(:,:), intent(in) :: dx
     real(kind=rp), dimension(:,:), intent(in) :: dy
+    real(kind=rp), dimension(:,:), intent(in) :: zeta
     real(kind=rp), dimension(:,:), intent(in) :: h
 
     integer(kind=ip)::  lev
@@ -39,6 +41,9 @@ contains
 
     real(kind=rp), dimension(:,:), pointer :: dyf
     real(kind=rp), dimension(:,:), pointer :: dyc
+
+    real(kind=rp), dimension(:,:), pointer :: zetaf
+    real(kind=rp), dimension(:,:), pointer :: zetac
 
     real(kind=rp), dimension(:,:), pointer :: hf
     real(kind=rp), dimension(:,:), pointer :: hc
@@ -66,7 +71,9 @@ contains
           !NG: on (ny,nx) and not on (nx,ny) !!
           grid(lev)%dx(0:ny+1,0:nx+1) = dx
           grid(lev)%dy(0:ny+1,0:nx+1) = dy
+          grid(lev)%zeta(0:ny+1,0:nx+1) = zeta
           grid(lev)%h (0:ny+1,0:nx+1) =  h
+
 
        else
           nxf =grid(lev-1)%nx
@@ -75,6 +82,7 @@ contains
 
           dxf => grid(lev-1)%dx
           dyf => grid(lev-1)%dy
+          zetaf  => grid(lev-1)%zeta
           hf  => grid(lev-1)%h
 
           if (grid(lev)%gather == 1) then
@@ -83,12 +91,14 @@ contains
 
              allocate(dxc(0:nyc+1,0:nxc+1))
              allocate(dyc(0:nyc+1,0:nxc+1))
+             allocate(zetac(0:nyc+1,0:nxc+1))
              allocate( hc(0:nyc+1,0:nxc+1))
           else
              nxc = nx
              nyc = ny
              dxc => grid(lev)%dx
              dyc => grid(lev)%dy
+             zetac  => grid(lev)%zeta
              hc  => grid(lev)%h
           endif
 
@@ -112,6 +122,12 @@ contains
                   dyf(1:nyf  :2,2:nxf+1:2) + &
                   dyf(2:nyf+1:2,2:nxf+1:2) )
 
+             zetac(1:nyc,1:nxc)  = qrt      * ( &
+                  zetaf(1:nyf  :2,1:nxf  :2)  + &
+                  zetaf(2:nyf+1:2,1:nxf  :2)  + &
+                  zetaf(1:nyf  :2,2:nxf+1:2)  + &
+                  zetaf(2:nyf+1:2,2:nxf+1:2)  )
+
              hc(1:nyc,1:nxc)  = qrt      * ( &
                   hf(1:nyf  :2,1:nxf  :2)  + &
                   hf(2:nyf+1:2,1:nxf  :2)  + &
@@ -124,10 +140,12 @@ contains
 
              call gather(lev,dxc,grid(lev)%dx)
              call gather(lev,dyc,grid(lev)%dy)
+             call gather(lev,zetac,grid(lev)%zeta)
              call gather(lev, hc,grid(lev)%h)
 
              deallocate(dxc)
              deallocate(dyc)
+             deallocate(zetac)
              deallocate( hc)
           endif
 
@@ -135,27 +153,23 @@ contains
 
        call fill_halo(lev, grid(lev)%dx,nhalo=1)
        call fill_halo(lev, grid(lev)%dy,nhalo=1)
+       call fill_halo(lev, grid(lev)%zeta,nhalo=2)
        call fill_halo(lev, grid(lev)%h ,nhalo=2)
 
        zrc => grid(lev)%zr
        zwc => grid(lev)%zw
 
        ! Compute zr and zw
-       if (trim(bench) == 'seamount') then
-          call setup_zr_zw(grid(lev)%h,grid(lev)%zr,grid(lev)%zw)
-          !!call setup_zr_zw                     ( & 
-          !!     hlim,theta_b,theta_s,grid(lev)%h, &  ! input args
-          !!     grid(lev)%zr, grid(lev)%zw      )    ! output args
-       else
-          call setup_zr_zw                         ( & 
-               hlim,nhtheta_b,nhtheta_s,grid(lev)%h, &  ! input args
-               grid(lev)%zr, grid(lev)%zw          , &  ! output args
-               coord_type='new_s_coord'            )    ! optional
-       endif
+       call setup_zr_zw                    (  & 
+               hlim,nhtheta_b,nhtheta_s,     &
+               grid(lev)%zeta,grid(lev)%h,   &  ! input args
+               grid(lev)%zr, grid(lev)%zw,   &  ! output args
+               coord_type='new_s_coord'      )    ! optional
 
        if (netcdf_output) then
           call write_netcdf(grid(lev)%dx,vname='dx',netcdf_file_name='dx.nc',rank=myrank,iter=lev)
           call write_netcdf(grid(lev)%dy,vname='dy',netcdf_file_name='dy.nc',rank=myrank,iter=lev)
+          call write_netcdf(grid(lev)%zeta,vname='zeta',netcdf_file_name='zeta.nc',rank=myrank,iter=lev)
           call write_netcdf(grid(lev)%h ,vname='h' ,netcdf_file_name='h.nc' ,rank=myrank,iter=lev)
           call write_netcdf(grid(lev)%zr,vname='zr',netcdf_file_name='zr.nc',rank=myrank,iter=lev)
           call write_netcdf(grid(lev)%zw,vname='zw',netcdf_file_name='zw.nc',rank=myrank,iter=lev)
@@ -163,7 +177,6 @@ contains
 
        ! Define matrix coefficients from dx, dy, zr and zw coarsened
        call define_matrix(lev, grid(lev)%dx, grid(lev)%dy, grid(lev)%zr, grid(lev)%zw)
-!!$       call define_matrix_orig(lev, grid(lev)%dx, grid(lev)%dy, grid(lev)%zr, grid(lev)%zw)
 
     enddo ! lev
 
@@ -258,14 +271,15 @@ contains
        enddo
     enddo
 
-    !! interaction coeff with neighbours
-    do i = 1,nx     !! 1, nx+1 improve the solution
-       do j = 1,ny  !! 1, ny+1 improve the solution but not possible
-
+!! interaction coeff with neighbours
+!XX
           !---------!
           !- K = 1 -! lower level
           !---------!
           k = 1
+
+    do i = 1,nx
+       do j = 1,ny+1
           cA(3,k,j,i) = qrt * ( &
                ( hlf * (zr(k+1,j+1,i  )-zr(k+1,j-1,i  )) / dy(j,i) ) * dx(j,i) + &
                ( hlf * (zr(k,j,i  )-zr(k,j-2,i  )) / dy(j-1,i) ) * dx(j-1,i) )
@@ -285,6 +299,10 @@ contains
                - qrt * ( &
                (( hlf * (zr(k,j,i  )-zr(k,j-2,i  )) / dy(j-1,i) ) * dx(j-1,i)) -  &
                ( hlf * (zr(k,j+1,i  )-zr(k,j-1,i  )) / dy(j,i) ) * dx(j,i))  
+      enddo
+    enddo
+    do i = 1,nx+1
+       do j = 1,ny
           cA(6,k,j,i) = qrt * ( &
                ( hlf * (zr(k+1,j  ,i+1)-zr(k+1,j  ,i-1)) / dx(j,i) ) * dy(j,i) + &
                ( hlf * (zr(k,j  ,i)-zr(k,j  ,i-2)) / dx(j,i-1) ) * dy(j,i-1) )  ! couples with k+1 i-1
@@ -303,6 +321,10 @@ contains
                - qrt * ( &
                ( hlf * (zr(k,j  ,i  )-zr(k,j  ,i-2)) / dx(j,i-1) ) * dy(j,i-1) - &
                ( hlf * (zr(k,j  ,i+1)-zr(k,j  ,i-1)) / dx(j,i  ) ) * dy(j,i) )
+      enddo
+    enddo
+    do i = 1,nx+1
+       do j = 0,ny
           ! only for k==1, couples with j+1,i-1
           cA(5,k,j,i) = &
                + hlf * &
@@ -312,8 +334,12 @@ contains
                + hlf * &
                (( hlf * (zr(k,j  ,i)-zr(k,j  ,i-2)) / dx(j,i-1) ) * dy(j,i-1)) * &
                (( hlf * (zr(k,j+1,i-1)-zr(k,j-1,i-1)) / dy(j,i-1) ) * dx(j,i-1)) / &
-               ( cw(k,j  ,i-1) + cw(k+1,j  ,i-1))   
-          ! only for k==1, couples wit
+               ( cw(k,j  ,i-1) + cw(k+1,j  ,i-1))
+         enddo
+    enddo
+    do i = 1,nx+1
+       do j = 1,ny+1
+          ! only for k==1, couples with j-1,i-1
           cA(8,k,j,i) = &
                - hlf * &
                (( hlf * (zr(k,j-1,i+1)-zr(k,j-1,i-1)) / dx(j-1,i) ) * dy(j-1,i)) * &
@@ -323,12 +349,24 @@ contains
                (( hlf * (zr(k,j,i)-zr(k,j,i-2)) / dx(j,i-1) ) * dy(j,i-1)) * &
                (( hlf * (zr(k,j+1,i-1)-zr(k,j-1,i-1)) / dy(j,i-1) ) * dx(j,i-1)) / &
                (cw(k,j  ,i-1) + cw(k+1,j  ,i-1)) 
+       enddo
+    enddo
 
+!XX
           !---------------!
           !- K = 2, nz-1 -! interior levels
           !---------------!
+
+    do i = 1,nx
+       do j = 1,ny
           do k = 2,nz-1 
              cA(2,k,j,i) =  cw(k,j,i)                                  ! couples with k-1
+          enddo
+       enddo
+    enddo
+    do i = 1,nx
+       do j = 1,ny+1
+          do k = 2,nz-1 
              cA(3,k,j,i) =  qrt * ( &
                   ( hlf * (zr(k+1,j+1,i  )-zr(k+1,j-1,i  )) / dy(j,i) ) * dx(j,i) + &
                   ( hlf * (zr(k,j,i  )-zr(k,j-2,i  )) / dy(j-1,i) ) * dx(j-1,i) )     ! couples with k+1 j-1
@@ -338,6 +376,12 @@ contains
              cA(5,k,j,i) =- qrt * ( &
                   (( hlf * (zr(k-1,j+1,i  )-zr(k-1,j-1,i  )) / dy(j,i) ) * dx(j,i)) + &
                   (( hlf * (zr(k,j,i  )-zr(k,j-2,i  )) / dy(j-1,i) ) * dx(j-1,i)) )     ! couples with k-1 j-1
+          enddo
+      enddo
+    enddo
+    do i = 1,nx+1
+       do j = 1,ny 
+          do k = 2,nz-1 
              cA(6,k,j,i) =  qrt * ( &
                   (( hlf * (zr(k+1,j  ,i+1)-zr(k+1,j  ,i-1)) / dx(j,i) ) * dy(j,i)) + &
                   (( hlf * (zr(k,j  ,i)-zr(k,j  ,i-2)) / dx(j,i-1) ) * dy(j,i-1)) )     ! Couples with k+1 i-1
@@ -348,12 +392,22 @@ contains
                   (( hlf * (zr(k-1,j  ,i+1)-zr(k-1,j  ,i-1)) / dx(j,i) ) * dy(j,i)) + &
                   (( hlf * (zr(k,j  ,i)-zr(k,j  ,i-2)) / dx(j,i-1) ) * dy(j,i-1))  )     ! Couples with k-1 i-1
           enddo
+       enddo
+    enddo
 
+!XX
           !----------!
           !- K = nz -! upper level
           !----------!
           k = nz
+
+    do i = 1,nx    
+       do j = 1,ny 
           cA(2,k,j,i) = cw(k,j,i)                                    ! couples with k-1
+       enddo 
+    enddo 
+    do i = 1,nx
+       do j = 1,ny+1
           cA(4,k,j,i) = ( qrt * &
                ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
                (dx(j,i)+dx(j-1,i)) ) / ( hlf * (dy(j,i)+dy(j-1,i)) ) & ! couples with j-1
@@ -363,6 +417,10 @@ contains
           cA(5,k,j,i) =- qrt * ( &
                (( hlf * (zr(k-1,j+1,i  )-zr(k-1,j-1,i  )) / dy(j,i) ) * dx(j,i)) + &
                (( hlf * (zr(k,j,i  )-zr(k,j-2,i  )) / dy(j-1,i) ) * dx(j-1,i)) )     ! couples with k-1 j-1
+      enddo 
+    enddo 
+    do i = 1,nx+1
+       do j = 1,ny 
           cA(7,k,j,i) = (qrt * &
                ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
                (dy(j,i)+dy(j,i-1)) ) / ( hlf * (dx(j,i)+dx(j,i-1)) ) & ! Couples with i-1
@@ -372,9 +430,8 @@ contains
           cA(8,k,j,i) =- qrt * ( &
                (( hlf * (zr(k-1,j  ,i+1)-zr(k-1,j  ,i-1)) / dx(j,i) ) * dy(j,i)) + &
                (( hlf * (zr(k,j  ,i)-zr(k,j  ,i-2)) / dx(j,i-1) ) * dy(j,i-1)) )     ! Couples with k-1 i-1
-
-       enddo ! j
-    enddo ! i
+       enddo
+    enddo
 
     call fill_halo(lev,cA)
 

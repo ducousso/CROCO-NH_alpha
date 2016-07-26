@@ -1125,8 +1125,8 @@ C$    integer omp_get_thread_num
       enddo
         do j=JstrR,JendR
           do i=IstrR,IendR
-            ru_nhmg(i,j)=init
-            rv_nhmg(i,j)=init
+            rufrc_nhmg(i,j)=init
+            rvfrc_nhmg(i,j)=init
           enddo
         enddo
 # endif

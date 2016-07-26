@@ -37,6 +37,7 @@
 #endif
 #ifdef NHMG
           USE nhydro, only : nhydro_init
+          USE nhydro, only : nhydro_matrices
 #endif
 !     implicit none
       integer tile, subs, trd, ierr
@@ -283,17 +284,21 @@ C$OMP PARALLEL DO PRIVATE(tile)
 #ifdef NHMG
 !
 !----------------------------------------------------------------------
-!  Setup of the NHMG grids and matrices
-!  from the horizontal and vertical grid variables
+!  Setup of the NHMG grids
 !----------------------------------------------------------------------
 !
       call nhydro_init(
      & Lm,Mm,N,
-     & NP_XI,NP_ETA,
-     & transpose(1._8/pm(0:Lm+1,0:Mm+1)),
-     & transpose(1._8/pn(0:Lm+1,0:Mm+1)),
-     & transpose(h(0:Lm+1,0:Mm+1)),
+     & NP_XI,NP_ETA)
+
+      call nhydro_matrices(
+     & Lm,Mm,N,
+     & 1._8/pm(0:Lm+1,0:Mm+1),
+     & 1._8/pn(0:Lm+1,0:Mm+1),
+     & 0._8*h(0:Lm+1,0:Mm+1), !zeta set to zero
+     & h(0:Lm+1,0:Mm+1),
      & hc,theta_b,theta_s)
+
 #endif
 !
 !----------------------------------------------------------------------

@@ -42,6 +42,7 @@ module mg_grids
 
      real(kind=rp),dimension(:,:)  ,pointer :: dx => null()   ! Mesh in x  (1 halo point)
      real(kind=rp),dimension(:,:)  ,pointer :: dy => null()   ! Mesh in y  (1 halo point)
+     real(kind=rp),dimension(:,:)  ,pointer :: zeta  => null()   ! Free-surface anomaly (2 halo points)
      real(kind=rp),dimension(:,:)  ,pointer :: h  => null()   ! Topography (2 halo points)
      real(kind=rp),dimension(:,:,:),pointer :: zr => null()   ! Mesh in z at rho point (nz  , 2 halo points)
      real(kind=rp),dimension(:,:,:),pointer :: zw => null()   ! Mesh in z at w point   (nz+1, 2 halo points)
@@ -174,6 +175,7 @@ contains
        ny = grid(lev)%ny
        nz = grid(lev)%nz
        ! Halo point is two for topography and vertical mesh !
+       allocate(grid(lev)%zeta(   -1:ny+2,-1:nx+2))
        allocate(grid(lev)%h(      -1:ny+2,-1:nx+2))
        allocate(grid(lev)%zr(  nz,-1:ny+2,-1:nx+2))
        allocate(grid(lev)%zw(nz+1,-1:ny+2,-1:nx+2))
@@ -392,7 +394,7 @@ contains
     enddo
 
     ! Initialize pressure to zero
-    grid(1)%p(:,:,:) = 0._8
+    grid(1)%p(:,:,:) = 0._rp
 
     if (myrank==0) write(*,*)'  - define gather informations'
     ! Call the routine which calculate gather informations
@@ -428,9 +430,9 @@ contains
     ! we have 
     ! nhoriz = ncoarsest * 2^(nlevs-1)
     ! thus nlevs = ...
-    nl1 = 1+floor( log( nhoriz*1._8 / ncoarsest*1._8) / log(2._8) )
+    nl1 = 1+floor( log( nhoriz*1._rp / ncoarsest*1._rp) / log(2._rp) )
 
-    nl2 = 1+floor( log( nzg*1._8 / nzmin*1._8) / log(2._8) )
+    nl2 = 1+floor( log( nzg*1._rp / nzmin*1._rp) / log(2._rp) )
 
     ! NLEVS: global variable which store the number of grid levels
     nlevs = min(nl1,nl2) 

@@ -71,40 +71,25 @@ contains
 
     do i = 1,nx+1
        do j = 0,ny+1 
+!       do j = 1,ny
+
           do k = 1,nz
-             ru(i,j) = ru(i,j) - hlf / dxu(j,i) *(dz(k,j,i)+dz(k,j,i-1)) *(p(k,j,i)-p(k,j,i-1))
+             ru(i,j) = ru(i,j) - hlf*(dz(k,j,i)+dz(k,j,i-1)) / dxu(j,i) *(p(k,j,i)-p(k,j,i-1))
           enddo
+
        enddo
     enddo
-
+ 
     do i = 0,nx+1
+!    do i = 1,nx
        do j = 1,ny+1 
+
           do k = 1,nz
-             rv(i,j) = rv(i,j) - hlf / dyv(j,i) *(dz(k,j,i)+dz(k,j-1,i)) *(p(k,j,i)-p(k,j-1,i))
+             rv(i,j) = rv(i,j) - hlf*(dz(k,j,i)+dz(k,j-1,i)) / dyv(j,i) *(p(k,j,i)-p(k,j-1,i))
           enddo
+
        enddo
     enddo
-
-!!$k=N
-!!$ rsurf(i,j)=rho(i,j,N) + (rho(i,j,N)-rho(i,j,N-1))
-!!$     &                             *(z_w(i,j,N)-z_r(i,j,N))
-!!$     &                           /(z_r(i,j,N)-z_r(i,j,N-1))
-!!$ pgrd(i)=(g+cff*(rsurf(i-1,j)+rsurf(i,j)))*( z_w(i-1,j,N)
-!!$     &                                                   -z_w(i,j,N))
-!!$ 
-!!$     &     +cff*( (rho(i-1,j,N)-rsurf(i,j))*(z_w(i-1,j,N)-z_r(i,j,N))
-!!$     &           +(rsurf(i-1,j)-rho(i,j,N))*(z_w(i,j,N)-z_r(i-1,j,N))
-!!$     &                                                              )
-!!$ ru(i,j,N) = 0.5*(HZR(i,j,N)+HZR(i-1,j,N)) *on_u(i,j) *pgrd(i)
-!!$
-!!$do k=N-1,1,-1
-!!$ pgrd(i)=pgrd(i)-cff*(
-!!$ &                                   (rho(i,j,k+1)-rho(i-1,j,k))
-!!$     &                                  *(z_r(i-1,j,k+1)-z_r(i,j,k))
-!!$     &                                  +(rho(i,j,k)-rho(i-1,j,k+1))
-!!$     &                                  *(z_r(i,j,k+1)-z_r(i-1,j,k))
-!!$     &                                                             )
-!!$ ru(i,j,k) = 0.5*(HZR(i,j,k)+HZR(i-1,j,k)) *on_u(i,j) *pgrd(i)
 
     deallocate(dz)
     deallocate(dxu)
