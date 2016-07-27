@@ -246,7 +246,7 @@ contains
                * v(k,j,i) &
                - qrt * ( &
                + zydx(k,j  ,i)*       dzw(k  ,j  ,i) * w(k-1,j,i) &
-               + zydx(k,j  ,i)* two * dzw(k+1,j  ,i) * w(k+1-1,i,j) &
+               + zydx(k,j  ,i)* two * dzw(k+1,j  ,i) * w(k+1-1,j,i) &
                + zydx(k,j-1,i)*       dzw(k  ,j-1,i) * w(k-1,j-1,i) &
                + zydx(k,j-1,i)* two * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) &
                ) !* vmask(j,i)
