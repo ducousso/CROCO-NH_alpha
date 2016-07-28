@@ -1,4 +1,4 @@
-! $Id: param.h 1619 2015-01-07 13:53:03Z marchesiello $
+
 !
 !======================================================================
 ! ROMS_AGRIF is a branch of ROMS developped at IRD and INRIA, in France
@@ -119,7 +119,10 @@
 #  ifndef TANKY
 !      parameter (LLm0=50,   MMm0=1,    N=50)   ! 20 cm resolution
 !      parameter (LLm0=50,   MMm0=50,    N=50)   ! 20 cm resolution
-      parameter (LLm0=64,   MMm0=64,    N=64)   ! 20 cm resolution
+!
+      parameter (LLm0=64,   MMm0=64,    N=64)   
+!      parameter (LLm0=128,   MMm0=128,    N=128)  
+!
 #  else
       parameter (LLm0=1,    MMm0=50,   N=50)   ! 20 cm resolution
 #  endif

@@ -45,13 +45,13 @@ contains
   end subroutine setup_zr_zw_seamount
 
   !-------------------------------------------------------------------------     
-  subroutine setup_zr_zw_croco(hlim,theta_b,theta_s,zeta,h,zr,zw,coord_type)
+  subroutine setup_zr_zw_croco(hc,theta_b,theta_s,zeta,h,zr,zw,coord_type)
 
     ! compute zr and zw from zeta(j,i) and h(j,i)
 
     integer(kind=4),parameter :: ip=4,rp=8
 
-    real(kind=rp), intent(in) :: hlim
+    real(kind=rp), intent(in) :: hc
     real(kind=rp), intent(in) :: theta_b
     real(kind=rp), intent(in) :: theta_s
     real(kind=rp), dimension(:,:)  , pointer, intent(in)  :: zeta, h
@@ -74,7 +74,7 @@ contains
     real(kind=rp) :: sc_w,sc_r,cff_w,cff_r
     real(kind=rp) :: z_w0,z_r0
     real(kind=rp) :: cs_r,cs_w
-    real(kind=rp) :: csrf, cswf, hc
+    real(kind=rp) :: csrf, cswf
 
     if (present(coord_type)) then
        coord = trim(coord_type)
@@ -103,7 +103,7 @@ contains
 
              cff=one/real(nz,kind=rp)
 
-             hinv = one / (h(j,i)+hlim)
+             hinv = one / (h(j,i)+hc)
 
              do k = 1,nz
 
@@ -135,8 +135,8 @@ contains
                    cs_w=cswf
                 endif
 
-                cff_w = hlim * sc_w
-                cff_r = hlim * sc_r
+                cff_w = hc * sc_w
+                cff_r = hc * sc_r
 
                 z_w0 = cff_w + cs_w*h(j,i)
                 z_r0 = cff_r + cs_r*h(j,i)
@@ -162,7 +162,7 @@ contains
                 cs_w=cswf
              endif
 
-             cff_w = hlim * sc_w
+             cff_w = hc * sc_w
              z_w0 = cff_w + cs_w*h(j,i)
              zw(k,j,i) = z_w0*h(j,i)*hinv + zeta(j,i)*(1.+z_w0*hinv)
              

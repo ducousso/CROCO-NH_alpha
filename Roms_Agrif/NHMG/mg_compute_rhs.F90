@@ -342,8 +342,6 @@ contains
 
     wf => null()
 
-    !- if (myrank==0) write(*,*)'- compute rhs (finish)'
-
   end subroutine compute_rhs
 
 end module mg_compute_rhs

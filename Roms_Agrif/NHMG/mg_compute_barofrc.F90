@@ -13,8 +13,9 @@ module mg_compute_barofrc
 
 contains
   !-------------------------------------------------------------------------     
-  subroutine compute_barofrc(ru,rv)
+  subroutine compute_barofrc(dt,ru,rv)
 
+    real(kind=rp),                            intent(in)  :: dt
     real(kind=rp), dimension(:,:)  , pointer, intent(out) :: ru,rv
 
     integer(kind=ip):: k, j, i
@@ -77,6 +78,8 @@ contains
              ru(i,j) = ru(i,j) - hlf*(dz(k,j,i)+dz(k,j,i-1)) / dxu(j,i) *(p(k,j,i)-p(k,j,i-1))
           enddo
 
+          ru(i,j) = ru(i,j)/dt
+
        enddo
     enddo
  
@@ -87,6 +90,8 @@ contains
           do k = 1,nz
              rv(i,j) = rv(i,j) - hlf*(dz(k,j,i)+dz(k,j-1,i)) / dyv(j,i) *(p(k,j,i)-p(k,j-1,i))
           enddo
+
+          rv(i,j) = rv(i,j)/dt
 
        enddo
     enddo

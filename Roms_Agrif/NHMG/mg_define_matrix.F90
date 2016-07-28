@@ -161,7 +161,7 @@ contains
 
        ! Compute zr and zw
        call setup_zr_zw                    (  & 
-               hlim,nhtheta_b,nhtheta_s,     &
+               nhhc,nhtheta_b,nhtheta_s,     &
                grid(lev)%zeta,grid(lev)%h,   &  ! input args
                grid(lev)%zr, grid(lev)%zw,   &  ! output args
                coord_type='new_s_coord'      )    ! optional

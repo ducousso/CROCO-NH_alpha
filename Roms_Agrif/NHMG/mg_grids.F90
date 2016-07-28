@@ -110,17 +110,7 @@ module mg_grids
   ! Number of grid levels of the multigrid solver
   integer(kind=ip):: nlevs ! index of the coarsest level (1 is the finest)q
 
-  real(kind=rp) :: hlim, nhtheta_b, nhtheta_s
-
-!!$  ! Parameters of the CROCO vertical mesh definition
-!!$  real(kind=rp) :: hlim, theta_b, theta_s
-!!$  ! CROCO mesh 
-!!$  real(kind=8), dimension(:,:)  , pointer :: dx ! Croco Mesh grid in x ( halo = 1)
-!!$  real(kind=8), dimension(:,:)  , pointer :: dy ! Croco Mesh grid in y ( halo = 1)
-!!$  real(kind=8), dimension(:,:)  , pointer :: h  ! Croco topography     ( halo = 1)
-!!$
-!!$  ! Analytical test parameters (for example testseamount)
-!!$  real(kind=8) :: Lx, Ly, Htot
+  real(kind=rp) :: nhhc, nhtheta_b, nhtheta_s
 
 contains
 

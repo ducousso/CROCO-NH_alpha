@@ -60,7 +60,7 @@ contains
        enddo
     enddo
 
-   do i = 0,nx+1
+    do i = 0,nx+1
        do j = 1,ny+1 
           do k = 1,nz
 
