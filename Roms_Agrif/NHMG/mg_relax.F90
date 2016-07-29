@@ -69,9 +69,9 @@ contains
     integer(kind=ip)            :: ib,ie,jb,je,rbb,rbe,rbi
     real(kind=rp) :: z,gamma,g1,g2
 
-    gamma = 1._8
+    gamma = 1._rp
     g1 = gamma
-    g2 = 1._8 - gamma
+    g2 = 1._rp - gamma
 
     k=1
 
@@ -373,7 +373,7 @@ contains
        call global_sum(lev,resloc,res)
        res = sqrt(res)
     else
-       res = -999._8
+       res = -999._rp
     endif
 
   end subroutine compute_residual
@@ -391,7 +391,7 @@ contains
     integer(kind=ip) :: i,j,k
     real(kind=rp)  :: z
 
-    res = 0._8
+    res = 0._rp
 
     k=1
 
@@ -435,7 +435,7 @@ contains
 
     integer(kind=ip)           :: i,j,k
 
-    res = 0._8
+    res = 0._rp
 
     do i = 1,nx
        do j = 1,ny
