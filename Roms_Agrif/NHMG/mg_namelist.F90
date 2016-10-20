@@ -34,6 +34,8 @@ module mg_namelist
 
   logical           :: netcdf_output = .false. !- .false. or .true.
 
+  logical           :: check_output  = .false. !- .false. or .true.
+
   character(len=16) :: bench =''               !- 'seamount'
 
   namelist/nhparam/    &
@@ -48,6 +50,7 @@ module mg_namelist
        interp_type   , &
        restrict_type , &
        netcdf_output , &
+       check_output , &
        aggressive   
 
 contains
@@ -120,6 +123,7 @@ contains
           write(*,*)'  - restrict_type : ', trim(restrict_type)
           write(*,*)'  - aggressive    : ', aggressive
           write(*,*)'  - netcdf_output : ', netcdf_output
+          write(*,*)'  - check_output : ', check_output
           write(*,*)'  '
        endif
     endif

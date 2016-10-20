@@ -8,7 +8,6 @@ module mg_solvers
   use mg_grids
   use mg_intergrids
   use mg_relax
-  use mg_intergrids
   use mg_netcdf_out
 
   implicit none

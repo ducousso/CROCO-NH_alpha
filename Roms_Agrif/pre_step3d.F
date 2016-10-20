@@ -69,6 +69,7 @@
 #ifdef NHMG
           USE nhydro, only : nhydro_matrices
           USE nhydro, only : nhydro_solve
+          USE nhydro, only : nhydro_coupling
 #endif
       implicit none
 # include "param.h"
@@ -562,6 +563,125 @@
 # endif          
 !
         enddo   !<-- itrc  !--> discard DC
+      enddo     !<-- j
+
+
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# ifdef NHMG
+      if (FIRST_TIME_STEP) then
+c$$$
+      call nhydro_matrices(
+     & Lm,Mm,N,
+     & 1._8/pm(0:Lm+1,0:Mm+1),
+     & 1._8/pn(0:Lm+1,0:Mm+1),
+     & z_w(0:Lm+1,0:Mm+1,N),
+     & h(0:Lm+1,0:Mm+1),
+     & hc,theta_b,theta_s)
+c$$$
+c$$$#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
+c$$$      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        u(START_2D_ARRAY,1,nnew))
+c$$$      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        v(START_2D_ARRAY,1,nnew))
+c$$$      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        wz(START_2D_ARRAY,0,nnew))     
+c$$$#  endif
+c$$$
+      do j=Jstr,Jend
+        do k=1,N
+          do i=IstrU,Iend
+            ru(i,j,k) = 2.*ru(i,j,k)*pm_u(i,j)*pn_u(i,j)/
+     &                (Hz(i,j,k)+Hz(i-1,j,k))
+          enddo
+        enddo
+        if (j.ge.JstrV) then
+          do k=1,N
+            do i=Istr,Iend
+              rv(i,j,k) = 2.*rv(i,j,k)*pm_v(i,j)*pn_v(i,j)/
+     &                (Hz(i,j,k)+Hz(i,j-1,k))
+            enddo
+          enddo
+        endif
+      enddo
+      do j=Jstr,Jend
+        do k=1,N-1
+          do i=Istr,Iend
+            rw(i,j,k) = 2.*rw(i,j,k)*pn(i,j)*pm(i,j)/
+     &                (Hz(i,j,k)+Hz(i,j,k+1))
+          enddo
+        enddo
+        rw(i,j,N) = 2.*rw(i,j,N)*pn(i,j)*pm(i,j)/
+     &                (Hz(i,j,N))
+      enddo
+
+      call nhydro_solve(
+     & Lm, Mm, N,
+     & z_r(0:Lm+1,0:Mm+1,1:N),
+     & z_w(0:Lm+1,0:Mm+1,0:N),
+     & ru(1:Lm+1,0:Mm+1,1:N),
+     & rv(0:Lm+1,1:Mm+1,1:N),
+     & rw(0:Lm+1,0:Mm+1,0:N) )
+
+      do j=Jstr,Jend
+        do k=1,N
+          do i=IstrU,Iend
+            ru(i,j,k) = ru(i,j,k)/(pm_u(i,j)*pn_u(i,j))*
+     &                0.5*(Hz(i,j,k)+Hz(i-1,j,k))
+          enddo
+        enddo
+        if (j.ge.JstrV) then
+          do k=1,N
+            do i=Istr,Iend
+              rv(i,j,k) = rv(i,j,k)/(pm_v(i,j)*pn_v(i,j))*
+     &                0.5*(Hz(i,j,k)+Hz(i,j-1,k))
+            enddo
+          enddo
+        endif
+      enddo
+
+      do j=Jstr,Jend
+        do k=1,N-1
+          do i=Istr,Iend
+            rw(i,j,k) = rw(i,j,k)/(pn(i,j)*pm(i,j))*
+     &                0.5*(Hz(i,j,k)+Hz(i,j,k+1))
+          enddo
+        enddo
+        do i=Istr,Iend
+          rw(i,j,N) = rw(i,j,N)/(pn(i,j)*pm(i,j))*
+     &                0.5*(Hz(i,j,N))
+        enddo
+      enddo
+
+      do j=Jstr,Jend
+        do i=IstrU,Iend
+          rufrc(i,j)=ru(i,j,1)
+        enddo
+        do k=2,N
+          do i=IstrU,Iend
+            rufrc(i,j)=rufrc(i,j)+ru(i,j,k)
+          enddo
+        enddo
+        if (j.ge.JstrV) then
+          do i=Istr,Iend
+            rvfrc(i,j)=rv(i,j,1)
+          enddo
+          do k=2,N
+            do i=Istr,Iend
+              rvfrc(i,j)=rvfrc(i,j)+rv(i,j,k)
+            enddo
+          enddo
+        endif
+      enddo      !<-- j
+c$$$
+!      call v3dbc_tile (Istr,Iend,Jstr,Jend, WORK)   
+!      call u3dbc_tile (Istr,Iend,Jstr,Jend, WORK)
+!      call w3dbc_tile (Istr,Iend,Jstr,Jend, WORK) 
+c$$$
+      endif
+# endif
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
 !
 !======================================================================
 !
@@ -569,9 +689,10 @@
 !
 !======================================================================
 !
+      do j=Jstr,Jend
         do i=IstrU,Iend
           DC(i,0)=pm_u(i,j)*pn_u(i,j)
-        enddo       
+        enddo
         if (FIRST_TIME_STEP) then
           do k=1,N
             do i=IstrU,Iend
@@ -739,14 +860,23 @@
 !==        
         do k=1,N-1
           do i=Istr,Iend
-            wz(i,j,k,nnew)=( wz(i,j,k,nstp)*(Hz(i,j,k)+Hz(i,j,k+1))
-     &                                          +dt*pn(i,j)*pm(i,j)
+            wz(i,j,k,nnew)=(wz(i,j,k,nstp)*0.5*(Hz(i,j,k)+Hz(i,j,k+1))
+     &                                          +cdt*pn(i,j)*pm(i,j)
      &                              *(rw(i,j,k)
 #  ifdef NBQ
      &                                         +rw_nbq_avg1(i,j,k)
 #  endif
      &                                                            )
-     &                     )   /  (Hz_half(i,j,k)+Hz_half(i,j,k+1)) !<-- wz has units m.s-1
+     &                     ) * 2./ (Hz_half(i,j,k)+Hz_half(i,j,k+1)) !<-- wz has units m.s-1
+!            wz(i,j,k,nnew)=( wz(i,j,k,nstp)*(Hz(i,j,k)+Hz(i,j,k+1))
+!     &                                          +dt*pn(i,j)*pm(i,j)
+!     &                              *(rw(i,j,k)
+!#  ifdef NBQ
+!     &                                         +rw_nbq_avg1(i,j,k)
+!#  endif
+!     &                                                            )
+!     &                     )   /  (Hz_half(i,j,k)+Hz_half(i,j,k+1)) !<-- wz has units m.s-1
+
             wz(i,j,k,indx)=wz(i,j,k,nstp)*0.5*(Hz(i,j,k  )+
      &                                         Hz(i,j,k+1)) !<-- wz(indx) has units kg.m-1.s-1
 #  ifdef NBQ
@@ -756,14 +886,23 @@
         enddo
         ! Special treatment for k=N because the control volume at the top is Hz/2       
         do i=Istr,Iend
-            wz(i,j,N,nnew)=( wz(i,j,N,nstp)*Hz(i,j,N)
-     &                            +dt*pn(i,j)*pm(i,j)
-     &                *(rw(i,j,N)
+            wz(i,j,N,nnew)=(wz(i,j,N,nstp)*0.5*Hz(i,j,N)
+     &                            +cdt*pn(i,j)*pm(i,j)
+     &                            *(rw(i,j,N)
 #  ifdef NBQ
      &                            +rw_nbq_avg1(i,j,N)
 #  endif
      &                                               )
-     &                     )        /  Hz_half(i,j,N) !<-- wz has units m.s-1
+     &                     ) * 2. /  Hz_half(i,j,N) !<-- wz has units m.s-1
+!            wz(i,j,N,nnew)=( wz(i,j,N,nstp)*Hz(i,j,N)
+!     &                            +dt*pn(i,j)*pm(i,j)
+!     &                *(rw(i,j,N)
+!#  ifdef NBQ
+!     &                            +rw_nbq_avg1(i,j,N)
+!#  endif
+!     &                                               )
+!     &                     )        /  Hz_half(i,j,N) !<-- wz has units m.s-1
+
             wz(i,j,N,indx)=wz(i,j,N,nstp)*0.5*Hz(i,j,N) !<-- wz(indx) has units kg.m-1.s-1
 #  ifdef NBQ
             rwint_nbq(i,j,N)=pm(i,j)*pn(i,j)*rw(i,j,N) !<-- rwint_nbq has units kg.m-1.s-2
@@ -776,17 +915,29 @@
         cff2=0.5-gamma
         do k=1,N-1
           do i=Istr,Iend
-             wz(i,j,k,nnew)=( cff1*wz(i,j,k,nstp)*(Hz(i,j,k  )+
-     &                                             Hz(i,j,k+1))
-     &                       +cff2*wz(i,j,k,indx)*(Hz_bak(i,j,k  )+
-     &                                             Hz_bak(i,j,k+1))
-     &                       +2.*cdt*pn(i,j)*pm(i,j)
+             wz(i,j,k,nnew)=( cff1*wz(i,j,k,nstp)*0.5*(Hz(i,j,k  )+
+     &                                                 Hz(i,j,k+1))
+     &                       +cff2*wz(i,j,k,indx)*0.5*(Hz_bak(i,j,k  )+
+     &                                                 Hz_bak(i,j,k+1))
+     &                       +cdt*pn(i,j)*pm(i,j)
      &                              *(rw(i,j,k)
 #  ifdef NBQ
      &                                       +rw_nbq_avg1(i,j,k)
 #  endif
      &                                                          )
-     &                      ) / (Hz_half(i,j,k)+Hz_half(i,j,k+1))  !<-- wz has units m.s-1
+     &                      ) * 2./ (Hz_half(i,j,k)+Hz_half(i,j,k+1))  !<-- wz has units m.s-1
+!             wz(i,j,k,nnew)=( cff1*wz(i,j,k,nstp)*(Hz(i,j,k  )+
+!     &                                             Hz(i,j,k+1))
+!     &                       +cff2*wz(i,j,k,indx)*(Hz_bak(i,j,k  )+
+!     &                                             Hz_bak(i,j,k+1))
+!     &                       +2.*cdt*pn(i,j)*pm(i,j)
+!     &                              *(rw(i,j,k)
+!#  ifdef NBQ
+!     &                                       +rw_nbq_avg1(i,j,k)
+!#  endif
+!     &                                                          )
+!     &                      ) / (Hz_half(i,j,k)+Hz_half(i,j,k+1))  !<-- wz has units m.s-1
+
              wz(i,j,k,indx)=wz(i,j,k,nstp)*0.5*(Hz(i,j,k  )+
      &                                          Hz(i,j,k+1)) !<-- wz(indx) has units kg.m-1.s-1
 #  ifdef NBQ
@@ -796,15 +947,25 @@
        enddo              
        ! Special treatment for k=N because the control volume at the top is Hz/2             
        do i=Istr,Iend
-             wz(i,j,N,nnew)=( cff1*wz(i,j,N,nstp)*Hz    (i,j,N)
-     &                       +cff2*wz(i,j,N,indx)*Hz_bak(i,j,N)
-     &                       +2.*cdt*pn(i,j)*pm(i,j)
+             wz(i,j,N,nnew)=( cff1*wz(i,j,N,nstp)*0.5*Hz    (i,j,N)
+     &                       +cff2*wz(i,j,N,indx)*0.5*Hz_bak(i,j,N)
+     &                       +cdt*pn(i,j)*pm(i,j)
      &                          *(rw(i,j,N)
 #  ifdef NBQ
      &                                     +rw_nbq_avg1(i,j,N)
 #  endif
      &                                                        )
-     &                      )/ Hz_half(i,j,N)                !<-- wz has units m.s-1
+     &                      ) * 2. / Hz_half(i,j,N)                !<-- wz has units m.s-1
+!             wz(i,j,N,nnew)=( cff1*wz(i,j,N,nstp)*Hz    (i,j,N)
+!     &                       +cff2*wz(i,j,N,indx)*Hz_bak(i,j,N)
+!     &                       +2.*cdt*pn(i,j)*pm(i,j)
+!     &                          *(rw(i,j,N)
+!#  ifdef NBQ
+!     &                                     +rw_nbq_avg1(i,j,N)
+!#  endif
+!     &                                                        )
+!     &                      )/ Hz_half(i,j,N)                !<-- wz has units m.s-1
+
              wz(i,j,N,indx)=wz(i,j,N,nstp)*0.5*Hz(i,j,N)   !<-- wz(indx) has units kg.m-1.s-1
 #  ifdef NBQ
              rwint_nbq(i,j,N)=pm(i,j)*pn(i,j)*rw(i,j,N) !<-- rwint_nbq has units kg.m-1.s-2
@@ -815,10 +976,14 @@
       enddo
 !==
 # endif /* NBQ */   
+
+      write(*,*) wz(32,32,64,nnew)
+      write(*,*) wz(32,32,63,nnew)
   
 !
 !======================================================================
 ! Set PHYSICAL lateral boundary conditions for tracers.
+! and exchange periodic boundaries and computational margins.
 !======================================================================
 !
       do itrc=1,NT
@@ -833,7 +998,11 @@
 #  endif
 # endif
       enddo
-
+!
+!======================================================================
+! Set PHYSICAL lateral boundary conditions for momentum.
+!======================================================================
+!
       call u3dbc_tile (Istr,Iend,Jstr,Jend, WORK)
       call v3dbc_tile (Istr,Iend,Jstr,Jend, WORK)
 # if defined NBQ || defined NHMG
@@ -843,31 +1012,36 @@
 
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # ifdef NHMG
-
-c$$$      call nhydro_matrices(
-c$$$     & transpose(1._8/pm(0:Lm+1,0:Mm+1)),
-c$$$     & transpose(1._8/pn(0:Lm+1,0:Mm+1)),
-c$$$!which zeta?
-c$$$     & transpose(Zt_avg1(0:Lm+1,0:Mm+1)),
-c$$$!
-c$$$     & transpose(h(0:Lm+1,0:Mm+1)),
-c$$$     & hc,theta_b,theta_s)
-
-#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
-      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
-     &                        u(START_2D_ARRAY,1,nnew))
-      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
-     &                        v(START_2D_ARRAY,1,nnew))
-      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
-     &                        wz(START_2D_ARRAY,0,nnew))     
-#  endif
-
+c$$$
+      call nhydro_matrices(
+     & Lm,Mm,N,
+     & 1._8/pm(0:Lm+1,0:Mm+1),
+     & 1._8/pn(0:Lm+1,0:Mm+1),
+     & z_w(0:Lm+1,0:Mm+1,N),
+     & h(0:Lm+1,0:Mm+1),
+     & hc,theta_b,theta_s)
+c$$$
+c$$$#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
+c$$$      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        u(START_2D_ARRAY,1,nnew))
+c$$$      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        v(START_2D_ARRAY,1,nnew))
+c$$$      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        wz(START_2D_ARRAY,0,nnew))     
+c$$$#  endif
+c$$$
       call nhydro_solve(
      & Lm, Mm, N,
+     & z_r(0:Lm+1,0:Mm+1,1:N),
+     & z_w(0:Lm+1,0:Mm+1,0:N),
      & u(1:Lm+1,0:Mm+1,1:N,nnew),
      & v(0:Lm+1,1:Mm+1,1:N,nnew),
      & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
-
+c$$$
+      call v3dbc_tile (Istr,Iend,Jstr,Jend, WORK)   
+      call u3dbc_tile (Istr,Iend,Jstr,Jend, WORK)
+      call w3dbc_tile (Istr,Iend,Jstr,Jend, WORK) 
+c$$$
 # endif
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
@@ -895,144 +1069,126 @@ c$$$     & hc,theta_b,theta_s)
 #  define JV_RANGE Jstr,JendR
 # endif
 !
-      do j=JU_RANGE                      ! XI-component
-        do i=IU_RANGE
-          DC(i,0)=0.
-          CF(i,0)=0.
-        enddo
-        do k=1,N,+1
-          do i=IU_RANGE
-            DC(i,k)=0.5*(Hz(i,j,k)+Hz(i-1,j,k))*on_u(i,j)
-            DC(i,0)=DC(i,0)+DC(i,k)
-            CF(i,0)=CF(i,0)+DC(i,k)*u(i,j,k,nnew)
-          enddo
-        enddo
-        if (FIRST_TIME_STEP) then
-          cff1=1.
-          cff2=0.
-        else
-          cff1=1.5
-          cff2=0.5
-        endif
-        do i=IU_RANGE
-          CF(i,0)=( CF(i,0)-cff1*DU_avg1(i,j,nstp)
-     &                     +cff2*DU_avg1(i,j,indx) )/DC(i,0)
-        enddo
-        do k=N,1,-1
-          do i=IU_RANGE
-            u(i,j,k,nnew)=(u(i,j,k,nnew)-CF(i,0))
-# ifdef MASKING
-     &                                 *umask(i,j)
-# endif
-# ifdef WET_DRY
-            cff3=wetdry(i-1,j)+wetdry(i,j)
-            IF (cff3.eq.1.) THEN
-              cff3=wetdry(i-1,j)-wetdry(i,j)
-            END IF
-            cff4=ABS(ABS(cff3)-1.)
-            cff5=0.5+SIGN(0.5,(cff1*DU_avg1(i,j,nstp)
-     &                        -cff2*DU_avg1(i,j,indx)))*cff3
-            umask_wet(i,j)=0.5*cff3*cff4+cff5*(1.-cff4)
-!            IF (cff1*DU_avg1(i,j,nstp)
-!     &         -cff2*DU_avg1(i,j,indx).eq.0. .and.
-!     &          wetdry(i-1,j)+wetdry(i,j).le.1.) THEN
-!              umask_wet(i,j)=0.
-!            END IF
-            u(i,j,k,nnew)=u(i,j,k,nnew)*umask_wet(i,j)
-# endif
-          enddo
-        enddo
-      enddo
-
-      do j=JV_RANGE
-        do i=IV_RANGE                   ! ETA-component
-          DC(i,0)=0.
-          CF(i,0)=0.
-        enddo
-        do k=1,N,+1
-          do i=IV_RANGE
-            DC(i,k)=0.5*(Hz(i,j,k)+Hz(i,j-1,k))*om_v(i,j)
-            DC(i,0)=DC(i,0)+DC(i,k)
-            CF(i,0)=CF(i,0)+DC(i,k)*v(i,j,k,nnew)
-          enddo
-        enddo
-        if (FIRST_TIME_STEP) then
-          cff1=1.
-          cff2=0.
-        else
-          cff1=1.5
-          cff2=0.5
-        endif
-        do i=IV_RANGE
-          CF(i,0)=( CF(i,0)-cff1*DV_avg1(i,j,nstp)
-     &                     +cff2*DV_avg1(i,j,indx) )/DC(i,0)
-        enddo
-        do k=N,1,-1
-          do i=IV_RANGE
-            v(i,j,k,nnew)=(v(i,j,k,nnew)-CF(i,0))
-# ifdef MASKING
-     &                                  *vmask(i,j)
-# endif
-# ifdef WET_DRY
-            cff3=wetdry(i,j-1)+wetdry(i,j)
-            IF (cff3.eq.1.) THEN
-              cff3=wetdry(i,j-1)-wetdry(i,j)
-            END IF
-            cff4=ABS(ABS(cff3)-1.)
-            cff5=0.5+SIGN(0.5,(cff1*DV_avg1(i,j,nstp)
-     &                        -cff2*DV_avg1(i,j,indx)))*cff3
-            vmask_wet(i,j)=0.5*cff3*cff4+cff5*(1.-cff4)
-!            IF (cff1*DV_avg1(i,j,nstp)
-!     &         -cff2*DV_avg1(i,j,indx).eq.0. .and.
-!     &          wetdry(i,j-1)+wetdry(i,j).le.1.) THEN
-!              vmask_wet(i,j)=0.
-!            END IF
-            v(i,j,k,nnew)=v(i,j,k,nnew)*vmask_wet(i,j)
-# endif
-          enddo
-        enddo
-      enddo
-c$$$# ifdef NHMG
-c$$$!
-c$$$!--------------------------------------------------
-c$$$!  Couple s-component of velocity
-c$$$!--------------------------------------------------
-c$$$!
-c$$$#   if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
-c$$$      call exchange_r3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        Hz_half(START_2D_ARRAY,1))
-c$$$      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        u(START_2D_ARRAY,1,nnew))
-c$$$      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        v(START_2D_ARRAY,1,nnew))
-c$$$#   endif
-c$$$
-c$$$      do j=Jstr,Jend
-c$$$        do k=1,N
-c$$$          do i=Istr,Iend
-c$$$            wz(i,j,k,nnew)=wz(i,j,k-1,nnew) + (       
-c$$$     &         -0.5*(Hz_half(i+1,j,k)+Hz_half(i,j,k))
-c$$$     &         *on_u(i+1,j)*u(i+1,j,k,nnew)
-c$$$     &         +0.5*(Hz_half(i,j,k)+Hz_half(i-1,j,k))
-c$$$     &         *on_u(i,j)*u(i,j,k,nnew)
-c$$$     &         -0.5*(Hz_half(i,j+1,k)+Hz_half(i,j,k))
-c$$$     &         *om_v(i,j+1)*v(i,j+1,k,nnew)
-c$$$     &         +0.5*(Hz_half(i,j,k)+Hz_half(i,j-1,k))
-c$$$     &         *om_v(i,j)*v(i,j,k,nnew) )
-c$$$     &         / (on_r(i,j)*om_r(i,j))
+c$$$#  ifndef NHMG
+c$$$      do j=JU_RANGE                      ! XI-component
+c$$$        do i=IU_RANGE
+c$$$          DC(i,0)=0.
+c$$$          CF(i,0)=0.
+c$$$        enddo
+c$$$        do k=1,N,+1
+c$$$          do i=IU_RANGE
+c$$$            DC(i,k)=0.5*(Hz(i,j,k)+Hz(i-1,j,k))*on_u(i,j)
+c$$$            DC(i,0)=DC(i,0)+DC(i,k)
+c$$$            CF(i,0)=CF(i,0)+DC(i,k)*u(i,j,k,nnew)
+c$$$          enddo
+c$$$        enddo
+c$$$        if (FIRST_TIME_STEP) then
+c$$$          cff1=1.
+c$$$          cff2=0.
+c$$$        else
+c$$$          cff1=1.5
+c$$$          cff2=0.5
+c$$$        endif
+c$$$        do i=IU_RANGE
+c$$$          CF(i,0)=( CF(i,0)-cff1*DU_avg1(i,j,nstp)
+c$$$     &                     +cff2*DU_avg1(i,j,indx) )/DC(i,0)
+c$$$        enddo
+c$$$        do k=N,1,-1
+c$$$          do i=IU_RANGE
+c$$$            u(i,j,k,nnew)=(u(i,j,k,nnew)-CF(i,0))
+c$$$# ifdef MASKING
+c$$$     &                                 *umask(i,j)
+c$$$# endif
+c$$$# ifdef WET_DRY
+c$$$            cff3=wetdry(i-1,j)+wetdry(i,j)
+c$$$            IF (cff3.eq.1.) THEN
+c$$$              cff3=wetdry(i-1,j)-wetdry(i,j)
+c$$$            END IF
+c$$$            cff4=ABS(ABS(cff3)-1.)
+c$$$            cff5=0.5+SIGN(0.5,(cff1*DU_avg1(i,j,nstp)
+c$$$     &                        -cff2*DU_avg1(i,j,indx)))*cff3
+c$$$            umask_wet(i,j)=0.5*cff3*cff4+cff5*(1.-cff4)
+c$$$!            IF (cff1*DU_avg1(i,j,nstp)
+c$$$!     &         -cff2*DU_avg1(i,j,indx).eq.0. .and.
+c$$$!     &          wetdry(i-1,j)+wetdry(i,j).le.1.) THEN
+c$$$!              umask_wet(i,j)=0.
+c$$$!            END IF
+c$$$            u(i,j,k,nnew)=u(i,j,k,nnew)*umask_wet(i,j)
+c$$$# endif
 c$$$          enddo
 c$$$        enddo
 c$$$      enddo
 c$$$
-c$$$!      call nhydro_check_nondivergence(
-c$$$!     & Lm, Mm, N,
-c$$$!     & u(1:Lm+1,0:Mm+1,1:N,nnew),
-c$$$!     & v(0:Lm+1,1:Mm+1,1:N,nnew),
-c$$$!     & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
+c$$$      do j=JV_RANGE
+c$$$        do i=IV_RANGE                   ! ETA-component
+c$$$          DC(i,0)=0.
+c$$$          CF(i,0)=0.
+c$$$        enddo
+c$$$        do k=1,N,+1
+c$$$          do i=IV_RANGE
+c$$$            DC(i,k)=0.5*(Hz(i,j,k)+Hz(i,j-1,k))*om_v(i,j)
+c$$$            DC(i,0)=DC(i,0)+DC(i,k)
+c$$$            CF(i,0)=CF(i,0)+DC(i,k)*v(i,j,k,nnew)
+c$$$          enddo
+c$$$        enddo
+c$$$        if (FIRST_TIME_STEP) then
+c$$$          cff1=1.
+c$$$          cff2=0.
+c$$$        else
+c$$$          cff1=1.5
+c$$$          cff2=0.5
+c$$$        endif
+c$$$        do i=IV_RANGE
+c$$$          CF(i,0)=( CF(i,0)-cff1*DV_avg1(i,j,nstp)
+c$$$     &                     +cff2*DV_avg1(i,j,indx) )/DC(i,0)
+c$$$        enddo
+c$$$        do k=N,1,-1
+c$$$          do i=IV_RANGE
+c$$$            v(i,j,k,nnew)=(v(i,j,k,nnew)-CF(i,0))
+c$$$# ifdef MASKING
+c$$$     &                                  *vmask(i,j)
 c$$$# endif
+c$$$# ifdef WET_DRY
+c$$$            cff3=wetdry(i,j-1)+wetdry(i,j)
+c$$$            IF (cff3.eq.1.) THEN
+c$$$              cff3=wetdry(i,j-1)-wetdry(i,j)
+c$$$            END IF
+c$$$            cff4=ABS(ABS(cff3)-1.)
+c$$$            cff5=0.5+SIGN(0.5,(cff1*DV_avg1(i,j,nstp)
+c$$$     &                        -cff2*DV_avg1(i,j,indx)))*cff3
+c$$$            vmask_wet(i,j)=0.5*cff3*cff4+cff5*(1.-cff4)
+c$$$!            IF (cff1*DV_avg1(i,j,nstp)
+c$$$!     &         -cff2*DV_avg1(i,j,indx).eq.0. .and.
+c$$$!     &          wetdry(i,j-1)+wetdry(i,j).le.1.) THEN
+c$$$!              vmask_wet(i,j)=0.
+c$$$!            END IF
+c$$$            v(i,j,k,nnew)=v(i,j,k,nnew)*vmask_wet(i,j)
+c$$$# endif
+c$$$          enddo
+c$$$        enddo
+c$$$      enddo
+c$$$!
+c$$$#  else
+c$$$      if (FIRST_TIME_STEP) then
+c$$$         cff1=1.
+c$$$         cff2=0.
+c$$$      else
+c$$$         cff1=1.5
+c$$$         cff2=0.5
+c$$$      endif
+c$$$      call nhydro_coupling(
+c$$$     & Lm, Mm, N,
+c$$$     & z_r(0:Lm+1,0:Mm+1,1:N), !pb here
+c$$$     & z_w(0:Lm+1,0:Mm+1,0:N), !pb here
+c$$$     & cff1*DU_avg1(1:Lm+1,0:Mm+1,nstp)-cff2*DU_avg1(i,j,indx),
+c$$$     & cff1*DV_avg1(0:Lm+1,1:Mm+1,nstp)-cff2*DV_avg1(i,j,indx),
+c$$$     & u(1:Lm+1,0:Mm+1,1:N,nnew),
+c$$$     & v(0:Lm+1,1:Mm+1,1:N,nnew),
+c$$$     & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
+c$$$#  endif
 !
 !======================================================================
-! Set PHYSICAL lateral boundary conditions for momentum.
+! Exchange periodic boundaries and computational margins.
 !======================================================================
 !
 # if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI

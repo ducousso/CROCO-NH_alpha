@@ -13,8 +13,9 @@ module mg_compute_barofrc
 
 contains
   !-------------------------------------------------------------------------     
-  subroutine compute_barofrc(dt,ru,rv)
+  subroutine compute_barofrc(zr,zw,dt,ru,rv)
 
+    real(kind=rp), dimension(:,:,:), pointer, intent(in)  :: zr,zw
     real(kind=rp),                            intent(in)  :: dt
     real(kind=rp), dimension(:,:)  , pointer, intent(out) :: ru,rv
 
@@ -22,7 +23,7 @@ contains
     integer(kind=ip):: nx, ny, nz
 
     real(kind=rp), dimension(:,:)  , pointer :: dx,dy
-    real(kind=rp), dimension(:,:,:), pointer :: zw
+!    real(kind=rp), dimension(:,:,:), pointer :: zw
     real(kind=rp), dimension(:,:)  , pointer :: dxu,dyv
     real(kind=rp), dimension(:,:,:), pointer :: dz
     real(kind=rp), dimension(:,:,:), pointer :: p
@@ -36,7 +37,7 @@ contains
 
     dx => grid(1)%dx
     dy => grid(1)%dy
-    zw => grid(1)%zw
+!    zw => grid(1)%zw
 
     if (myrank==0) write(*,*)'- compute barofrc:'
 
@@ -45,11 +46,11 @@ contains
     do i = 0,nx+1
        do j = 0,ny+1
           do k = 1,nz
-             dz(k,j,i) = zw(k+1,j,i)-zw(k,j,i)
+!             dz(k,j,i) = zw(k+1,j,i)-zw(k,j,i)
+             dz(k,j,i) = zw(k,j,i)-zw(k-1,j,i) !because zw indexed as croco from 0 to nz
           enddo
        enddo
     enddo
-
     !! Cell widths
     allocate(dxu(0:ny+1,nx+1))
     do i = 1,nx+1

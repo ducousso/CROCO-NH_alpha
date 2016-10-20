@@ -135,8 +135,11 @@ include Makedefs
 	mg_grids.F90         \
 	mg_mpi_exchange.F90  \
 	mg_gather.F90        \
+	mg_set_bbc.F90   \
+	mg_compute_fluxes.F90   \
+	mg_btbc_coupling.F90   \
 	mg_compute_rhs.F90   \
-	mg_define_matrix.F90 \
+	mg_define_matrices.F90 \
 	mg_correct_uvw.F90   \
 	mg_compute_barofrc.F90   \
 	mg_relax.F90         \

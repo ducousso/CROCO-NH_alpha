@@ -13,21 +13,20 @@ module mg_correct_uvw
 
 contains
   !-------------------------------------------------------------------------     
-  subroutine correct_uvw(u,v,w)
+  subroutine correct_uvw(zr,zw,u,v,w)
 
+    real(kind=rp), dimension(:,:,:), pointer, intent(in)  :: zr,zw
     real(kind=rp), dimension(:,:,:), pointer, intent(inout) :: u,v,w
 
     integer(kind=ip):: k, j, i
     integer(kind=ip):: nx, ny, nz
 
     real(kind=rp), dimension(:,:)  , pointer :: dx,dy
-    real(kind=rp), dimension(:,:,:), pointer :: zr,zw
+!    real(kind=rp), dimension(:,:,:), pointer :: zr,zw
     real(kind=rp), dimension(:,:,:), pointer :: p
     real(kind=rp) :: dxu,dyv
     real(kind=rp) :: dzw
 
-
-    !NG comment: constants in a mg_cst.f90 file ?
     real(kind=rp), parameter :: two  = 2._rp
     real(kind=rp), parameter :: one  = 1._rp
     real(kind=rp), parameter :: hlf  = 0.5_rp
@@ -40,16 +39,18 @@ contains
 
     dx => grid(1)%dx
     dy => grid(1)%dy
-    zr => grid(1)%zr
-    zw => grid(1)%zw
+!    zr => grid(1)%zr
+!    zw => grid(1)%zw
 
     if (myrank==0) write(*,*)'- correct u,v,w:'
 
     !! Correct
     p => grid(1)%p
 
-    do i = 1,nx+1
-       do j = 0,ny+1 
+!    do i = 1,nx+1
+    do i = 2,nx
+!       do j = 0,ny+1
+        do j = 1,ny
           do k = 1,nz
 
              dxu = hlf * (dx(j,i)+dx(j,i-1))
@@ -60,8 +61,10 @@ contains
        enddo
     enddo
 
-    do i = 0,nx+1
-       do j = 1,ny+1 
+!    do i = 0,nx+1
+    do i = 1,nx
+!       do j = 1,ny+1 
+       do j = 2,ny 
           do k = 1,nz
 
              dyv = hlf * (dy(j,i)+dy(j-1,i))
@@ -72,16 +75,21 @@ contains
        enddo
     enddo
 
-    do i = 0,nx+1
-       do j = 0,ny+1
+!    do i = 0,nx+1
+    do i = 1,nx
+!       do j = 0,ny+1
+       do j = 1,ny
 
-          do k = 2,nz !interior and upper levels
+          k = 1 !bottom
+
+          do k = 2,nz !interior levels
              dzw = zr(k,j,i)-zr(k-1,j,i)
              w(k-1,j,i) = w(k-1,j,i) - one / dzw * (p(k,j,i)-p(k-1,j,i))
           enddo
 
           k = nz+1 !surface
-          dzw = zw(nz+1,j,i)-zr(nz,j,i)
+!          dzw = zw(nz+1,j,i)-zr(nz,j,i)
+          dzw = zw(nz,j,i)-zr(nz,j,i) !because zw indexed as croco from 0 to nz
           w(k-1,j,i) = w(k-1,j,i) - one / dzw * (-p(k-1,j,i))
 
        enddo

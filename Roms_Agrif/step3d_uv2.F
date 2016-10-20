@@ -61,7 +61,8 @@
 #ifdef NHMG
           USE nhydro, only : nhydro_matrices
           USE nhydro, only : nhydro_solve
-          USE nhydro, only : nhydro_check_nondivergence
+          USE nhydro, only : nhydro_coupling
+!          USE nhydro, only : nhydro_check_nondivergence
 #endif
       implicit none
 # include "param.h"
@@ -460,115 +461,52 @@ c$$$              v(i,j,k,nnew)=(DC(i,k)-DC(i,0)) SWITCH vmask(i,j)
 ! Set PHYSICAL lateral boundary conditions.
 !--------------------------------------------------------------------
 !
-!      call v3dbc_tile (Istr,Iend,Jstr,Jend, grad)   
-!      call u3dbc_tile (Istr,Iend,Jstr,Jend, grad)
+      call v3dbc_tile (Istr,Iend,Jstr,Jend, grad)   
+      call u3dbc_tile (Istr,Iend,Jstr,Jend, grad)
 
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # ifdef NHMG
-
-c$$$      call nhydro_matrices(
-c$$$     & transpose(1._8/pm(0:Lm+1,0:Mm+1)),
-c$$$     & transpose(1._8/pn(0:Lm+1,0:Mm+1)),
-c$$$!which zeta?
-c$$$     & transpose(Zt_avg1(0:Lm+1,0:Mm+1)),
-c$$$!
-c$$$     & transpose(h(0:Lm+1,0:Mm+1)),
-c$$$     & hc,theta_b,theta_s)
-
-#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
-      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
-     &                        u(START_2D_ARRAY,1,nnew))
-      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
-     &                        v(START_2D_ARRAY,1,nnew))
-      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
-     &                        wz(START_2D_ARRAY,0,nnew))     
-#  endif
-
+c$$$
+      call nhydro_matrices(
+     & Lm,Mm,N,
+     & 1._8/pm(0:Lm+1,0:Mm+1),
+     & 1._8/pn(0:Lm+1,0:Mm+1),
+     & z_w(0:Lm+1,0:Mm+1,N),
+     & h(0:Lm+1,0:Mm+1),
+     & hc,theta_b,theta_s)
+c$$$
+c$$$#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
+c$$$      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        u(START_2D_ARRAY,1,nnew))
+c$$$      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        v(START_2D_ARRAY,1,nnew))
+c$$$      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        wz(START_2D_ARRAY,0,nnew))     
+c$$$#  endif
+c$$$
       call nhydro_solve(
      & Lm, Mm, N,
+     & z_r(0:Lm+1,0:Mm+1,1:N),
+     & z_w(0:Lm+1,0:Mm+1,0:N),
      & u(1:Lm+1,0:Mm+1,1:N,nnew),
      & v(0:Lm+1,1:Mm+1,1:N,nnew),
      & wz(0:Lm+1,0:Mm+1,0:N,nnew),
      & dt,
      & rufrc_nhmg(1:Lm+1,0:Mm+1),
      & rvfrc_nhmg(0:Lm+1,1:Mm+1) )
-
-!      call nhydro_check_nondivergence(
-!     & Lm, Mm, N,
-!     & u(1:Lm+1,0:Mm+1,1:N,nnew),
-!     & v(0:Lm+1,1:Mm+1,1:N,nnew),
-!     & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
-
-# endif
-!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-c$$$# ifdef EW_PERIODIC
-c$$$#  define IU_RANGE Istr,Iend
-c$$$#  define IV_RANGE Istr,Iend
-c$$$# else
-c$$$#  define IU_RANGE Istr,IendR
-c$$$#  define IV_RANGE IstrR,IendR
-c$$$# endif
-c$$$!
-c$$$# ifdef NS_PERIODIC
-c$$$#  define JU_RANGE Jstr,Jend
-c$$$#  define JV_RANGE Jstr,Jend
-c$$$# else
-c$$$#  define JU_RANGE JstrR,JendR
-c$$$#  define JV_RANGE Jstr,JendR
-c$$$# endif
-c$$$      do j=JU_RANGE 
-c$$$        do i=IU_RANGE
-c$$$          DC(i,0)=0.
-c$$$          CF(i,0)=0.
-c$$$          FC(i,0)=0.
-c$$$        enddo
-c$$$        do k=1,N,+1
-c$$$          do i=IU_RANGE
-c$$$            DC(i,k)=0.5*(Hz(i,j,k)+Hz(i-1,j,k))*on_u(i,j)
-c$$$            DC(i,0)=DC(i,0)+DC(i,k)
-c$$$            CF(i,0)=CF(i,0)+DC(i,k)*u(i,j,k,nnew)
-c$$$          enddo
-c$$$        enddo
-c$$$        do i=IU_RANGE
-c$$$          DC(i,0)=1./DC(i,0)
-c$$$          CF(i,0)=DC(i,0)*(CF(i,0)-DU_avg1(i,j,nnew))
-c$$$        enddo
-c$$$        do k=N,1,-1
-c$$$          do i=IU_RANGE
-c$$$            u(i,j,k,nnew)=(u(i,j,k,nnew)-CF(i,0)) 
-c$$$          enddo
-c$$$        enddo
-c$$$        if (j.ge.Jstr) then
-c$$$          do i=IV_RANGE
-c$$$            DC(i,0)=0.
-c$$$            CF(i,0)=0.
-c$$$            FC(i,0)=0.
-c$$$          enddo
-c$$$          do k=1,N,+1
-c$$$            do i=IV_RANGE
-c$$$              DC(i,k)=0.5*(Hz(i,j,k)+Hz(i,j-1,k))*om_v(i,j)
-c$$$              DC(i,0)=DC(i,0)+DC(i,k)
-c$$$              CF(i,0)=CF(i,0)+DC(i,k)*v(i,j,k,nnew)
-c$$$            enddo
-c$$$          enddo
-c$$$          do i=IV_RANGE
-c$$$            DC(i,0)=1./DC(i,0)
-c$$$            CF(i,0)=DC(i,0)*(CF(i,0)-DV_avg1(i,j,nnew))
-c$$$          enddo
-c$$$          do k=N,1,-1
-c$$$            do i=IV_RANGE
-c$$$              v(i,j,k,nnew)=(v(i,j,k,nnew)-CF(i,0)) 
-c$$$            enddo
-c$$$          enddo
-c$$$        endif
-c$$$      enddo   
-
+c$$$
+c$$$      call nhydro_check_nondivergence(
+c$$$     & Lm, Mm, N,
+c$$$     & u(1:Lm+1,0:Mm+1,1:N,nnew),
+c$$$     & v(0:Lm+1,1:Mm+1,1:N,nnew),
+c$$$     & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
+c$$$
       call v3dbc_tile (Istr,Iend,Jstr,Jend, grad)   
       call u3dbc_tile (Istr,Iend,Jstr,Jend, grad)
-# ifdef NHMG
       call w3dbc_tile (Istr,Iend,Jstr,Jend, grad)   
+c$$$
 # endif
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 !
 !
@@ -620,6 +558,19 @@ c$$$      enddo
 #  define JU_RANGE JstrR,JendR
 #  define JV_RANGE Jstr,JendR
 # endif
+
+# ifdef NHMG
+      call nhydro_coupling(
+     & Lm, Mm, N,
+     & z_r(0:Lm+1,0:Mm+1,1:N),
+     & z_w(0:Lm+1,0:Mm+1,0:N),
+     & DU_avg1(1:Lm+1,0:Mm+1,nnew),
+     & DV_avg1(0:Lm+1,1:Mm+1,nnew),
+     & u(1:Lm+1,0:Mm+1,1:N,nnew),
+     & v(0:Lm+1,1:Mm+1,1:N,nnew),
+     & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
+# endif
+
 !
 !--------------------------------------------------
 !  Couple XI-component of velocity
@@ -634,8 +585,8 @@ c$$$      enddo
         do k=1,N,+1
           do i=IU_RANGE
             DC(i,k)=0.5*(Hz(i,j,k)+Hz(i-1,j,k))*on_u(i,j)
-            DC(i,0)=DC(i,0)+DC(i,k)
-            CF(i,0)=CF(i,0)+DC(i,k)*u(i,j,k,nnew)
+            DC(i,0)=DC(i,0)+DC(i,k)                        
+            CF(i,0)=CF(i,0)+DC(i,k)*u(i,j,k,nnew)          !care this computation is not valid...
           enddo
         enddo
         do i=IU_RANGE
@@ -658,7 +609,11 @@ c$$$      enddo
         enddo
         do k=N,1,-1
           do i=IU_RANGE
+# ifdef NHMG
+            u(i,j,k,nnew)=u(i,j,k,nnew)
+# else
             u(i,j,k,nnew)=(u(i,j,k,nnew)-CF(i,0)) 
+# endif /* NHMG */
 # ifdef MASKING
      &                                *umask(i,j)
 #  ifdef MRL_WCI
@@ -689,7 +644,7 @@ c$$$      enddo
      &                                        +2.0*ust(i,j,k))
 #  else
             FC(i,k)=DELTA*Huon(i,j,k) +
-     &              EPSIL*DC(i,k)*(u(i,j,k,nstp)+u(i,j,k,nnew))
+     &              EPSIL*DC(i,k)*(u(i,j,k,nstp)+u(i,j,k,nnew)) !care this computation is not valid...
 #  endif
 # endif /* TR */
 
@@ -701,7 +656,7 @@ c$$$      enddo
         enddo
         do k=1,N,+1
           do i=IU_RANGE
-            Huon(i,j,k)=FC(i,k)-DC(i,k)*FC(i,0)
+            Huon(i,j,k)=FC(i,k)-DC(i,k)*FC(i,0) !care this computation is not valid...
           enddo
         enddo
 !
@@ -793,7 +748,11 @@ c$$$      enddo
           enddo
           do k=N,1,-1
             do i=IV_RANGE
+# ifdef NHMG
+              v(i,j,k,nnew)=v(i,j,k,nnew)
+# else
               v(i,j,k,nnew)=(v(i,j,k,nnew)-CF(i,0)) 
+# endif
 # ifdef MASKING
      &                                  *vmask(i,j)
 #  ifdef MRL_WCI
@@ -806,7 +765,7 @@ c$$$      enddo
               vst(i,j,k)=vst(i,j,k)*vmask_wet(i,j)
 #  endif
 # endif
-
+     
 # ifdef TR
 #  ifdef MRL_WCI
               FC(i,k)=DC(i,k)*(0.5*(v(i,j,k,nstp)+v(i,j,k,nnew))
@@ -891,39 +850,7 @@ c$$$      enddo
 !
         endif  !<-- j.ge.Jstr
       enddo    !<-- j loop
-
-# ifdef NHMG
 !
-!--------------------------------------------------
-!  Couple s-component of velocity
-!--------------------------------------------------
-!
-#   if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
-      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
-     &                                 u(START_2D_ARRAY,1,nnew))
-      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
-     &                                 v(START_2D_ARRAY,1,nnew))
-#   endif
-
-      do j=Jstr,Jend
-        do k=1,N
-          do i=Istr,Iend
-            wz(i,j,k,nnew)=wz(i,j,k-1,nnew) + (       
-     &         -0.5*(Hz(i+1,j,k)+Hz(i,j,k))*on_u(i+1,j)*u(i+1,j,k,nnew)
-     &         +0.5*(Hz(i,j,k)+Hz(i-1,j,k))*on_u(i,j)*u(i,j,k,nnew)
-     &         -0.5*(Hz(i,j+1,k)+Hz(i,j,k))*om_v(i,j+1)*v(i,j+1,k,nnew)
-     &         +0.5*(Hz(i,j,k)+Hz(i,j-1,k))*om_v(i,j)*v(i,j,k,nnew) )
-     &         / (on_r(i,j)*om_r(i,j))
-          enddo
-        enddo
-      enddo
-
-!      call nhydro_check_nondivergence(
-!     & Lm, Mm, N,
-!     & u(1:Lm+1,0:Mm+1,1:N,nnew),
-!     & v(0:Lm+1,1:Mm+1,1:N,nnew),
-!     & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
-# endif
 !
 !--------------------------------------------------------------------
 ! Apply mass point sources

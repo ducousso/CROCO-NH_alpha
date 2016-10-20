@@ -13,23 +13,32 @@ module mg_compute_rhs
 
 contains
   !-------------------------------------------------------------------------     
-  subroutine compute_rhs(u,v,w)
+  subroutine compute_rhs(zr,zw,u,v,w)
 
+    real(kind=rp), dimension(:,:,:), pointer, intent(in)  :: zr,zw
     real(kind=rp), dimension(:,:,:), pointer, intent(in) :: u,v,w
 
     integer(kind=ip):: k, j, i
     integer(kind=ip):: nx, ny, nz
 
     real(kind=rp), dimension(:,:)  , pointer :: dx,dy
-    real(kind=rp), dimension(:,:,:), pointer :: zr,zw
+!    real(kind=rp), dimension(:,:,:), pointer :: zr,zw
+!    real(kind=rp) :: Arx, Ary
+!    real(kind=rp), dimension(:,:,:), pointer :: dzw
+!    real(kind=rp), dimension(:,:,:), pointer :: zydx,zxdy
+!    real(kind=rp), dimension(:,:,:), pointer :: cw
 
-    real(kind=rp) :: Arx, Ary
-    real(kind=rp), dimension(:,:,:), pointer :: dzw
-    real(kind=rp), dimension(:,:,:), pointer :: zydx,zxdy
-    real(kind=rp), dimension(:,:,:), pointer :: cw
+    real(kind=rp), dimension(:,:)  ,   pointer :: dxu,dyv
+    real(kind=rp), dimension(:,:,:),   pointer :: Arx,Ary
+    real(kind=rp), dimension(:,:)  ,   pointer :: Arz
+    real(kind=rp), dimension(:,:,:),   pointer :: dz,dzw
+    real(kind=rp), dimension(:,:,:),   pointer :: zy,zx
+    real(kind=rp), dimension(:,:,:),   pointer :: zydx,zxdy
+    real(kind=rp), dimension(:,:,:),   pointer :: zxw,zyw
+    real(kind=rp), dimension(:,:,:),   pointer :: cw
+
     real(kind=rp), dimension(:,:,:), pointer :: uf,vf,wf,rhs
 
-    !NG comment: constants in a mg_cst.f90 file ?
     real(kind=rp), parameter :: two  = 2._rp
     real(kind=rp), parameter :: one  = 1._rp
     real(kind=rp), parameter :: hlf  = 0.5_rp
@@ -45,20 +54,123 @@ contains
 
     dx => grid(1)%dx
     dy => grid(1)%dy
-    zr => grid(1)%zr
-    zw => grid(1)%zw
+
+!    zr => grid(1)%zr
+!    zw => grid(1)%zw
 
     if (myrank==0) write(*,*)'- compute rhs:'
 
-    !- Cell heights (computed in define matices)
-    dzw => grid(1)%dzw
+!    !- Cell heights (computed in define matices)
+!    dzw => grid(1)%dzw
+!
+!    !- Slopes in x- and y-direction defined at rho-points (computed in define matices)
+!    zxdy => grid(1)%zxdy
+!    zydx => grid(1)%zydx
+!
+!    !- (computed in define matices)
+!    cw  => grid(1)%cw
 
-    !- Slopes in x- and y-direction defined at rho-points (computed in define matices)
-    zxdy => grid(1)%zxdy
-    zydx => grid(1)%zydx
-
-    !- (computed in define matices)
-    cw  => grid(1)%cw
+!XXX
+    !! Cell heights
+    allocate(dz(nz,0:ny+1,0:nx+1))
+    do i = 0,nx+1
+       do j = 0,ny+1
+          do k = 1,nz
+!             dz(k,j,i) = zw(k+1,j,i)-zw(k,j,i)
+             dz(k,j,i) = zw(k,j,i)-zw(k-1,j,i) !because zw indexed as croco from 0 to nz
+          enddo
+       enddo
+    enddo
+    allocate(dzw(nz+1,0:ny+1,0:nx+1))
+    do i = 0,nx+1
+       do j = 0,ny+1
+!          dzw(1,j,i) = zr(1,j,i)-zw(1,j,i) 
+          dzw(1,j,i) = zr(1,j,i)-zw(0,j,i) !because zw indexed as croco from 0 to nz
+          do k = 2,nz
+             dzw(k,j,i) = zr(k,j,i)-zr(k-1,j,i) 
+          enddo
+!          dzw(nz+1,j,i) = zw(nz+1,j,i)-zr(nz,j,i) 
+         dzw(nz+1,j,i) = zw(nz,j,i)-zr(nz,j,i) !because zw indexed as croco from 0 to nz
+       enddo
+    enddo
+    !! Cell widths
+    allocate(dxu(0:ny+1,nx+1))
+    do i = 1,nx+1
+       do j = 0,ny+1
+          dxu(j,i) = 0.5_8*(dx(j,i)+dx(j,i-1))
+       enddo
+    enddo
+    allocate(dyv(ny+1,0:nx+1))
+    do i = 0,nx+1
+       do j = 1,ny+1
+          dyv(j,i) = 0.5_8*(dy(j,i)+dy(j-1,i))
+       enddo
+    enddo
+    !!  Areas
+    allocate(Arx(nz,0:ny+1,nx+1))
+    do i = 1,nx+1
+       do j = 0,ny+1
+          do k = 1,nz
+             Arx(k,j,i) = 0.25_8*(dz(k,j,i)+dz(k,j,i-1))*(dy(j,i)+dy(j,i-1)) 
+          enddo
+       enddo
+    enddo
+    allocate(Ary(nz,ny+1,0:nx+1))
+    do i = 0,nx+1
+       do j = 1,ny+1
+          do k = 1,nz
+             Ary(k,j,i) = 0.25_8*(dz(k,j,i)+dz(k,j-1,i))*(dx(j,i)+dx(j-1,i)) 
+          enddo
+       enddo
+    enddo
+    allocate(Arz(0:ny+1,0:nx+1))
+    do i = 0,nx+1
+       do j = 0,ny+1
+          Arz(j,i) = dx(j,i)*dy(j,i)
+       enddo
+    enddo
+    !! Slopes in x- and y-direction defined at rho-points
+    allocate(zx(nz,0:ny+1,0:nx+1))
+    allocate(zy(nz,0:ny+1,0:nx+1))
+    do i = 1,nx
+       do j = 1,ny
+          do k = 1,nz
+             zy(k,j,i) = 0.5_8*(zr(k,j+1,i)-zr(k,j-1,i))/dy(j,i)
+             zx(k,j,i) = 0.5_8*(zr(k,j,i+1)-zr(k,j,i-1))/dx(j,i)
+          enddo
+       enddo
+    enddo
+    call fill_halo(1,zy)
+    call fill_halo(1,zx) 
+    allocate(zxdy(nz,0:ny+1,0:nx+1))
+    allocate(zydx(nz,0:ny+1,0:nx+1))
+    do k = 1,nz
+       zydx(k,:,:) = zy(k,:,:)*dx(:,:)
+       zxdy(k,:,:) = zx(k,:,:)*dy(:,:)
+    enddo
+    allocate(zyw(nz+1,0:ny+1,0:nx+1))
+    allocate(zxw(nz+1,0:ny+1,0:nx+1))
+    do i = 1,nx
+       do j = 1,ny
+          do k = 1,nz+1
+!             zyw(k,j,i) = 0.5_8*(zw(k,j+1,i)-zw(k,j-1,i))/dy(j,i)
+             zyw(k,j,i) = 0.5_8*(zw(k-1,j+1,i)-zw(k-1,j-1,i))/dy(j,i) !because zw indexed as croco from 0 to nz
+!             zxw(k,j,i) = 0.5_8*(zw(k,j,i+1)-zw(k,j,i-1))/dx(j,i)
+             zxw(k,j,i) = 0.5_8*(zw(k-1,j,i+1)-zw(k-1,j,i-1))/dx(j,i) !because zw indexed as croco from 0 to nz
+          enddo
+       enddo
+    enddo
+    call fill_halo(1,zyw)
+    call fill_halo(1,zxw)
+    allocate(cw(nz+1,0:ny+1,0:nx+1))
+    do i = 0,nx+1
+       do j = 0,ny+1
+          do k = 1,nz+1
+             cw(k,j,i) = Arz(j,i)/dzw(k,j,i) * (1._8 + zxw(k,j,i)*zxw(k,j,i)+zyw(k,j,i)*zyw(k,j,i))
+          enddo
+       enddo
+    enddo
+!XXX
 
     !--------------!
     !- DIVERGENCE -!
@@ -78,18 +190,17 @@ contains
 
     k = 1 ! lower level
 
-    do i = 1,nx+1  ! West  to East
-       do j = 1,ny ! South to North
+    do i = 1,nx+1  
+       do j = 1,ny 
 
           uf(k,j,i) =  &
                qrt                                                      * & 
-               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
-               ( dy(j,i) + dy(j,i-1) ) &
-               !               * u(i,j,k) &
-               * u(k,j,i) &
+!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
+               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
+               ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
                - qrt * ( &
-               + zxdy(k,j,i  )*dzw(k+1,j,i  )*w(k+1-1,j,i)   &
-               + zxdy(k,j,i-1)*dzw(k+1,j,i-1)*w(k+1-1,j,i-1) ) &
+               + zxdy(k,j,i  )*dzw(k+1,j,i  )*w(k+1-1,j,i)   & !note the index trick for w 
+               + zxdy(k,j,i-1)*dzw(k+1,j,i-1)*w(k+1-1,j,i-1) ) & !note the index trick for w 
                -( &
                + zxdy(k,j,i  )*zxdy(k,j,i  )/(cw(k,j,i  )+cw(k+1,j,i  )) &
                + zxdy(k,j,i-1)*zxdy(k,j,i-1)/(cw(k,j,i-1)+cw(k+1,j,i-1)) ) * &
@@ -107,25 +218,20 @@ contains
        enddo
     enddo
 
-    do i = 1,nx+1  ! West  to East
-       do j = 1,ny ! South to North
-
-       enddo
-    enddo
-
-    do i = 1,nx+1  ! West  to East
-       do j = 1,ny ! South to North
+    do i = 1,nx+1  
+       do j = 1,ny 
 
           do k = 2,nz-1 !interior levels
-
+             
              uf(k,j,i) =  qrt                                               * & 
-                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
+!                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
+                  ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
                   ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
                   - qrt * ( &
-                  + zxdy(k,j,i  ) * dzw(k  ,j,i  ) * w(k-1,j,i) &
-                  + zxdy(k,j,i  ) * dzw(k+1,j,i  ) * w(k+1-1,j,i) &
-                  + zxdy(k,j,i-1) * dzw(k  ,j,i-1) * w(k-1,j,i-1) &
-                  + zxdy(k,j,i-1) * dzw(k+1,j,i-1) * w(k+1-1,j,i-1) &
+                  + zxdy(k,j,i  ) * dzw(k  ,j,i  ) * w(k-1,j,i) & !note the index trick for w 
+                  + zxdy(k,j,i  ) * dzw(k+1,j,i  ) * w(k+1-1,j,i) & !note the index trick for w 
+                  + zxdy(k,j,i-1) * dzw(k  ,j,i-1) * w(k-1,j,i-1) & !note the index trick for w 
+                  + zxdy(k,j,i-1) * dzw(k+1,j,i-1) * w(k+1-1,j,i-1) & !note the index trick for w 
                   )  ! umask
           enddo
 
@@ -134,22 +240,20 @@ contains
 
     k = nz !upper level
 
-    do i = 1,nx+1  ! West  to East
-       do j = 1,ny ! South to North
+    do i = 1,nx+1  
+       do j = 1,ny 
 
           uf(k,j,i) = &
                qrt                                                       * & 
-               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
-               ( dy(j,i) + dy(j,i-1) ) &
-               !               * u(i,j,k) &
-               * u(k,j,i) &
+!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
+               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
+               ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
                - qrt * ( &
-               + zxdy(k,j,i  )*       dzw(k  ,j,i  )*w(k-1,j,i) &
-               + zxdy(k,j,i  )* two * dzw(k+1,j,i  )*w(k+1-1,j,i) &
-               + zxdy(k,j,i-1)*       dzw(k  ,j,i-1)*w(k-1,j,i-1) &
-               + zxdy(k,j,i-1)* two * dzw(k+1,j,i-1)*w(k+1-1,j,i-1) &
+               + zxdy(k,j,i  )*       dzw(k  ,j,i  )*w(k-1,j,i) & !note the index trick for w 
+               + zxdy(k,j,i  )* two * dzw(k+1,j,i  )*w(k+1-1,j,i) & !note the index trick for w 
+               + zxdy(k,j,i-1)*       dzw(k  ,j,i-1)*w(k-1,j,i-1) & !note the index trick for w 
+               + zxdy(k,j,i-1)* two * dzw(k+1,j,i-1)*w(k+1-1,j,i-1) & !note the index trick for w 
                )  ! umask
-
        enddo
     enddo
 
@@ -185,19 +289,15 @@ contains
 
           vf(k,j,i) = &
                qrt                                                       * &
-               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
-               ( dx(j,i) + dx(j-1,i) ) &
-               !               * v(i,j,k) &
-               * v(k,j,i) &
+!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
+               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
+               ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
                - qrt * ( &
-               + zydx(k,j  ,i) * dzw(k+1,j  ,i)*w(k+1-1,j,i) &
-               + zydx(k,j-1,i) * dzw(k+1,j-1,i)*w(k+1-1,j-1,i) &
-               ) &
-               
+               + zydx(k,j  ,i) * dzw(k+1,j  ,i)*w(k+1-1,j,i) & !note the index trick for w 
+               + zydx(k,j-1,i) * dzw(k+1,j-1,i)*w(k+1-1,j-1,i) ) & !note the index trick for w 
                -( &
                + zydx(k,j  ,i) * zydx(k,j  ,i)/(cw(k,j  ,i)+cw(k+1,j  ,i)) &
                + zydx(k,j-1,i) * zydx(k,j-1,i)/(cw(k,j-1,i)+cw(k+1,j-1,i)) ) * &
-               !               hlf * ( dy(j,i) + dy(j-1,i) ) * v(i,j,k) &
                hlf * ( dy(j,i) + dy(j-1,i) ) * v(k,j,i) &
                - ( &
                + zxdy(k,j  ,i) * zydx(k,j  ,i)/(cw(k,j  ,i)+cw(k+1,j  ,i))  &
@@ -220,13 +320,14 @@ contains
 
              vf(k,j,i) = &
                   qrt                                                       * &
-                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
+!                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
+                  ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
                   ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
                   - qrt * ( &
-                  + zydx(k,j  ,i) * dzw(k  ,j  ,i) * w(k-1,j,i) &
-                  + zydx(k,j  ,i) * dzw(k+1,j  ,i) * w(k+1-1,j,i) &
-                  + zydx(k,j-1,i) * dzw(k  ,j-1,i) * w(k-1,j-1,i) &
-                  + zydx(k,j-1,i) * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) &
+                  + zydx(k,j  ,i) * dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w 
+                  + zydx(k,j  ,i) * dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w 
+                  + zydx(k,j-1,i) * dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w 
+                  + zydx(k,j-1,i) * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w 
                   )  !* vmask(j,i)
 
           enddo
@@ -241,14 +342,14 @@ contains
 
           vf(k,j,i) =  &
                qrt                                                       * &
-               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
-               ( dx(j,i) + dx(j-1,i) ) &
-               * v(k,j,i) &
+!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
+                  ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
+               ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
                - qrt * ( &
-               + zydx(k,j  ,i)*       dzw(k  ,j  ,i) * w(k-1,j,i) &
-               + zydx(k,j  ,i)* two * dzw(k+1,j  ,i) * w(k+1-1,j,i) &
-               + zydx(k,j-1,i)*       dzw(k  ,j-1,i) * w(k-1,j-1,i) &
-               + zydx(k,j-1,i)* two * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) &
+               + zydx(k,j  ,i)*       dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w 
+               + zydx(k,j  ,i)* two * dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w 
+               + zydx(k,j-1,i)*       dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w 
+               + zydx(k,j-1,i)* two * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w 
                ) !* vmask(j,i)
 
        enddo
@@ -294,7 +395,7 @@ contains
 
           do k = 2,nz !interior levels
 
-             wf(k,j,i) = cw(k,j,i) * dzw(k,j,i) * w(k-1,j,i) &
+             wf(k,j,i) = cw(k,j,i) * dzw(k,j,i) * w(k-1,j,i) & !note the index trick for w
                   - qrt * hlf * ( &
                   + zxdy(k  ,j,i) * ( dx(j,i  ) + dx(j,i-1) ) * u(k,j,i ) &
                   + zxdy(k  ,j,i) * ( dx(j,i+1) + dx(j,i  ) ) * u(k,j,i+1) &
@@ -315,8 +416,8 @@ contains
     do i = 1,nx
        do j = 1,ny
 
-          wf(k,j,i) = cw(k,j,i) * dzw(k,j,i) * w(k-1,j,i)&
-               - hlf * hlf *( &
+          wf(k,j,i) = cw(k,j,i) * dzw(k,j,i) * w(k-1,j,i)& !note the index trick for w
+               - hlf * hlf * ( &
                + zxdy(k-1,j,i) * ( dx(j,i) + dx(j,i-1) ) * u(k-1,j,i) &
                + zxdy(k-1,j,i) * ( dx(j,i+1) + dx(j,i) ) * u(k-1,j,i+1) ) &
                - hlf * hlf * ( &
@@ -341,6 +442,19 @@ contains
     enddo
 
     wf => null()
+
+    deallocate(dz)
+    deallocate(dzw)
+    deallocate(dxu)
+    deallocate(dyv)
+    deallocate(Arx)
+    deallocate(Ary)
+    deallocate(Arz)
+    deallocate(zx)
+    deallocate(zy)
+    deallocate(zxdy)
+    deallocate(zydx)
+    deallocate(cw)
 
   end subroutine compute_rhs
 

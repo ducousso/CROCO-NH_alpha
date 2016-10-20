@@ -1,6 +1,6 @@
 #include "cppdefs.h"
 #ifdef NHMG
-module mg_define_matrix
+module mg_define_matrices
 
   use mg_mpi
   use mg_tictoc
@@ -74,8 +74,8 @@ contains
           grid(lev)%zeta(0:ny+1,0:nx+1) = zeta
           grid(lev)%h (0:ny+1,0:nx+1) =  h
 
-
        else
+
           nxf =grid(lev-1)%nx
           nyf =grid(lev-1)%ny
           nzf =grid(lev-1)%nz
@@ -151,10 +151,10 @@ contains
 
        endif ! lev == 1
 
-       call fill_halo(lev, grid(lev)%dx,nhalo=1)
-       call fill_halo(lev, grid(lev)%dy,nhalo=1)
-       call fill_halo(lev, grid(lev)%zeta,nhalo=2)
-       call fill_halo(lev, grid(lev)%h ,nhalo=2)
+       call fill_halo(lev, grid(lev)%dx)
+       call fill_halo(lev, grid(lev)%dy)
+       call fill_halo(lev, grid(lev)%zeta)
+       call fill_halo(lev, grid(lev)%h)
 
        zrc => grid(lev)%zr
        zwc => grid(lev)%zw
@@ -165,6 +165,9 @@ contains
                grid(lev)%zeta,grid(lev)%h,   &  ! input args
                grid(lev)%zr, grid(lev)%zw,   &  ! output args
                coord_type='new_s_coord'      )    ! optional
+
+       call fill_halo(lev,grid(lev)%zr) ! Special fill_halo nh = 2
+       call fill_halo(lev,grid(lev)%zw) ! Special fill_halo nh = 2
 
        if (netcdf_output) then
           call write_netcdf(grid(lev)%dx,vname='dx',netcdf_file_name='dx.nc',rank=myrank,iter=lev)
@@ -283,8 +286,6 @@ contains
           cA(3,k,j,i) = qrt * ( &
                ( hlf * (zr(k+1,j+1,i  )-zr(k+1,j-1,i  )) / dy(j,i) ) * dx(j,i) + &
                ( hlf * (zr(k,j,i  )-zr(k,j-2,i  )) / dy(j-1,i) ) * dx(j-1,i) )
-          !! zydx(k+1,j,i) + &
-          !! zydx(k,j-1,i) ) ! couples with k+1 j-1
           cA(4,k,j,i) =                                                                &
                                 ! couples with j-1
                ( qrt                                                                 * &
@@ -485,8 +486,8 @@ contains
 
   end subroutine define_matrix
 
-end module mg_define_matrix
+end module mg_define_matrices
 #else
-        module mg_define_matrix_empty
+        module mg_define_matrices_empty
         end module
 #endif

@@ -166,6 +166,7 @@ C$    integer omp_get_thread_num
 # elif defined TANK
 #  ifndef MOVING_BATHY 
                      depth=10.
+!                     depth=5.
 #  else
                      depth=0.394
 #  endif
@@ -584,6 +585,12 @@ CR     &                                'x0=',x0, 'y0=',y0, mynode
           h(i,j)=depth
         enddo
       enddo
+!      cff=1./(1.)**2
+!      do j=JstrR,JendR
+!        do i=IstrR,IendR
+!          h(i,j)=depth-3.*exp(-cff*((xr(i,j)-5.)**2)) 
+!        enddo
+!      enddo
 #  else
       cff=1./(0.03686)**2
       do j=JstrR,JendR

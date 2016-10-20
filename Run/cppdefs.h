@@ -985,19 +985,13 @@
 # define NHMG
 # define SOLVE3D
 # define NEW_S_COORD
-# undef  MASKING
-# define  UV_ADV
+# define UV_ADV
 # define ANA_GRID
 # define ANA_INITIAL
 # define ANA_BTFLUX
 # define ANA_SMFLUX
 # define ANA_SRFLUX
 # define ANA_STFLUX
-
-
-# define ANA_SMFLUX
-# define ANA_STFLUX
-# define ANA_BTFLUX
 
 #endif /* END OF CONFIGURATION CHOICE */
 

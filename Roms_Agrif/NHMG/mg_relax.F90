@@ -6,7 +6,7 @@ module mg_relax
   use mg_tictoc
   use mg_namelist
   use mg_grids
-  use mg_define_matrix
+  use mg_mpi_exchange
 
   implicit none
 

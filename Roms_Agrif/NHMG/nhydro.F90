@@ -8,9 +8,13 @@ module nhydro
   use mg_tictoc
   use mg_mpi_exchange
   use mg_netcdf_out
+  use mg_set_bbc
+  use mg_compute_fluxes
+  use mg_btbc_coupling
   use mg_compute_rhs
-  use mg_correct_uvw
+  use mg_define_matrices
   use mg_solvers
+  use mg_correct_uvw
   use mg_compute_barofrc
 
   implicit none
@@ -38,6 +42,439 @@ contains
   end subroutine nhydro_init
 
   !--------------------------------------------------------------
+  subroutine nhydro_bbc(nx,ny,nz,zra,zwa,ua,va,wa)
+
+    integer(kind=ip), intent(in) :: nx, ny, nz
+
+    real(kind=rp), dimension(0:nx+1,0:ny+1,1:nz), target, intent(in) :: zra
+    real(kind=rp), dimension(0:nx+1,0:ny+1,0:nz), target, intent(in) :: zwa
+    real(kind=rp), dimension(1:nx+1,0:ny+1,1:nz), target, intent(in) :: ua
+    real(kind=rp), dimension(0:nx+1,1:ny+1,1:nz), target, intent(in) :: va
+    real(kind=rp), dimension(0:nx+1,0:ny+1,0:nz), target, intent(inout) :: wa
+
+    real(kind=rp), dimension(:,:,:), pointer :: zr,zw
+    real(kind=rp), dimension(:,:,:), pointer :: u,v,w
+
+!!! dirty reshape arrays indexing ijk -> kji !!!
+    real(kind=rp), dimension(:,:,:), allocatable, target :: zrb,zwb 
+    real(kind=rp), dimension(:,:,:), allocatable, target :: ub,vb,wb
+!!!
+    integer(kind=ip) :: i,j,k
+
+    integer(kind=ip), save :: iter_bbc=0
+    iter_bbc = iter_bbc + 1
+
+    if (myrank==0) write(*,*)' nhydro_bbc:'
+
+!!! dirty reshape arrays indexing ijk -> kji !!!
+    allocate(zrb(1:nz,0:ny+1,0:nx+1))
+    allocate(zwb(0:nz,0:ny+1,0:nx+1))
+    allocate(ub(1:nz,0:ny+1,  nx+1))
+    allocate(vb(1:nz,  ny+1,0:nx+1))
+    allocate(wb(0:nz,0:ny+1,0:nx+1))
+    do i = 1,nx+1
+      do j = 0,ny+1
+        do k = 1,nz
+          ub(k,j,i) = ua(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 1,ny+1
+        do k = 1,nz
+          vb(k,j,i) = va(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 0,nz
+          wb(k,j,i) = wa(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 1,nz
+          zrb(k,j,i) = zra(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 0,nz
+          zwb(k,j,i) = zwa(i,j,k)
+        enddo
+      enddo
+    enddo
+    zr => zrb
+    zw => zwb
+    u => ub
+    v => vb
+    w => wb
+!!!
+
+    call set_bbc(zr,zw,u,v,w)
+
+!!! dirty reshape arrays indexing kji -> ijk !!!
+   do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 0,nz
+          wa(i,j,k) = w(k,j,i)
+        enddo
+      enddo
+    enddo
+    deallocate(zrb)
+    deallocate(zwb)
+    deallocate(ub)
+    deallocate(vb)
+    deallocate(wb)
+!!!
+
+    if (associated(zr)) zr => null()
+    if (associated(zw)) zw => null()
+    if (associated(u)) u => null()
+    if (associated(v)) v => null()
+    if (associated(w)) w => null()
+
+  end subroutine nhydro_bbc
+
+  !--------------------------------------------------------------
+  subroutine nhydro_fluxes(nx,ny,nz,zra,zwa,ua,va,wa,ufa,vfa)
+
+    integer(kind=ip), intent(in) :: nx, ny, nz
+
+    real(kind=rp), dimension(0:nx+1,0:ny+1,1:nz), target, intent(in) :: zra
+    real(kind=rp), dimension(0:nx+1,0:ny+1,0:nz), target, intent(in) :: zwa
+    real(kind=rp), dimension(1:nx+1,0:ny+1,1:nz), target, intent(in) :: ua
+    real(kind=rp), dimension(0:nx+1,1:ny+1,1:nz), target, intent(in) :: va
+    real(kind=rp), dimension(0:nx+1,0:ny+1,0:nz), target, intent(in) :: wa
+    real(kind=rp), dimension(1:nx+1,0:ny+1,1:nz), target, intent(out):: ufa
+    real(kind=rp), dimension(0:nx+1,1:ny+1,1:nz), target, intent(out):: vfa
+
+    real(kind=rp), dimension(:,:,:), pointer :: zr,zw
+    real(kind=rp), dimension(:,:,:), pointer :: u,v,w
+    real(kind=rp), dimension(:,:,:), pointer :: uf,vf
+
+!!! dirty reshape arrays indexing ijk -> kji !!!
+    real(kind=rp), dimension(:,:,:), allocatable, target :: zrb,zwb 
+    real(kind=rp), dimension(:,:,:), allocatable, target :: ub,vb,wb
+    real(kind=rp), dimension(:,:,:), allocatable, target :: ufb,vfb
+!!!
+
+    integer(kind=ip) :: i,j,k
+
+    integer(kind=ip), save :: iter_fluxes=-1
+    iter_fluxes = iter_fluxes + 1
+
+    if (myrank==0) write(*,*)' nhydro_fluxes:'
+
+    call tic(1,'nhydro_fluxes')
+
+!!! dirty reshape arrays indexing ijk -> kji !!!
+    allocate(zrb(1:nz,0:ny+1,0:nx+1))
+    allocate(zwb(0:nz,0:ny+1,0:nx+1))
+    allocate(ub(1:nz,0:ny+1,  nx+1))
+    allocate(vb(1:nz,  ny+1,0:nx+1))
+    allocate(wb(0:nz,0:ny+1,0:nx+1))
+    do i = 1,nx+1
+      do j = 0,ny+1
+        do k = 1,nz
+          ub(k,j,i) = ua(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 1,ny+1
+        do k = 1,nz
+          vb(k,j,i) = va(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 0,nz
+          wb(k,j,i) = wa(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 1,nz
+          zrb(k,j,i) = zra(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 0,nz
+          zwb(k,j,i) = zwa(i,j,k)
+        enddo
+      enddo
+    enddo
+    zr => zrb
+    zw => zwb
+    u => ub
+    v => vb
+    w => wb
+
+    allocate(ufb(1:nz,0:ny+1,  nx+1))
+    allocate(vfb(1:nz,  ny+1,0:nx+1))
+    uf => ufb
+    vf => vfb
+!!!
+
+!    u => ua
+!    v => va
+!    w => wa
+!    uf => ufa
+!    vf => vfa
+
+    if (check_output) then
+       call write_netcdf(u,vname='u',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
+       call write_netcdf(v,vname='v',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
+       call write_netcdf(w,vname='w',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
+    endif
+
+    call compute_fluxes(zr,zw,u,v,w,uf,vf)
+
+    if (check_output) then
+       call write_netcdf(uf,vname='uf',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
+       call write_netcdf(vf,vname='vf',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
+    endif
+
+!!! dirty reshape arrays indexing kji -> ijk !!!
+   do i = 1,nx+1
+      do j = 0,ny+1
+        do k = 1,nz
+          ufa(i,j,k) = uf(k,j,i)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 1,ny+1
+        do k = 1,nz
+          vfa(i,j,k) = vf(k,j,i)
+        enddo
+      enddo
+    enddo
+    deallocate(zrb)
+    deallocate(zwb)
+    deallocate(ub)
+    deallocate(vb)
+    deallocate(wb)
+    deallocate(ufb)
+    deallocate(vfb)
+!!!
+
+    if (associated(zr)) zr => null()
+    if (associated(zw)) zw => null()
+    if (associated(u)) u => null()
+    if (associated(v)) v => null()
+    if (associated(w)) w => null()
+    if (associated(uf)) uf => null()
+    if (associated(vf)) vf => null()
+
+    call toc(1,'nhydro_fluxes')	
+ 
+  end subroutine nhydro_fluxes
+
+  !--------------------------------------------------------------
+  subroutine nhydro_coupling(nx,ny,nz,zra,zwa,uf_bara,vf_bara,ua,va,wa,ufa,vfa)
+
+    integer(kind=ip), intent(in) :: nx, ny, nz
+
+    real(kind=rp), dimension(1:nx+1,0:ny+1),      target, intent(in) :: uf_bara
+    real(kind=rp), dimension(0:nx+1,1:ny+1),      target, intent(in) :: vf_bara
+    real(kind=rp), dimension(0:nx+1,0:ny+1,1:nz), target, intent(in) :: zra
+    real(kind=rp), dimension(0:nx+1,0:ny+1,0:nz), target, intent(in) :: zwa
+    real(kind=rp), dimension(1:nx+1,0:ny+1,1:nz), target, intent(inout) :: ua
+    real(kind=rp), dimension(0:nx+1,1:ny+1,1:nz), target, intent(inout) :: va
+    real(kind=rp), dimension(0:nx+1,0:ny+1,0:nz), target, intent(inout) :: wa
+    real(kind=rp), dimension(1:nx+1,0:ny+1,1:nz), target, optional, intent(out):: ufa
+    real(kind=rp), dimension(0:nx+1,1:ny+1,1:nz), target, optional, intent(out):: vfa
+
+    real(kind=rp), dimension(:,:),   pointer :: uf_bar,vf_bar
+    real(kind=rp), dimension(:,:,:), pointer :: zr,zw
+    real(kind=rp), dimension(:,:,:), pointer :: u,v,w
+    real(kind=rp), dimension(:,:,:), pointer :: uf,vf
+
+!!! dirty reshape arrays indexing ijk -> kji !!!
+    real(kind=rp), dimension(:,:),   allocatable, target :: uf_barb,vf_barb
+    real(kind=rp), dimension(:,:,:), allocatable, target :: zrb,zwb 
+    real(kind=rp), dimension(:,:,:), allocatable, target :: ub,vb,wb
+    real(kind=rp), dimension(:,:,:), allocatable, target :: ufb,vfb
+!!! 
+
+    integer(kind=ip) :: i,j,k
+
+    integer(kind=ip), save :: iter_coupling=0
+    iter_coupling = iter_coupling + 1
+
+    if (myrank==0) write(*,*)' nhydro_coupling:'
+
+    call tic(1,'nhydro_coupling')
+
+!!! dirty reshape arrays indexing ijk -> kji !!!
+    allocate(uf_barb(0:ny+1,  nx+1))
+    allocate(vf_barb(  ny+1,0:nx+1))
+    allocate(zrb(1:nz,0:ny+1,0:nx+1))
+    allocate(zwb(0:nz,0:ny+1,0:nx+1))
+    allocate(ub(1:nz,0:ny+1,  nx+1))
+    allocate(vb(1:nz,  ny+1,0:nx+1))
+    allocate(wb(0:nz,0:ny+1,0:nx+1))
+    do i = 1,nx+1
+      do j = 0,ny+1
+          uf_barb(j,i) = uf_bara(i,j)
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 1,ny+1
+          vf_barb(j,i) = vf_bara(i,j)
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 1,nz
+          zrb(k,j,i) = zra(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 0,nz
+          zwb(k,j,i) = zwa(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 1,nx+1
+      do j = 0,ny+1
+        do k = 1,nz
+          ub(k,j,i) = ua(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 1,ny+1
+        do k = 1,nz
+          vb(k,j,i) = va(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 0,nz
+          wb(k,j,i) = wa(i,j,k)
+        enddo
+      enddo
+    enddo
+    uf_bar => uf_barb
+    vf_bar => vf_barb
+    zr => zrb
+    zw => zwb
+    u => ub
+    v => vb
+    w => wb
+!!!
+
+!    zr => zra
+!    zw => zwa
+!    uf_bar => uf_bara
+!    vf_bar => vf_bara
+!    u => ua
+!    v => va
+!    w => wa
+
+       if (check_output) then
+          call write_netcdf(uf_bar,vname='uf_bar',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(vf_bar,vname='vf_bar',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(u,vname='uin',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(v,vname='vin',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(w,vname='win',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+       endif
+
+    if ((present(ufa)).and.(present(vfa))) then
+ 
+       allocate(ufb(1:nz,0:ny+1,  nx+1))
+       allocate(vfb(1:nz,  ny+1,0:nx+1))
+       uf => ufb
+       vf => vfb
+
+!       uf => ufa
+!       vf => vfa
+
+       call btbc_coupling(zr,zw,uf_bar,vf_bar,u,v,w,uf,vf)
+
+    else
+
+       call btbc_coupling(zr,zw,uf_bar,vf_bar,u,v,w)
+
+    endif
+
+       if (check_output) then
+          call write_netcdf(u,vname='uout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(v,vname='vout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(w,vname='wout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          if ((present(ufa)).and.(present(vfa))) then
+          call write_netcdf(uf,vname='uf',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(vf,vname='vf',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          endif
+       endif
+
+!!! dirty reshape arrays indexing kji -> ijk !!!
+    do i = 1,nx+1
+      do j = 0,ny+1
+        do k = 1,nz
+          ua(i,j,k) = u(k,j,i)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 1,ny+1
+        do k = 1,nz
+          va(i,j,k) = v(k,j,i)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 0,nz
+          wa(i,j,k) = w(k,j,i)
+        enddo
+      enddo
+    enddo
+    if ((present(ufa)).and.(present(vfa))) then
+    do i = 1,nx+1
+      do j = 0,ny+1
+        do k = 1,nz
+          ufa(i,j,k) = uf(k,j,i)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 1,ny+1
+        do k = 1,nz
+          vfa(i,j,k) = vf(k,j,i)
+        enddo
+      enddo
+    enddo
+    deallocate(ufb)
+    deallocate(vfb)
+    endif
+    deallocate(uf_barb)
+    deallocate(vf_barb)
+    deallocate(zrb)
+    deallocate(zwb)
+    deallocate(ub)
+    deallocate(vb)
+    deallocate(wb)
+!!!
+
+    call toc(1,'nhydro_coupling')
+
+  end subroutine nhydro_coupling
+
+  !--------------------------------------------------------------
   subroutine nhydro_matrices(nx,ny,nz,dxa,dya,zetaa,ha,hc,theta_b,theta_s)
 
     integer(kind=ip), intent(in) :: nx, ny, nz
@@ -48,6 +485,9 @@ contains
     real(kind=rp), dimension(0:ny+1,0:nx+1), target :: dxb, dyb, zetab, hb
 
     real(kind=rp), dimension(:,:)  , pointer :: dx, dy, zeta, h
+
+    integer(kind=ip), save :: iter_matrices=-1
+    iter_matrices = iter_matrices + 1
 
     if (myrank==0) write(*,*)' nhydro_matrices:'
 
@@ -67,28 +507,38 @@ contains
 
     call define_matrices(dx,dy,zeta,h)
 
+    if (check_output) then
+       call write_netcdf(grid(1)%cA,vname='cA',netcdf_file_name='so.nc',rank=myrank,iter=iter_matrices)
+    endif
+
   end subroutine nhydro_matrices
 
   !--------------------------------------------------------------
-  subroutine nhydro_solve(nx,ny,nz,ua,va,wa,dt,rua,rva)
+  subroutine nhydro_solve(nx,ny,nz,zra,zwa,ua,va,wa,dt,rua,rva)
 
     integer(kind=ip), intent(in) :: nx, ny, nz
 
+    real(kind=rp), dimension(0:nx+1,0:ny+1,1:nz), target, intent(in) :: zra
+    real(kind=rp), dimension(0:nx+1,0:ny+1,0:nz), target, intent(in) :: zwa
     real(kind=rp), dimension(1:nx+1,0:ny+1,1:nz), target, intent(inout) :: ua
     real(kind=rp), dimension(0:nx+1,1:ny+1,1:nz), target, intent(inout) :: va
     real(kind=rp), dimension(0:nx+1,0:ny+1,0:nz), target, intent(inout) :: wa
-
     real(kind=rp),                                   optional, intent(in) :: dt
     real(kind=rp), dimension(1:nx+1,0:ny+1), target, optional, intent(out):: rua
     real(kind=rp), dimension(0:nx+1,1:ny+1), target, optional, intent(out):: rva
 
+    real(kind=rp), dimension(:,:,:), pointer :: zr,zw
     real(kind=rp), dimension(:,:,:), pointer :: u, v, w
     real(kind=rp), dimension(:,:)  , pointer :: ru, rv
 
+!!! dirty reshape arrays indexing
+    real(kind=rp), dimension(:,:,:), allocatable, target :: zrb,zwb 
     real(kind=rp), dimension(:,:,:), allocatable, target :: ub, vb, wb
+!!! 
 
     real(kind=rp)    :: tol
     integer(kind=ip) :: maxite
+
     integer(kind=ip) :: i,j,k
 
     integer(kind=ip), save :: iter_solve=0
@@ -98,162 +548,147 @@ contains
 
     call tic(1,'nhydro_solve')
 
-    tol    = solver_prec    ! solver_prec    is defined in the namelist file
-    maxite = solver_maxiter ! solver_maxiter is defined in the namelist file
+    tol    = solver_prec    
+    maxite = solver_maxiter 
 
-!!!
-    ! Reshape u,v and w array indexing
-    if (myrank==0) write(*,*)' ijk -> kji'
+!!! dirty reshape arrays indexing ijk -> kji !!!
+    allocate(zrb(1:nz,0:ny+1,0:nx+1))
+    allocate(zwb(0:nz,0:ny+1,0:nx+1))
     allocate(ub(1:nz,0:ny+1,  nx+1))
     allocate(vb(1:nz,  ny+1,0:nx+1))
     allocate(wb(0:nz,0:ny+1,0:nx+1))
-
-    do i = 1, nx+1
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 1,nz
+          zrb(k,j,i) = zra(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 0,nx+1
+      do j = 0,ny+1
+        do k = 0,nz
+          zwb(k,j,i) = zwa(i,j,k)
+        enddo
+      enddo
+    enddo
+    do i = 1,nx+1
       do j = 0,ny+1
         do k = 1,nz
           ub(k,j,i) = ua(i,j,k)
         enddo
       enddo
     enddo
-
-    do i = 0, nx+1
+    do i = 0,nx+1
       do j = 1,ny+1
         do k = 1,nz
           vb(k,j,i) = va(i,j,k)
         enddo
       enddo
     enddo
-
-    do i = 0, nx+1
+    do i = 0,nx+1
       do j = 0,ny+1
         do k = 0,nz
           wb(k,j,i) = wa(i,j,k)
         enddo
       enddo
     enddo
-
+    zr => zrb
+    zw => zwb
     u => ub
     v => vb
     w => wb
-!!!
+!!! 
 
 !    u => ua
 !    v => va
 !    w => wa
 
-    if (netcdf_output) then
-       call write_netcdf(u,vname='uin',netcdf_file_name='uin.nc',rank=myrank,iter=iter_solve)
-       call write_netcdf(v,vname='vin',netcdf_file_name='vin.nc',rank=myrank,iter=iter_solve)
-       call write_netcdf(w,vname='win',netcdf_file_name='win.nc',rank=myrank,iter=iter_solve)
-    endif
+       if (check_output) then
+          call write_netcdf(u,vname='uin',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+          call write_netcdf(v,vname='vin',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+          call write_netcdf(w,vname='win',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+       endif
 
     !- step 1 - 
-    call tic(1,'compute_rhs')
-    call compute_rhs(u, v, w)
-    call toc(1,'compute_rhs')
+    call compute_rhs(zr,zw,u,v,w)
 
-    if (netcdf_output) then
-       call write_netcdf(grid(1)%b,vname='b',netcdf_file_name='b.nc',rank=myrank,iter=iter_solve)
+    if (check_output) then
+       call write_netcdf(grid(1)%b,vname='b',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
     endif
 
     !- step 2 -
     call solve_p(tol,maxite)
 
-    if (netcdf_output) then
-       call write_netcdf(grid(1)%p,vname='p',netcdf_file_name='p.nc',rank=myrank,iter=iter_solve)
-       call write_netcdf(grid(1)%r,vname='r',netcdf_file_name='r.nc',rank=myrank,iter=iter_solve)
+    if (check_output) then
+       call write_netcdf(grid(1)%p,vname='p',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+       call write_netcdf(grid(1)%r,vname='r',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
     endif
 
     !- step 3 -
-    call correct_uvw(u,v,w)
+    call correct_uvw(zr,zw,u,v,w)
 
-    if (netcdf_output) then
-       call write_netcdf(u,vname='uout',netcdf_file_name='uout.nc',rank=myrank,iter=iter_solve)
-       call write_netcdf(v,vname='vout',netcdf_file_name='vout.nc',rank=myrank,iter=iter_solve)
-       call write_netcdf(w,vname='wout',netcdf_file_name='wout.nc',rank=myrank,iter=iter_solve)
-    endif
+       if (check_output) then
+          call write_netcdf(u,vname='uout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+          call write_netcdf(v,vname='vout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+          call write_netcdf(w,vname='wout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+       endif
 
+    !- step 4 -
     if ((present(dt)).and.(present(rua)).and.(present(rva))) then
 
        ru => rua
        rv => rva
 
-       !- step 4 -
-       call compute_barofrc(dt,ru,rv)
+       call compute_barofrc(zr,zw,dt,ru,rv)
 
-       if (netcdf_output) then
-          call write_netcdf(ru,vname='ru',netcdf_file_name='ru.nc',rank=myrank,iter=iter_solve)
-          call write_netcdf(rv,vname='rv',netcdf_file_name='rv.nc',rank=myrank,iter=iter_solve)
+       if (check_output) then
+          call write_netcdf(ru,vname='ru',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+          call write_netcdf(rv,vname='rv',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
        endif
 
     endif
 
-!!!
-   if (myrank==0) write(*,*)' kji -> ijk'
-   do i = 1, nx+1
+    !- step 5 -
+    call compute_rhs(zr,zw,u,v,w)
+
+    if (check_output) then
+       call write_netcdf(grid(1)%b,vname='bout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+    endif
+
+!!! dirty reshape arrays indexing kji -> ijk !!!
+   do i = 1,nx+1
       do j = 0,ny+1
         do k = 1,nz
           ua(i,j,k) = ub(k,j,i)
         enddo
       enddo
     enddo
-
-    do i = 0, nx+1
+    do i = 0,nx+1
       do j = 1,ny+1
         do k = 1,nz
           va(i,j,k) = vb(k,j,i)
         enddo
       enddo
     enddo
-
-    do i = 0, nx+1
+    do i = 0,nx+1
       do j = 0,ny+1
         do k = 0,nz
           wa(i,j,k) = wb(k,j,i)
         enddo
       enddo
     enddo
-
-    if (associated(u)) u => null()
-    if (associated(v)) v => null()
-    if (associated(w)) w => null()
-
     deallocate(ub)
     deallocate(vb)
     deallocate(wb)
 !!!
 
+    if (associated(u)) u => null()
+    if (associated(v)) v => null()
+    if (associated(w)) w => null()
+
     call toc(1,'nhydro_solve')	
  
   end subroutine nhydro_solve
-
-  !--------------------------------------------------------------
-  subroutine nhydro_check_nondivergence(nx,ny,nz,ua,va,wa)
-
-    integer(kind=ip), intent(in) :: nx, ny, nz
-
-    real(kind=rp), dimension(1:nx+1,0:ny+1,1:nz), target, intent(inout) :: ua
-    real(kind=rp), dimension(0:nx+1,1:ny+1,1:nz), target, intent(inout) :: va
-    real(kind=rp), dimension(0:nx+1,0:ny+1,0:nz), target, intent(inout) :: wa
-
-    real(kind=rp), dimension(:,:,:), pointer :: u, v, w
-
-    integer(kind=ip), save :: iter_check=0
-    iter_check = iter_check + 1
-
-    u => ua
-    v => va
-    w => wa
-
-    if (myrank==0) write(*,*)'- check non-divergence:'
-
-    call compute_rhs(u,v,w)
-
-    if (netcdf_output) then
-       call write_netcdf(grid(1)%b,vname='b',netcdf_file_name='check.nc',rank=myrank,iter=iter_check)
-    endif
-
-  end subroutine nhydro_check_nondivergence
 
   !--------------------------------------------------------------
   subroutine nhydro_clean()

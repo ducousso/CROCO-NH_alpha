@@ -212,6 +212,9 @@ C$    integer omp_get_thread_num
       end
 
       subroutine set_HUV_tile (Istr,Iend,Jstr,Jend)
+#ifdef NHMG
+          USE nhydro, only : nhydro_fluxes
+#endif
       implicit none
       integer Istr,Iend,Jstr,Jend, i,j,k
 # include "param.h"
@@ -231,7 +234,6 @@ C$    integer omp_get_thread_num
 #   define IU_RANGE Istr,IendR
 #   define IV_RANGE IstrR,IendR
 #  endif
-
 #  ifdef NS_PERIODIC 
 #   define JU_RANGE Jstr,Jend
 #   define JV_RANGE Jstr,Jend
@@ -240,6 +242,7 @@ C$    integer omp_get_thread_num
 #   define JV_RANGE Jstr,JendR
 #  endif
 
+#  ifndef NHMG
       do k=1,N
         do j=JU_RANGE
           do i=IU_RANGE
@@ -277,6 +280,18 @@ C$    integer omp_get_thread_num
           enddo
         enddo
       enddo
+#  else
+      call nhydro_fluxes(
+     & Lm, Mm, N,
+     & z_r(0:Lm+1,0:Mm+1,1:N),
+     & z_w(0:Lm+1,0:Mm+1,0:N),
+     & u(1:Lm+1,0:Mm+1,1:N,nrhs),
+     & v(0:Lm+1,1:Mm+1,1:N,nrhs),
+     & wz(0:Lm+1,0:Mm+1,0:N,nrhs),
+     & Huon(1:Lm+1,0:Mm+1,1:N),
+     & Hvom(0:Lm+1,1:Mm+1,1:N) )
+#  endif
+
 #  undef IU_RANGE
 #  undef JU_RANGE
 #  undef IV_RANGE
@@ -414,6 +429,9 @@ C$    integer omp_get_thread_num
       end
 
       subroutine set_HUV2_tile (Istr,Iend,Jstr,Jend,DC,FC)
+#ifdef NHMG
+          USE nhydro, only : nhydro_coupling
+#endif
       implicit none
       integer Istr,Iend,Jstr,Jend, i,j,k
 # include "param.h"
@@ -436,7 +454,6 @@ C$    integer omp_get_thread_num
 #   define IU_RANGE Istr,IendR
 #   define IV_RANGE IstrR,IendR
 #  endif
-
 #  ifdef NS_PERIODIC
 #   define JU_RANGE Jstr,Jend
 #   define JV_RANGE Jstr,Jend
@@ -444,7 +461,8 @@ C$    integer omp_get_thread_num
 #   define JU_RANGE JstrR,JendR
 #   define JV_RANGE Jstr,JendR
 #  endif
-
+!
+#  ifndef NHMG
       do j=JU_RANGE
         do i=IU_RANGE
           DC(i,0)=0.
@@ -480,8 +498,6 @@ C$    integer omp_get_thread_num
           enddo
         enddo
       enddo
-
-         
       do j=JV_RANGE
         do i=IV_RANGE
           DC(i,0)=0.
@@ -517,7 +533,20 @@ C$    integer omp_get_thread_num
           enddo
         enddo
       enddo
-
+#  else
+      call nhydro_coupling(
+     & Lm, Mm, N,
+     & z_r(0:Lm+1,0:Mm+1,1:N),
+     & z_w(0:Lm+1,0:Mm+1,0:N),
+     & DU_avg2(1:Lm+1,0:Mm+1),
+     & DV_avg2(0:Lm+1,1:Mm+1),
+     & u(1:Lm+1,0:Mm+1,1:N,nrhs),
+     & v(0:Lm+1,1:Mm+1,1:N,nrhs),
+     & wz(0:Lm+1,0:Mm+1,0:N,nrhs),
+     & Huon(1:Lm+1,0:Mm+1,1:N),
+     & Hvom(0:Lm+1,1:Mm+1,1:N) )
+#  endif
+!
 #  undef IU_RANGE
 #  undef JU_RANGE
 #  undef IV_RANGE
@@ -534,6 +563,10 @@ C$    integer omp_get_thread_num
      &                                    Hvom(START_2D_ARRAY,1))
       call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
      &                                  v(START_2D_ARRAY,1,nrhs))
+#  if defined NBQ || defined NHMG
+      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
+     &                                  wz(START_2D_ARRAY,0,nrhs))     
+#  endif
 #  endif
 # endif /* SOLVE3D */
       return
