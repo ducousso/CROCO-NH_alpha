@@ -10,9 +10,9 @@ module unload intel mpich2 netcdf
 module load intel/12.1 mpich2/1.5-intel12 netcdf/4.1.3-intel12
 module list
 
-SOURCE=../Roms_Agrif
 SCRDIR=/local/tmp/1/${LOGNAME}/CROCO-NH/Compile
 RUNDIR=`pwd`
+SOURCE=${RUNDIR}/../Roms_Agrif
 
 #
 # determine operating system
@@ -68,19 +68,35 @@ AGRIF_SRC=${SOURCE}/AGRIF
 #
 # copy SOURCE code
 #
-/bin/cp -f ${SOURCE}/*.F90 $SCRDIR
-/bin/cp -f ${SOURCE}/*.h90 $SCRDIR
-/bin/cp -f ${SOURCE}/*.F   $SCRDIR
-/bin/cp -f ${SOURCE}/*.h   $SCRDIR
-/bin/cp -f ${SOURCE}/Make* $SCRDIR
-/bin/cp -f ${SOURCE}/testkeys.F $SCRDIR
-/bin/cp -f ${SOURCE}/jobcomp $SCRDIR
-/bin/cp -f ${SOURCE}/amr.in $SCRDIR
-/bin/cp -RLf ${AGRIF_SRC} $SCRDIR
-/bin/cp -f ${SOURCE}/XIOS/*.F $SCRDIR
-/bin/cp -f ${SOURCE}/PISCES/* $SCRDIR
-/bin/cp -f ${SOURCE}/PISCES/kRGB61* $RUNDIR
-/bin/cp -f ${SOURCE}/NHMG/* $SCRDIR
+#/bin/cp -f ${SOURCE}/*.F90 $SCRDIR
+#/bin/cp -f ${SOURCE}/*.h90 $SCRDIR
+#/bin/cp -f ${SOURCE}/*.F   $SCRDIR
+#/bin/cp -f ${SOURCE}/*.h   $SCRDIR
+#/bin/cp -f ${SOURCE}/Make* $SCRDIR
+#/bin/cp -f ${SOURCE}/testkeys.F $SCRDIR
+#/bin/cp -f ${SOURCE}/jobcomp $SCRDIR
+#/bin/cp -f ${SOURCE}/amr.in $SCRDIR
+#/bin/cp -RLf ${AGRIF_SRC} $SCRDIR
+#/bin/cp -f ${SOURCE}/XIOS/*.F $SCRDIR
+#/bin/cp -f ${SOURCE}/PISCES/* $SCRDIR
+#/bin/cp -f ${SOURCE}/PISCES/kRGB61* $RUNDIR
+#/bin/cp -f ${SOURCE}/NHMG/* $SCRDIR
+#
+# link SOURCE code
+#
+/bin/ln -sf ${SOURCE}/*.F90 $SCRDIR
+/bin/ln -sf ${SOURCE}/*.h90 $SCRDIR
+/bin/ln -sf ${SOURCE}/*.F   $SCRDIR
+/bin/ln -sf ${SOURCE}/*.h   $SCRDIR
+/bin/ln -sf ${SOURCE}/Make* $SCRDIR
+/bin/ln -sf ${SOURCE}/testkeys.F $SCRDIR
+#/bin/ln -sf ${SOURCE}/jobcomp $SCRDIR
+/bin/ln -sf ${SOURCE}/amr.in $SCRDIR
+/bin/ln -sf ${AGRIF_SRC} $SCRDIR
+/bin/ln -sf ${SOURCE}/XIOS/*.F $SCRDIR
+/bin/ln -sf ${SOURCE}/PISCES/* $SCRDIR
+/bin/ln -sf ${SOURCE}/PISCES/kRGB61* $RUNDIR
+/bin/ln -sf ${SOURCE}/NHMG/* $SCRDIR
 
 if [[ -e "namelist_pisces" ]] ; then
 	echo "  file namelist_pisces exists in Run directory"
@@ -99,12 +115,23 @@ fi
 #
 # overwrite with local files
 #
-/bin/cp -f *.F90 $SCRDIR
-/bin/cp -f *.h90 $SCRDIR
-/bin/cp -f *.F $SCRDIR
-/bin/cp -f *.h $SCRDIR
-/bin/cp -f Make* $SCRDIR
-/bin/cp -f jobcomp $SCRDIR
+#/bin/cp -f *.F90 $SCRDIR
+#/bin/cp -f *.h90 $SCRDIR
+#/bin/cp -f *.F $SCRDIR
+#/bin/cp -f *.h $SCRDIR
+#/bin/cp -f Make* $SCRDIR
+#/bin/cp -f jobcomp $SCRDIR
+
+#
+# overwrite with local files
+#
+/bin/ln -sf  ${RUNDIR}/*.F90 $SCRDIR
+/bin/ln -sf  ${RUNDIR}/*.h90 $SCRDIR
+/bin/ln -sf  ${RUNDIR}/*.F $SCRDIR
+/bin/ln -sf  ${RUNDIR}/*.h $SCRDIR
+#/bin/ln -sf  Make* $SCRDIR
+#/bin/ln -sf  jobcomp $SCRDIR
+
 #
 # Change directory
 #
