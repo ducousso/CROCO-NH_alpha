@@ -369,5 +369,5 @@ rm -f flags.tmp
 # compile roms
 #
 $MAKE 
-mv roms $RUNDIR
+#mv roms $RUNDIR
 #
