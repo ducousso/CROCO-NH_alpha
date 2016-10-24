@@ -975,11 +975,7 @@ c$$$
       endif
       enddo
 !==
-# endif /* NBQ */   
-
-      write(*,*) wz(32,32,64,nnew)
-      write(*,*) wz(32,32,63,nnew)
-  
+# endif /* NBQ */    
 !
 !======================================================================
 ! Set PHYSICAL lateral boundary conditions for tracers.

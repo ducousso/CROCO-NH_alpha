@@ -3,6 +3,10 @@ clear all
 
 %% directory
 
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.000001_0.5period_track_pb_modified_firststep/';
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.000001_0.5period_track_pb_modified_firststep_noUV_ADV_2/';
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.000001_0.5period_track_pb_modified_firststep_nofreesurface/';
+
 ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.001_0.5period_track_pb_modified_firststep/';
 
 step = 1;
@@ -65,11 +69,11 @@ subplot(1,3,3); imagesc(squeeze(so_r(:,32,2:end-1))); axis xy; axis equal; axis 
 
 so_uout = ncread([ncdir 'so_uout_000_0000' num2str(1+(step-1)*2) '.nc'],'uout');
 so_wout = ncread([ncdir 'so_wout_000_0000' num2str(1+(step-1)*2) '.nc'],'wout');
-%so_bout = ncread([ncdir 'so_bout_000_0000' num2str(1+(step-1)*2) '.nc'],'bout');
+so_bout = ncread([ncdir 'so_bout_000_0000' num2str(1+(step-1)*2) '.nc'],'bout');
 figure;
-subplot(1,2,1);imagesc(squeeze(so_uout(:,32,1:end)));axis xy;axis equal;axis tight;colorbar;title('pred so uout');
-subplot(1,2,2);imagesc(squeeze(so_wout(:,32,2:end-1)));axis xy;axis equal;axis tight;colorbar;title('pred so wout');
-%subplot(1,3,3);imagesc(squeeze(so_bout(:,32,2:end-1)));axis xy;axis equal;axis tight;colorbar;title('pred so bout');
+subplot(1,3,1);imagesc(squeeze(so_uout(:,32,1:end)));axis xy;axis equal;axis tight;colorbar;title('pred so uout');
+subplot(1,3,2);imagesc(squeeze(so_wout(:,32,2:end-1)));axis xy;axis equal;axis tight;colorbar;title('pred so wout');
+subplot(1,3,3);imagesc(squeeze(so_bout(:,32,2:end-1)));axis xy;axis equal;axis tight;colorbar;title('pred so bout');
 % figure;
 % %so_uout_diff = squeeze(so_uout(:,32,1:end)) - flipdim(squeeze(so_uout(:,32,1:end)),2);
 % so_uout_diff = squeeze(so_uout(:,32,1:end)) + flipdim(squeeze(so_uout(:,32,1:end)),2);
@@ -119,16 +123,16 @@ subplot(1,2,2);imagesc(squeeze(co_wout(:,32,2:end-1)));axis xy;axis equal;axis t
 
 % nh projection
 
-so_uin = ncread([ncdir 'so_uin_000_0000' num2str(1+2+(step-1)*2) '.nc'],'uin');
-so_win = ncread([ncdir 'so_win_000_0000' num2str(1+2+(step-1)*2) '.nc'],'win');
+so_uin = ncread([ncdir 'so_uin_000_0000' num2str(1+2+(step-1)*2) '.nc'],'uin'); %care
+so_win = ncread([ncdir 'so_win_000_0000' num2str(1+2+(step-1)*2) '.nc'],'win'); %care
 figure; 
 subplot(1,2,1);imagesc(squeeze(so_uin(:,32,1:end)));axis xy;axis equal;axis tight;colorbar;title('corr so uin');
 subplot(1,2,2);imagesc(squeeze(so_win(:,32,2:end-1)));axis xy;axis equal;axis tight;colorbar;title('corr so win');
 
-so_cA = ncread([ncdir 'so_cA_000_0000' num2str(2+(step-1)*2) '.nc'],'cA');
-so_b = ncread([ncdir 'so_b_000_0000' num2str(2+(step-1)*2) '.nc'],'b');
-so_p = ncread([ncdir 'so_p_000_0000' num2str(2+(step-1)*2) '.nc'],'p');
-so_r = ncread([ncdir 'so_r_000_0000' num2str(2+(step-1)*2) '.nc'],'r');
+so_cA = ncread([ncdir 'so_cA_000_0000' num2str(1+2+(step-1)*2) '.nc'],'cA'); %care
+so_b = ncread([ncdir 'so_b_000_0000' num2str(1+2+(step-1)*2) '.nc'],'b'); %care
+so_p = ncread([ncdir 'so_p_000_0000' num2str(1+2+(step-1)*2) '.nc'],'p'); %care
+so_r = ncread([ncdir 'so_r_000_0000' num2str(1+2+(step-1)*2) '.nc'],'r'); %care
 figure; 
 subplot(3,3,1); imagesc(squeeze(so_cA(6,:,32,2:end  ))); axis xy; axis equal; axis tight; colorbar;
 subplot(3,3,4); imagesc(squeeze(so_cA(7,:,32,2:end  ))); axis xy; axis equal; axis tight; colorbar;
@@ -140,8 +144,8 @@ subplot(1,3,1); imagesc(squeeze(so_b(:,32,2:end-1))); axis xy; axis equal; axis 
 subplot(1,3,2); imagesc(squeeze(so_p(:,32,2:end-1))); axis xy; axis equal; axis tight; colorbar;
 subplot(1,3,3); imagesc(squeeze(so_r(:,32,2:end-1))); axis xy; axis equal; axis tight; colorbar;
 
-so_uout = ncread([ncdir 'so_uout_000_0000' num2str(1+2+(step-1)*2) '.nc'],'uout');
-so_wout = ncread([ncdir 'so_wout_000_0000' num2str(1+2+(step-1)*2) '.nc'],'wout');
+so_uout = ncread([ncdir 'so_uout_000_0000' num2str(1+2+(step-1)*2) '.nc'],'uout');%care
+so_wout = ncread([ncdir 'so_wout_000_0000' num2str(1+2+(step-1)*2) '.nc'],'wout');%care
 %so_bout = ncread([ncdir 'so_bout_000_0000' num2str(2+(step-1)*2) '.nc'],'bout');
 figure;
 subplot(1,2,1);imagesc(squeeze(so_uout(:,32,1:end)));axis xy;axis equal;axis tight;colorbar;title('corr so uout');

@@ -4,8 +4,10 @@ clear all
 %% load files
 
 ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.001_0.5period_track_pb_modified_firststep/';
-
 ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.001_0.5period_track_pb_modified_firststep_long/';
+
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.000001_0.5period_track_pb_modified_firststep/';
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.000001_0.5period_track_pb_modified_firststep_noUV_ADV/';
 
 nx = 64;
 nz = 64;
@@ -83,7 +85,7 @@ subplot(1,2,2);
 x_u_pc = repmat(x_u(:,32),[1 nz]);
 x_u_pc = cat(2,cat(2,x_u_pc,x_u_pc(:,1)),x_u_pc(:,end));
 z_r_pc = squeeze(z_r(2:end-1,32,:));
-z_r_pc = cat(2,cat(2,zeros(nx,1),z_r_pc),H*ones(nx,1));
+z_r_pc = cat(2,cat(2,-H*ones(nx,1),z_r_pc),zeros(nx,1));
 z_r_pc = cat(1,z_r_pc,z_r_pc(end,:));
 w_pc = cat(2,cat(1,squeeze(double(w(2:end-1,32,:,step+1))),zeros(1,nz+1)),zeros(nx+1,1));
 pcolor(x_u_pc,z_r_pc,w_pc);shading flat;

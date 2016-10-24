@@ -64,6 +64,16 @@
         enddo
       enddo
 
+!ND
+      do k=1,N
+        do j=JstrV-1,jend
+          do i=IstrU-1,iend
+            rw(i,j,k)=0.
+          enddo
+        enddo
+      enddo
+!ND
+
 # if defined UV_COR
 !====================================================================
 !  Add in Coriolis  FWcor = +e (U cos(angle) - V sin(angle) ) 
@@ -269,7 +279,7 @@
 !--  be divided by 0.5*(Hz(i,j,k)+Hz(i,j,k+1)) in pre_step3d and step3d_w2 
 !================
        enddo          !<-- outer loop k
-# endif /* W_ADV */
+# endif /* W_HADV */
 
 
 !====================================================================     

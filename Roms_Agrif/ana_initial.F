@@ -163,6 +163,7 @@ C$    integer omp_get_thread_num
         enddo
 
 # elif defined TANK
+!        ETA0=0.000001
         ETA0=0.001
 !        ETA0=0.15
 !        ETA0=0.5

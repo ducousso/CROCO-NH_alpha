@@ -985,7 +985,7 @@
 # define NHMG
 # define SOLVE3D
 # define NEW_S_COORD
-# define UV_ADV
+# undef UV_ADV
 # define ANA_GRID
 # define ANA_INITIAL
 # define ANA_BTFLUX
