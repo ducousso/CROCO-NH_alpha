@@ -35,6 +35,8 @@
 	$(CFT) -c $(FFLAGS) $*_.f90 -o $*.o
 #	/bin/rm $*.f
 
+%.o: %.mod
+
 .F:
 	$(LDR) -o $@ $(LDFLAGS) $<
 .f:
