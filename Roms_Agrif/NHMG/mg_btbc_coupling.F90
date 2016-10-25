@@ -41,7 +41,7 @@ contains
 
     real(kind=rp), dimension(:,:)  ,   pointer :: su_integr,sv_integr
     real(kind=rp), dimension(:,:)  ,   pointer :: uf_integr,vf_integr
-    real(kind=rp), dimension(:,:)  ,   pointer :: uf_integr1,vf_integr1,uf_integr2,vf_integr2
+!!$    real(kind=rp), dimension(:,:)  ,   pointer :: uf_integr1,vf_integr1,uf_integr2,vf_integr2
     real(kind=rp), dimension(:,:,:),   pointer :: uf_integr_tmp,vf_integr_tmp
     real(kind=rp), dimension(:,:,:),   pointer :: wc
 
@@ -175,18 +175,18 @@ contains
 
     allocate(su_integr(0:ny+1,0:nx+1))
     allocate(sv_integr(0:ny+1,0:nx+1))
-    allocate(uf_integr1(0:ny+1,0:nx+1))
-    allocate(vf_integr1(0:ny+1,0:nx+1))
-    allocate(uf_integr2(0:ny+1,0:nx+1))
-    allocate(vf_integr2(0:ny+1,0:nx+1))
+!!$    allocate(uf_integr1(0:ny+1,0:nx+1))
+!!$    allocate(vf_integr1(0:ny+1,0:nx+1))
+!!$    allocate(uf_integr2(0:ny+1,0:nx+1))
+!!$    allocate(vf_integr2(0:ny+1,0:nx+1))
     allocate(uf_integr(0:ny+1,0:nx+1))
     allocate(vf_integr(0:ny+1,0:nx+1))
     su_integr(:,:) = zero
     sv_integr(:,:) = zero
-    uf_integr1(:,:) = zero
-    vf_integr1(:,:) = zero
-    uf_integr2(:,:) = zero
-    vf_integr2(:,:) = zero
+!!$    uf_integr1(:,:) = zero
+!!$    vf_integr1(:,:) = zero
+!!$    uf_integr2(:,:) = zero
+!!$    vf_integr2(:,:) = zero
     uf_integr(:,:) = zero
     vf_integr(:,:) = zero
 
@@ -200,30 +200,30 @@ contains
 !               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
                ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
                ( dy(j,i) + dy(j,i-1) )
-          uf_integr1(j,i) =  &
-               qrt                                                      * & 
-!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
-               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
-               ( dy(j,i) + dy(j,i-1) ) * u(k,j,i)
-          uf_integr2(j,i) =  &
-               - qrt * ( &
-               + zxdy(k,j,i  )* two * dzw(k  ,j,i  )*w(k-1,j,i) & !note the index trick for w 
-               + zxdy(k,j,i  )*       dzw(k+1,j,i  )*w(k+1-1,j,i) & !note the index trick for w 
-               + zxdy(k,j,i-1)* two * dzw(k  ,j,i-1)*w(k-1,j,i-1) & !note the index trick for w 
-               + zxdy(k,j,i-1)*       dzw(k+1,j,i-1)*w(k+1-1,j,i-1) & !note the index trick for w 
-               )
-          uf_integr(j,i) =  uf_integr1(j,i) + uf_integr2(j,i)
-!!$          uf_integr(j,i) =  &
+!!$          uf_integr1(j,i) =  &
 !!$               qrt                                                      * & 
 !!$!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
 !!$               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
-!!$               ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
+!!$               ( dy(j,i) + dy(j,i-1) ) * u(k,j,i)
+!!$          uf_integr2(j,i) =  &
 !!$               - qrt * ( &
 !!$               + zxdy(k,j,i  )* two * dzw(k  ,j,i  )*w(k-1,j,i) & !note the index trick for w 
 !!$               + zxdy(k,j,i  )*       dzw(k+1,j,i  )*w(k+1-1,j,i) & !note the index trick for w 
 !!$               + zxdy(k,j,i-1)* two * dzw(k  ,j,i-1)*w(k-1,j,i-1) & !note the index trick for w 
 !!$               + zxdy(k,j,i-1)*       dzw(k+1,j,i-1)*w(k+1-1,j,i-1) & !note the index trick for w 
-!!$               )  ! umask
+!!$               )
+!!$          uf_integr(j,i) =  uf_integr1(j,i) + uf_integr2(j,i)
+          uf_integr(j,i) =  &
+               qrt                                                      * & 
+!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
+               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
+               ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
+               - qrt * ( &
+               + zxdy(k,j,i  )* two * dzw(k  ,j,i  )*w(k-1,j,i) & !note the index trick for w 
+               + zxdy(k,j,i  )*       dzw(k+1,j,i  )*w(k+1-1,j,i) & !note the index trick for w 
+               + zxdy(k,j,i-1)* two * dzw(k  ,j,i-1)*w(k-1,j,i-1) & !note the index trick for w 
+               + zxdy(k,j,i-1)*       dzw(k+1,j,i-1)*w(k+1-1,j,i-1) & !note the index trick for w 
+               )  ! umask
 
 !!$               - qrt * ( &
 !!$               + zxdy(k,j,i  )*dzw(k+1,j,i  )*w(k+1-1,j,i)   & !note the index trick for w
@@ -248,30 +248,30 @@ contains
 !                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
                   ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
                   ( dy(j,i) + dy(j,i-1) )
-             uf_integr1(j,i) = uf_integr1(j,i) + &
-                  qrt                                               * & 
-!                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
-                  ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
-                  ( dy(j,i) + dy(j,i-1) ) * u(k,j,i)
-             uf_integr2(j,i) = uf_integr2(j,i) + &
-                  - qrt * ( &
-                  + zxdy(k,j,i  ) * dzw(k  ,j,i  ) * w(k-1,j,i) & !note the index trick for w
-                  + zxdy(k,j,i  ) * dzw(k+1,j,i  ) * w(k+1-1,j,i) & !note the index trick for w
-                  + zxdy(k,j,i-1) * dzw(k  ,j,i-1) * w(k-1,j,i-1) & !note the index trick for w
-                  + zxdy(k,j,i-1) * dzw(k+1,j,i-1) * w(k+1-1,j,i-1) & !note the index trick for w
-                  )
-             uf_integr(j,i) =  uf_integr1(j,i) + uf_integr2(j,i)
-!!$             uf_integr(j,i) = uf_integr(j,i) + &
+!!$             uf_integr1(j,i) = uf_integr1(j,i) + &
 !!$                  qrt                                               * & 
 !!$!                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
 !!$                  ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
-!!$                  ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
+!!$                  ( dy(j,i) + dy(j,i-1) ) * u(k,j,i)
+!!$             uf_integr2(j,i) = uf_integr2(j,i) + &
 !!$                  - qrt * ( &
 !!$                  + zxdy(k,j,i  ) * dzw(k  ,j,i  ) * w(k-1,j,i) & !note the index trick for w
 !!$                  + zxdy(k,j,i  ) * dzw(k+1,j,i  ) * w(k+1-1,j,i) & !note the index trick for w
 !!$                  + zxdy(k,j,i-1) * dzw(k  ,j,i-1) * w(k-1,j,i-1) & !note the index trick for w
 !!$                  + zxdy(k,j,i-1) * dzw(k+1,j,i-1) * w(k+1-1,j,i-1) & !note the index trick for w
-!!$                  )  ! umask
+!!$                  )
+!!$             uf_integr(j,i) =  uf_integr1(j,i) + uf_integr2(j,i)
+             uf_integr(j,i) = uf_integr(j,i) + &
+                  qrt                                               * & 
+!                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
+                  ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
+                  ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
+                  - qrt * ( &
+                  + zxdy(k,j,i  ) * dzw(k  ,j,i  ) * w(k-1,j,i) & !note the index trick for w
+                  + zxdy(k,j,i  ) * dzw(k+1,j,i  ) * w(k+1-1,j,i) & !note the index trick for w
+                  + zxdy(k,j,i-1) * dzw(k  ,j,i-1) * w(k-1,j,i-1) & !note the index trick for w
+                  + zxdy(k,j,i-1) * dzw(k+1,j,i-1) * w(k+1-1,j,i-1) & !note the index trick for w
+                  )  ! umask
           enddo
 
           k = nz ! upper level
@@ -280,45 +280,45 @@ contains
 !               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
                ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
                ( dy(j,i) + dy(j,i-1) )
-          uf_integr1(j,i) = uf_integr1(j,i) + &
-               qrt                                                       * & 
-!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
-               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
-               ( dy(j,i) + dy(j,i-1) ) * u(k,j,i)
-          uf_integr2(j,i) = uf_integr2(j,i) + &
-               - qrt * ( &
-               + zxdy(k,j,i  )*       dzw(k  ,j,i  )*w(k-1,j,i) & !note the index trick for w
-               + zxdy(k,j,i  )* two * dzw(k+1,j,i  )*w(k+1-1,j,i) & !note the index trick for w
-               + zxdy(k,j,i-1)*       dzw(k  ,j,i-1)*w(k-1,j,i-1) & !note the index trick for w
-               + zxdy(k,j,i-1)* two * dzw(k+1,j,i-1)*w(k+1-1,j,i-1) & !note the index trick for w
-               )  
-          uf_integr(j,i) =  uf_integr1(j,i) + uf_integr2(j,i)
-!!$          uf_integr(j,i) = uf_integr(j,i) + &
+!!$          uf_integr1(j,i) = uf_integr1(j,i) + &
 !!$               qrt                                                       * & 
 !!$!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
 !!$               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
-!!$               ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
+!!$               ( dy(j,i) + dy(j,i-1) ) * u(k,j,i)
+!!$          uf_integr2(j,i) = uf_integr2(j,i) + &
 !!$               - qrt * ( &
 !!$               + zxdy(k,j,i  )*       dzw(k  ,j,i  )*w(k-1,j,i) & !note the index trick for w
 !!$               + zxdy(k,j,i  )* two * dzw(k+1,j,i  )*w(k+1-1,j,i) & !note the index trick for w
 !!$               + zxdy(k,j,i-1)*       dzw(k  ,j,i-1)*w(k-1,j,i-1) & !note the index trick for w
 !!$               + zxdy(k,j,i-1)* two * dzw(k+1,j,i-1)*w(k+1-1,j,i-1) & !note the index trick for w
-!!$               )  ! umask
+!!$               )  
+!!$          uf_integr(j,i) =  uf_integr1(j,i) + uf_integr2(j,i)
+          uf_integr(j,i) = uf_integr(j,i) + &
+               qrt                                                       * & 
+!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
+               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
+               ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
+               - qrt * ( &
+               + zxdy(k,j,i  )*       dzw(k  ,j,i  )*w(k-1,j,i) & !note the index trick for w
+               + zxdy(k,j,i  )* two * dzw(k+1,j,i  )*w(k+1-1,j,i) & !note the index trick for w
+               + zxdy(k,j,i-1)*       dzw(k  ,j,i-1)*w(k-1,j,i-1) & !note the index trick for w
+               + zxdy(k,j,i-1)* two * dzw(k+1,j,i-1)*w(k+1-1,j,i-1) & !note the index trick for w
+               )  ! umask
 
        enddo
     enddo
 
-    allocate(uf_integr_tmp(1:nz,0:ny+1,0:nx+1))
-    uf_integr_tmp(1,1:ny,1:nx+1)=uf_integr1(1:ny,1:nx+1)
-    call fill_halo(1,uf_integr_tmp,lbc_null='u')
-    uf_integr1(1:ny,1:nx+1)=uf_integr_tmp(1,1:ny,1:nx+1)
-    deallocate(uf_integr_tmp)
-
-    allocate(uf_integr_tmp(1:nz,0:ny+1,0:nx+1))
-    uf_integr_tmp(1,1:ny,1:nx+1)=uf_integr2(1:ny,1:nx+1)
-    call fill_halo(1,uf_integr_tmp,lbc_null='u')
-    uf_integr2(1:ny,1:nx+1)=uf_integr_tmp(1,1:ny,1:nx+1)
-    deallocate(uf_integr_tmp)
+!!$    allocate(uf_integr_tmp(1:nz,0:ny+1,0:nx+1))
+!!$    uf_integr_tmp(1,1:ny,1:nx+1)=uf_integr1(1:ny,1:nx+1)
+!!$    call fill_halo(1,uf_integr_tmp,lbc_null='u')
+!!$    uf_integr1(1:ny,1:nx+1)=uf_integr_tmp(1,1:ny,1:nx+1)
+!!$    deallocate(uf_integr_tmp)
+!!$
+!!$    allocate(uf_integr_tmp(1:nz,0:ny+1,0:nx+1))
+!!$    uf_integr_tmp(1,1:ny,1:nx+1)=uf_integr2(1:ny,1:nx+1)
+!!$    call fill_halo(1,uf_integr_tmp,lbc_null='u')
+!!$    uf_integr2(1:ny,1:nx+1)=uf_integr_tmp(1,1:ny,1:nx+1)
+!!$    deallocate(uf_integr_tmp)
 
     allocate(uf_integr_tmp(1:nz,0:ny+1,0:nx+1))
     uf_integr_tmp(1,1:ny,1:nx+1)=uf_integr(1:ny,1:nx+1)
@@ -327,8 +327,8 @@ contains
     deallocate(uf_integr_tmp)
 
     if (check_output) then
-       call write_netcdf(uf_integr1,vname='uf1in',netcdf_file_name='coin.nc',rank=myrank,iter=iter_coupling_in)
-       call write_netcdf(uf_integr2,vname='uf2in',netcdf_file_name='coin.nc',rank=myrank,iter=iter_coupling_in)
+!!$       call write_netcdf(uf_integr1,vname='uf1in',netcdf_file_name='coin.nc',rank=myrank,iter=iter_coupling_in)
+!!$       call write_netcdf(uf_integr2,vname='uf2in',netcdf_file_name='coin.nc',rank=myrank,iter=iter_coupling_in)
        call write_netcdf(uf_integr,vname='ufin',netcdf_file_name='coin.nc',rank=myrank,iter=iter_coupling_in)
     endif
 
@@ -349,30 +349,30 @@ contains
 !               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
                ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
                ( dx(j,i) + dx(j-1,i) )
-          vf_integr1(j,i) = &
-               qrt                                                       * &
-!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
-               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
-               ( dx(j,i) + dx(j-1,i) ) * v(k,j,i)
-          vf_integr2(j,i) = &
-               - qrt * ( &
-               + zydx(k,j  ,i)* two * dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w 
-               + zydx(k,j  ,i)*       dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w 
-               + zydx(k,j-1,i)* two * dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w 
-               + zydx(k,j-1,i)*       dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w 
-               )
-          vf_integr(j,i) = vf_integr1(j,i) + vf_integr2(j,i)
-!!$          vf_integr(j,i) = &
+!!$          vf_integr1(j,i) = &
 !!$               qrt                                                       * &
 !!$!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
 !!$               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
-!!$               ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
+!!$               ( dx(j,i) + dx(j-1,i) ) * v(k,j,i)
+!!$          vf_integr2(j,i) = &
 !!$               - qrt * ( &
 !!$               + zydx(k,j  ,i)* two * dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w 
 !!$               + zydx(k,j  ,i)*       dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w 
 !!$               + zydx(k,j-1,i)* two * dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w 
 !!$               + zydx(k,j-1,i)*       dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w 
-!!$               ) !* vmask(j,i)
+!!$               )
+!!$          vf_integr(j,i) = vf_integr1(j,i) + vf_integr2(j,i)
+          vf_integr(j,i) = &
+               qrt                                                       * &
+!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
+               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
+               ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
+               - qrt * ( &
+               + zydx(k,j  ,i)* two * dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w 
+               + zydx(k,j  ,i)*       dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w 
+               + zydx(k,j-1,i)* two * dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w 
+               + zydx(k,j-1,i)*       dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w 
+               ) !* vmask(j,i)
 
 !!$               - qrt * ( &
 !!$               + zydx(k,j  ,i) * dzw(k+1,j  ,i)*w(k+1-1,j,i) & !note the index trick for w
@@ -398,30 +398,30 @@ contains
 !                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
                   ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
                   ( dx(j,i) + dx(j-1,i) )
-             vf_integr1(j,i) = vf_integr1(j,i) + &
-                  qrt                                                       * &
-!                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
-                  ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
-                  ( dx(j,i) + dx(j-1,i) ) * v(k,j,i)
-             vf_integr2(j,i) = vf_integr2(j,i) + &
-                  - qrt * ( &
-                  + zydx(k,j  ,i) * dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w
-                  + zydx(k,j  ,i) * dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w
-                  + zydx(k,j-1,i) * dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w
-                  + zydx(k,j-1,i) * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w
-                  )
-             vf_integr(j,i) = vf_integr1(j,i) + vf_integr2(j,i)
-!!$             vf_integr(j,i) = vf_integr(j,i) + &
+!!$             vf_integr1(j,i) = vf_integr1(j,i) + &
 !!$                  qrt                                                       * &
 !!$!                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
 !!$                  ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
-!!$                  ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
+!!$                  ( dx(j,i) + dx(j-1,i) ) * v(k,j,i)
+!!$             vf_integr2(j,i) = vf_integr2(j,i) + &
 !!$                  - qrt * ( &
 !!$                  + zydx(k,j  ,i) * dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w
 !!$                  + zydx(k,j  ,i) * dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w
 !!$                  + zydx(k,j-1,i) * dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w
 !!$                  + zydx(k,j-1,i) * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w
-!!$                  )  !* vmask(j,i)
+!!$                  )
+!!$             vf_integr(j,i) = vf_integr1(j,i) + vf_integr2(j,i)
+             vf_integr(j,i) = vf_integr(j,i) + &
+                  qrt                                                       * &
+!                  ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
+                  ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
+                  ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
+                  - qrt * ( &
+                  + zydx(k,j  ,i) * dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w
+                  + zydx(k,j  ,i) * dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w
+                  + zydx(k,j-1,i) * dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w
+                  + zydx(k,j-1,i) * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w
+                  )  !* vmask(j,i)
           enddo
 
           k = nz ! upper level
@@ -430,45 +430,45 @@ contains
 !               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
                ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
                ( dx(j,i) + dx(j-1,i) )
-          vf_integr1(j,i) = vf_integr1(j,i) + &
-               qrt                                                       * &
-!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
-               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
-               ( dx(j,i) + dx(j-1,i) ) * v(k,j,i)
-          vf_integr2(j,i) = vf_integr2(j,i) + &
-               - qrt * ( &
-               + zydx(k,j  ,i)*       dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w
-               + zydx(k,j  ,i)* two * dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w
-               + zydx(k,j-1,i)*       dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w
-               + zydx(k,j-1,i)* two * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w
-               )
-          vf_integr(j,i) = vf_integr1(j,i) + vf_integr2(j,i)
-!!$          vf_integr(j,i) = vf_integr(j,i) + &
+!!$          vf_integr1(j,i) = vf_integr1(j,i) + &
 !!$               qrt                                                       * &
 !!$!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
 !!$               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
-!!$               ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
+!!$               ( dx(j,i) + dx(j-1,i) ) * v(k,j,i)
+!!$          vf_integr2(j,i) = vf_integr2(j,i) + &
 !!$               - qrt * ( &
 !!$               + zydx(k,j  ,i)*       dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w
 !!$               + zydx(k,j  ,i)* two * dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w
 !!$               + zydx(k,j-1,i)*       dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w
 !!$               + zydx(k,j-1,i)* two * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w
-!!$               ) !* vmask(j,i)
+!!$               )
+!!$          vf_integr(j,i) = vf_integr1(j,i) + vf_integr2(j,i)
+          vf_integr(j,i) = vf_integr(j,i) + &
+               qrt                                                       * &
+!               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
+               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
+               ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
+               - qrt * ( &
+               + zydx(k,j  ,i)*       dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w
+               + zydx(k,j  ,i)* two * dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w
+               + zydx(k,j-1,i)*       dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w
+               + zydx(k,j-1,i)* two * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w
+               ) !* vmask(j,i)
 
        enddo
     enddo
 
-    allocate(vf_integr_tmp(1:nz,0:ny+1,0:nx+1))
-    vf_integr_tmp(1,1:ny+1,1:nx)=vf_integr1(1:ny+1,1:nx)
-    call fill_halo(1,vf_integr_tmp,lbc_null='v')
-    vf_integr1(1:ny+1,1:nx)=vf_integr_tmp(1,1:ny+1,1:nx)
-    deallocate(vf_integr_tmp)
-
-    allocate(vf_integr_tmp(1:nz,0:ny+1,0:nx+1))
-    vf_integr_tmp(1,1:ny+1,1:nx)=vf_integr2(1:ny+1,1:nx)
-    call fill_halo(1,vf_integr_tmp,lbc_null='v')
-    vf_integr2(1:ny+1,1:nx)=vf_integr_tmp(1,1:ny+1,1:nx)
-    deallocate(vf_integr_tmp)
+!!$    allocate(vf_integr_tmp(1:nz,0:ny+1,0:nx+1))
+!!$    vf_integr_tmp(1,1:ny+1,1:nx)=vf_integr1(1:ny+1,1:nx)
+!!$    call fill_halo(1,vf_integr_tmp,lbc_null='v')
+!!$    vf_integr1(1:ny+1,1:nx)=vf_integr_tmp(1,1:ny+1,1:nx)
+!!$    deallocate(vf_integr_tmp)
+!!$
+!!$    allocate(vf_integr_tmp(1:nz,0:ny+1,0:nx+1))
+!!$    vf_integr_tmp(1,1:ny+1,1:nx)=vf_integr2(1:ny+1,1:nx)
+!!$    call fill_halo(1,vf_integr_tmp,lbc_null='v')
+!!$    vf_integr2(1:ny+1,1:nx)=vf_integr_tmp(1,1:ny+1,1:nx)
+!!$    deallocate(vf_integr_tmp)
 
     allocate(vf_integr_tmp(1:nz,0:ny+1,0:nx+1))
     vf_integr_tmp(1,1:ny+1,1:nx)=vf_integr(1:ny+1,1:nx)
@@ -477,8 +477,8 @@ contains
     deallocate(vf_integr_tmp)
 
     if (check_output) then
-       call write_netcdf(vf_integr1,vname='vf1in',netcdf_file_name='coin.nc',rank=myrank,iter=iter_coupling_in)
-       call write_netcdf(vf_integr2,vname='vf2in',netcdf_file_name='coin.nc',rank=myrank,iter=iter_coupling_in)
+!!$       call write_netcdf(vf_integr1,vname='vf1in',netcdf_file_name='coin.nc',rank=myrank,iter=iter_coupling_in)
+!!$       call write_netcdf(vf_integr2,vname='vf2in',netcdf_file_name='coin.nc',rank=myrank,iter=iter_coupling_in)
        call write_netcdf(vf_integr,vname='vfin',netcdf_file_name='coin.nc',rank=myrank,iter=iter_coupling_in)
     endif
 
@@ -519,7 +519,7 @@ contains
              wc(k,j,i) = ( &
 
                - (zw(k,j,i)-zw(0,j,i))/(zw(nz,j,i)-zw(0,j,i)) & ! zw indexed as croco from 0 to nz
-                *( uf_integr(j,i+1)-uf_integr(j,i)+vf_integr(j+1,i)-vf_integr(j,i) ) / dx(j,i)*dy(j,i) &
+                *( uf_integr(j,i+1)-uf_integr(j,i)+vf_integr(j+1,i)-vf_integr(j,i) ) / (dx(j,i)*dy(j,i)) &
 
                + qrt *( &
                  (zx(k-1+1,j,i)+zx(k  +1,j,i)) * &!note the index trick for zx
@@ -538,7 +538,7 @@ contains
 
           wc(k,j,i) = ( &
 
-               - ( uf_integr(j,i+1)-uf_integr(j,i)+vf_integr(j+1,i)-vf_integr(j,i) ) / dx(j,i)*dy(j,i) &
+               - ( uf_integr(j,i+1)-uf_integr(j,i)+vf_integr(j+1,i)-vf_integr(j,i) ) / (dx(j,i)*dy(j,i)) &
 
                + hlf *( &
                  (zx(k-1+1,j,i)) * &!note the index trick for zx
@@ -666,10 +666,10 @@ contains
 
     deallocate(su_integr)
     deallocate(sv_integr)
-    deallocate(uf_integr1)
-    deallocate(vf_integr1)
-    deallocate(uf_integr2)
-    deallocate(vf_integr2)
+!!$    deallocate(uf_integr1)
+!!$    deallocate(vf_integr1)
+!!$    deallocate(uf_integr2)
+!!$    deallocate(vf_integr2)
     deallocate(uf_integr)
     deallocate(vf_integr)
     deallocate(wc)
