@@ -454,6 +454,8 @@ contains
     deallocate(zy)
     deallocate(zxdy)
     deallocate(zydx)
+    deallocate(zxw)
+    deallocate(zyw)
     deallocate(cw)
 
   end subroutine compute_rhs

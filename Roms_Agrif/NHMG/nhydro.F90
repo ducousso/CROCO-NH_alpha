@@ -677,6 +677,8 @@ contains
         enddo
       enddo
     enddo
+    deallocate(zrb)
+    deallocate(zwb)
     deallocate(ub)
     deallocate(vb)
     deallocate(wb)
