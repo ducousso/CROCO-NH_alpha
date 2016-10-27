@@ -198,6 +198,7 @@ contains
 !               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j,i-1) - zw(k,j,i-1) ) * &
                ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
                ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
+
                - qrt * ( &
                + zxdy(k,j,i  )*dzw(k+1,j,i  )*w(k+1-1,j,i)   & !note the index trick for w 
                + zxdy(k,j,i-1)*dzw(k+1,j,i-1)*w(k+1-1,j,i-1) ) & !note the index trick for w 
@@ -228,9 +229,9 @@ contains
                   ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
                   ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
                   - qrt * ( &
-                  + zxdy(k,j,i  ) * dzw(k  ,j,i  ) * w(k-1,j,i) & !note the index trick for w 
-                  + zxdy(k,j,i  ) * dzw(k+1,j,i  ) * w(k+1-1,j,i) & !note the index trick for w 
-                  + zxdy(k,j,i-1) * dzw(k  ,j,i-1) * w(k-1,j,i-1) & !note the index trick for w 
+                  + zxdy(k,j,i  ) * dzw(k  ,j,i  ) * w(k  -1,j,i  ) & !note the index trick for w 
+                  + zxdy(k,j,i  ) * dzw(k+1,j,i  ) * w(k+1-1,j,i  ) & !note the index trick for w 
+                  + zxdy(k,j,i-1) * dzw(k  ,j,i-1) * w(k  -1,j,i-1) & !note the index trick for w 
                   + zxdy(k,j,i-1) * dzw(k+1,j,i-1) * w(k+1-1,j,i-1) & !note the index trick for w 
                   )  ! umask
           enddo
@@ -249,9 +250,9 @@ contains
                ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j,i-1) - zw(k-1,j,i-1) ) * & !because zw indexed as croco from 0 to nz
                ( dy(j,i) + dy(j,i-1) ) * u(k,j,i) &
                - qrt * ( &
-               + zxdy(k,j,i  )*       dzw(k  ,j,i  )*w(k-1,j,i) & !note the index trick for w 
-               + zxdy(k,j,i  )* two * dzw(k+1,j,i  )*w(k+1-1,j,i) & !note the index trick for w 
-               + zxdy(k,j,i-1)*       dzw(k  ,j,i-1)*w(k-1,j,i-1) & !note the index trick for w 
+               + zxdy(k,j,i  )*       dzw(k  ,j,i  )*w(k  -1,j,i  ) & !note the index trick for w 
+               + zxdy(k,j,i  )* two * dzw(k+1,j,i  )*w(k+1-1,j,i  ) & !note the index trick for w 
+               + zxdy(k,j,i-1)*       dzw(k  ,j,i-1)*w(k  -1,j,i-1) & !note the index trick for w 
                + zxdy(k,j,i-1)* two * dzw(k+1,j,i-1)*w(k+1-1,j,i-1) & !note the index trick for w 
                )  ! umask
        enddo
@@ -259,15 +260,16 @@ contains
 
     call fill_halo(1,uf,lbc_null='u')
 
-    if (netcdf_output) then
-       call write_netcdf(uf,vname='uf',netcdf_file_name='uf.nc',rank=myrank,iter=iter_rhs)
+    if (check_output) then
+       call write_netcdf(uf,vname='uf',netcdf_file_name='rhs.nc',rank=myrank,iter=iter_rhs)
+!       call write_netcdf(uf,vname='uf',netcdf_file_name='uf.nc',rank=myrank,iter=iter_rhs)
     endif
 
     do i = 1,nx
        do j = 1,ny 
           do k = 1,nz
 
-             rhs(k,j,i) = uf(k  ,j  ,i+1) - uf(k,j,i) 
+             rhs(k,j,i) = uf(k,j,i+1) - uf(k,j,i) 
 
           enddo
        enddo
@@ -292,6 +294,7 @@ contains
 !               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
                ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
                ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
+
                - qrt * ( &
                + zydx(k,j  ,i) * dzw(k+1,j  ,i)*w(k+1-1,j,i) & !note the index trick for w 
                + zydx(k,j-1,i) * dzw(k+1,j-1,i)*w(k+1-1,j-1,i) ) & !note the index trick for w 
@@ -324,9 +327,9 @@ contains
                   ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
                   ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
                   - qrt * ( &
-                  + zydx(k,j  ,i) * dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w 
-                  + zydx(k,j  ,i) * dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w 
-                  + zydx(k,j-1,i) * dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w 
+                  + zydx(k,j  ,i) * dzw(k  ,j  ,i) * w(k  -1,j,i  ) & !note the index trick for w 
+                  + zydx(k,j  ,i) * dzw(k+1,j  ,i) * w(k+1-1,j,i  ) & !note the index trick for w 
+                  + zydx(k,j-1,i) * dzw(k  ,j-1,i) * w(k  -1,j-1,i) & !note the index trick for w 
                   + zydx(k,j-1,i) * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w 
                   )  !* vmask(j,i)
 
@@ -343,12 +346,12 @@ contains
           vf(k,j,i) =  &
                qrt                                                       * &
 !               ( zw(k+1,j,i) - zw(k,j,i) + zw(k+1,j-1,i) - zw(k,j-1,i) ) * &
-                  ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
+               ( zw(k,j,i) - zw(k-1,j,i) + zw(k,j-1,i) - zw(k-1,j-1,i) ) * & !because zw indexed as croco from 0 to nz
                ( dx(j,i) + dx(j-1,i) ) * v(k,j,i) &
                - qrt * ( &
-               + zydx(k,j  ,i)*       dzw(k  ,j  ,i) * w(k-1,j,i) & !note the index trick for w 
-               + zydx(k,j  ,i)* two * dzw(k+1,j  ,i) * w(k+1-1,j,i) & !note the index trick for w 
-               + zydx(k,j-1,i)*       dzw(k  ,j-1,i) * w(k-1,j-1,i) & !note the index trick for w 
+               + zydx(k,j  ,i)*       dzw(k  ,j  ,i) * w(k  -1,j  ,i) & !note the index trick for w 
+               + zydx(k,j  ,i)* two * dzw(k+1,j  ,i) * w(k+1-1,j  ,i) & !note the index trick for w 
+               + zydx(k,j-1,i)*       dzw(k  ,j-1,i) * w(k  -1,j-1,i) & !note the index trick for w 
                + zydx(k,j-1,i)* two * dzw(k+1,j-1,i) * w(k+1-1,j-1,i) & !note the index trick for w 
                ) !* vmask(j,i)
 
@@ -357,15 +360,16 @@ contains
 
     call fill_halo(1,vf,lbc_null='v')
 
-    if (netcdf_output) then
-       call write_netcdf(vf,vname='vf',netcdf_file_name='vf.nc',rank=myrank,iter=iter_rhs)
+    if (check_output) then
+       call write_netcdf(vf,vname='vf',netcdf_file_name='rhs.nc',rank=myrank,iter=iter_rhs)
+!       call write_netcdf(vf,vname='vf',netcdf_file_name='vf.nc',rank=myrank,iter=iter_rhs)
     endif
 
     do i = 1,nx
        do j = 1,ny 
           do k = 1,nz
 
-             rhs(k,j,i) =  rhs(k,j,i) + vf(k  ,j+1,i  ) - vf(k,j,i)
+             rhs(k,j,i) =  rhs(k,j,i) + vf(k,j+1,i) - vf(k,j,i)
 
           enddo
        enddo
@@ -397,14 +401,14 @@ contains
 
              wf(k,j,i) = cw(k,j,i) * dzw(k,j,i) * w(k-1,j,i) & !note the index trick for w
                   - qrt * hlf * ( &
-                  + zxdy(k  ,j,i) * ( dx(j,i  ) + dx(j,i-1) ) * u(k,j,i ) &
-                  + zxdy(k  ,j,i) * ( dx(j,i+1) + dx(j,i  ) ) * u(k,j,i+1) &
-                  + zxdy(k-1,j,i) * ( dx(j,i  ) + dx(j,i-1) ) * u(k-1,j,i) &
+                  + zxdy(k  ,j,i) * ( dx(j,i  ) + dx(j,i-1) ) * u(k  ,j,i  ) &
+                  + zxdy(k  ,j,i) * ( dx(j,i+1) + dx(j,i  ) ) * u(k  ,j,i+1) &
+                  + zxdy(k-1,j,i) * ( dx(j,i  ) + dx(j,i-1) ) * u(k-1,j,i  ) &
                   + zxdy(k-1,j,i) * ( dx(j,i+1) + dx(j,i  ) ) * u(k-1,j,i+1) ) &
                   - qrt * hlf * ( &
-                  + zydx(k  ,j,i) * ( dy(j  ,i) + dy(j-1,i) ) * v(k,j,i) &
-                  + zydx(k  ,j,i) * ( dy(j+1,i) + dy(j  ,i) ) * v(k,j+1,i ) &
-                  + zydx(k-1,j,i) * ( dy(j  ,i) + dy(j-1,i) ) * v(k-1,j,i) &
+                  + zydx(k  ,j,i) * ( dy(j  ,i) + dy(j-1,i) ) * v(k  ,j  ,i) &
+                  + zydx(k  ,j,i) * ( dy(j+1,i) + dy(j  ,i) ) * v(k  ,j+1,i) &
+                  + zydx(k-1,j,i) * ( dy(j  ,i) + dy(j-1,i) ) * v(k-1,j  ,i) &
                   + zydx(k-1,j,i) * ( dy(j+1,i) + dy(j  ,i) ) * v(k-1,j+1,i) )
           enddo
 
@@ -416,26 +420,27 @@ contains
     do i = 1,nx
        do j = 1,ny
 
-          wf(k,j,i) = cw(k,j,i) * dzw(k,j,i) * w(k-1,j,i)& !note the index trick for w
+          wf(k,j,i) = cw(k,j,i) * dzw(k,j,i) * w(k-1,j,i) & !note the index trick for w
                - hlf * hlf * ( &
-               + zxdy(k-1,j,i) * ( dx(j,i) + dx(j,i-1) ) * u(k-1,j,i) &
-               + zxdy(k-1,j,i) * ( dx(j,i+1) + dx(j,i) ) * u(k-1,j,i+1) ) &
+               + zxdy(k-1,j,i) * ( dx(j,i  ) + dx(j,i-1) ) * u(k-1,j,i  ) &
+               + zxdy(k-1,j,i) * ( dx(j,i+1) + dx(j,i  ) ) * u(k-1,j,i+1) ) &
                - hlf * hlf * ( &
-               + zydx(k-1,j,i) * ( dy(j,i) + dy(j-1,i) ) * v(k-1,j,i) &
-               + zydx(k-1,j,i) * ( dy(j+1,i) + dy(j,i) ) * v(k-1,j+1,i) )
+               + zydx(k-1,j,i) * ( dy(j  ,i) + dy(j-1,i) ) * v(k-1,j  ,i) &
+               + zydx(k-1,j,i) * ( dy(j+1,i) + dy(j  ,i) ) * v(k-1,j+1,i) )
 
        enddo
     enddo
 
-    if (netcdf_output) then
-       call write_netcdf(wf,vname='wf',netcdf_file_name='wf.nc',rank=myrank,iter=iter_rhs)
+    if (check_output) then
+       call write_netcdf(wf,vname='wf',netcdf_file_name='rhs.nc',rank=myrank,iter=iter_rhs)
+!       call write_netcdf(wf,vname='wf',netcdf_file_name='wf.nc',rank=myrank,iter=iter_rhs)
     endif
 
     do i = 1,nx
        do j = 1,ny 
           do k = 1,nz
 
-             rhs(k,j,i) = rhs(k,j,i) + wf(k+1,j  ,i  ) - wf(k,j,i)
+             rhs(k,j,i) = rhs(k,j,i) + wf(k+1,j,i) - wf(k,j,i)
 
           enddo
        enddo
