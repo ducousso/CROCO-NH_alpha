@@ -577,16 +577,7 @@ c$$$
      & z_w(0:Lm+1,0:Mm+1,N),
      & h(0:Lm+1,0:Mm+1),
      & hc,theta_b,theta_s)
-c$$$
-c$$$#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
-c$$$      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        u(START_2D_ARRAY,1,nnew))
-c$$$      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        v(START_2D_ARRAY,1,nnew))
-c$$$      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        wz(START_2D_ARRAY,0,nnew))     
-c$$$#  endif
-c$$$
+
       do j=Jstr,Jend
         do k=1,N
           do i=IstrU,Iend
@@ -613,6 +604,16 @@ c$$$
         rw(i,j,N) = 2.*rw(i,j,N)*pn(i,j)*pm(i,j)/
      &                (Hz(i,j,N))
       enddo
+
+
+#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
+      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
+     &                        ru(START_2D_ARRAY,1))
+      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
+     &                        rv(START_2D_ARRAY,1))
+      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
+     &                        rw(START_2D_ARRAY,0))     
+#  endif
 
       call nhydro_solve(
      & Lm, Mm, N,
