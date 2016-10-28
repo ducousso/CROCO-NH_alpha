@@ -47,8 +47,8 @@ contains
     !! Correct
     p => grid(1)%p
 
-!    do i = 1,nx+1
-    do i = 2,nx
+    do i = 1,nx+1
+!    do i = 2,nx
 !       do j = 0,ny+1
         do j = 1,ny
           do k = 1,nz
@@ -63,8 +63,8 @@ contains
 
 !    do i = 0,nx+1
     do i = 1,nx
-!       do j = 1,ny+1 
-       do j = 2,ny 
+       do j = 1,ny+1 
+!       do j = 2,ny 
           do k = 1,nz
 
              dyv = hlf * (dy(j,i)+dy(j-1,i))
