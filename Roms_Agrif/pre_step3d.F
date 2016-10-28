@@ -601,8 +601,10 @@ c$$$
      &                (Hz(i,j,k)+Hz(i,j,k+1))
           enddo
         enddo
-        rw(i,j,N) = 2.*rw(i,j,N)*pn(i,j)*pm(i,j)/
+        do i=Istr,Iend
+          rw(i,j,N) = 2.*rw(i,j,N)*pn(i,j)*pm(i,j)/
      &                (Hz(i,j,N))
+        enddo
       enddo
 
 
