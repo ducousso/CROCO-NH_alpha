@@ -572,8 +572,6 @@
 c$$$
       call nhydro_matrices(
      & Lm,Mm,N,
-     & 1._8/pm(0:Lm+1,0:Mm+1),
-     & 1._8/pn(0:Lm+1,0:Mm+1),
      & z_w(0:Lm+1,0:Mm+1,N),
      & h(0:Lm+1,0:Mm+1),
      & hc,theta_b,theta_s)
@@ -607,15 +605,14 @@ c$$$
         enddo
       enddo
 
-
-#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
-      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
-     &                        ru(START_2D_ARRAY,1))
-      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
-     &                        rv(START_2D_ARRAY,1))
-      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
-     &                        rw(START_2D_ARRAY,0))     
-#  endif
+c$$$#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
+c$$$      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        ru(START_2D_ARRAY,1))
+c$$$      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        rv(START_2D_ARRAY,1))
+c$$$      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
+c$$$     &                        rw(START_2D_ARRAY,0))     
+c$$$#  endif
 
       call nhydro_solve(
      & Lm, Mm, N,
@@ -1014,8 +1011,6 @@ c$$$
 c$$$
       call nhydro_matrices(
      & Lm,Mm,N,
-     & 1._8/pm(0:Lm+1,0:Mm+1),
-     & 1._8/pn(0:Lm+1,0:Mm+1),
      & z_w(0:Lm+1,0:Mm+1,N),
      & h(0:Lm+1,0:Mm+1),
      & hc,theta_b,theta_s)
@@ -1068,7 +1063,6 @@ c$$$
 #  define JV_RANGE Jstr,JendR
 # endif
 !
-c$$$#  ifndef NHMG
 c$$$      do j=JU_RANGE                      ! XI-component
 c$$$        do i=IU_RANGE
 c$$$          DC(i,0)=0.
@@ -1166,25 +1160,6 @@ c$$$# endif
 c$$$          enddo
 c$$$        enddo
 c$$$      enddo
-c$$$!
-c$$$#  else
-c$$$      if (FIRST_TIME_STEP) then
-c$$$         cff1=1.
-c$$$         cff2=0.
-c$$$      else
-c$$$         cff1=1.5
-c$$$         cff2=0.5
-c$$$      endif
-c$$$      call nhydro_coupling(
-c$$$     & Lm, Mm, N,
-c$$$     & z_r(0:Lm+1,0:Mm+1,1:N), !pb here
-c$$$     & z_w(0:Lm+1,0:Mm+1,0:N), !pb here
-c$$$     & cff1*DU_avg1(1:Lm+1,0:Mm+1,nstp)-cff2*DU_avg1(i,j,indx),
-c$$$     & cff1*DV_avg1(0:Lm+1,1:Mm+1,nstp)-cff2*DV_avg1(i,j,indx),
-c$$$     & u(1:Lm+1,0:Mm+1,1:N,nnew),
-c$$$     & v(0:Lm+1,1:Mm+1,1:N,nnew),
-c$$$     & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
-c$$$#  endif
 !
 !======================================================================
 ! Exchange periodic boundaries and computational margins.

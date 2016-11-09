@@ -62,7 +62,6 @@
           USE nhydro, only : nhydro_matrices
           USE nhydro, only : nhydro_solve
           USE nhydro, only : nhydro_coupling
-!          USE nhydro, only : nhydro_check_nondivergence
 #endif
       implicit none
 # include "param.h"
@@ -223,27 +222,28 @@
           DC(i,N)=(DC(i,N)-aa*DC(i,N-1))
      &           /(BC(i,N)-aa*CF(i,N-1))
 
-c$$$          CF(i,0)=0.5*(Hz(i,j,N)+Hz(i-1,j,N))
-c$$$          DC(i,0)=CF(i,0)*DC(i,N)
+          CF(i,0)=0.5*(Hz(i,j,N)+Hz(i-1,j,N))   !
+          DC(i,0)=CF(i,0)*DC(i,N)               !
         enddo
         do k=N-1,1,-1
           do i=IstrU,Iend
               DC(i,k)=DC(i,k)-CF(i,k)*DC(i,k+1)
 
-c$$$            cff=0.5*(Hz(i,j,k)+Hz(i-1,j,k))
-c$$$            CF(i,0)=CF(i,0)+cff
-c$$$            DC(i,0)=DC(i,0)+cff*DC(i,k)
+              cff=0.5*(Hz(i,j,k)+Hz(i-1,j,k))   !
+              CF(i,0)=CF(i,0)+cff               !
+              DC(i,0)=DC(i,0)+cff*DC(i,k)       !
           enddo
         enddo      !--> discard FC,BC; keep DC,CF(:,0)
 
-c$$$        do i=IstrU,Iend
-c$$$          DC(i,0)=(DC(i,0)*on_u(i,j)-DU_avg1(i,j,nnew))
-c$$$     &                             /(CF(i,0)*on_u(i,j))
-c$$$        enddo
+        do i=IstrU,Iend                         !
+          DC(i,0)=(DC(i,0)*on_u(i,j)-DU_avg1(i,j,nnew))  !
+     &                             /(CF(i,0)*on_u(i,j))  !
+        enddo                                   !
         do k=1,N
           do i=IstrU,Iend
-c$$$            u(i,j,k,nnew)=(DC(i,k)-DC(i,0)) SWITCH umask(i,j)
+!            u(i,j,k,nnew)=(DC(i,k)-DC(i,0)) SWITCH umask(i,j)
             u(i,j,k,nnew)=DC(i,k)
+!
 # ifdef DIAGNOSTICS_UV
             MVmix(i,j,k,1)=-( MVmix(i,j,k,1) - u(i,j,k,nnew)*
      &                           0.5*(Hz(i,j,k)+Hz(i-1,j,k)) )
@@ -354,27 +354,28 @@ c$$$            u(i,j,k,nnew)=(DC(i,k)-DC(i,0)) SWITCH umask(i,j)
             DC(i,N)=(DC(i,N)-aa*DC(i,N-1))
      &             /(BC(i,N)-aa*CF(i,N-1))
 
-c$$$            CF(i,0)=0.5*(Hz(i,j,N)+Hz(i,j-1,N))
-c$$$            DC(i,0)=CF(i,0)*DC(i,N)
+            CF(i,0)=0.5*(Hz(i,j,N)+Hz(i,j-1,N)) !
+            DC(i,0)=CF(i,0)*DC(i,N)             !
           enddo
           do k=N-1,1,-1
             do i=Istr,Iend
               DC(i,k)=DC(i,k)-CF(i,k)*DC(i,k+1)
 
-c$$$              cff=0.5*(Hz(i,j,k)+Hz(i,j-1,k))
-c$$$              CF(i,0)=CF(i,0)+cff
-c$$$              DC(i,0)=DC(i,0)+cff*DC(i,k)
+              cff=0.5*(Hz(i,j,k)+Hz(i,j-1,k))   !
+              CF(i,0)=CF(i,0)+cff               !
+              DC(i,0)=DC(i,0)+cff*DC(i,k)       !
             enddo
           enddo      !--> discard FC,BC; keep DC,CF(:,0)
 
-c$$$          do i=Istr,Iend
-c$$$            DC(i,0)=(DC(i,0)*om_v(i,j)-DV_avg1(i,j,nnew))
-c$$$     &                               /(CF(i,0)*om_v(i,j))
-c$$$          enddo
+          do i=Istr,Iend                        !
+            DC(i,0)=(DC(i,0)*om_v(i,j)-DV_avg1(i,j,nnew)) !
+     &                               /(CF(i,0)*om_v(i,j)) !
+          enddo                                 !
           do k=1,N
             do i=Istr,Iend
-c$$$              v(i,j,k,nnew)=(DC(i,k)-DC(i,0)) SWITCH vmask(i,j)
+!              v(i,j,k,nnew)=(DC(i,k)-DC(i,0)) SWITCH vmask(i,j) !
               v(i,j,k,nnew)=DC(i,k)
+!
 # ifdef DIAGNOSTICS_UV
               MVmix(i,j,k,2)=-( MVmix(i,j,k,2) - v(i,j,k,nnew)*
      &                             0.5*(Hz(i,j,k)+Hz(i,j-1,k)) )
@@ -469,8 +470,6 @@ c$$$              v(i,j,k,nnew)=(DC(i,k)-DC(i,0)) SWITCH vmask(i,j)
 c$$$
       call nhydro_matrices(
      & Lm,Mm,N,
-     & 1._8/pm(0:Lm+1,0:Mm+1),
-     & 1._8/pn(0:Lm+1,0:Mm+1),
      & z_w(0:Lm+1,0:Mm+1,N),
      & h(0:Lm+1,0:Mm+1),
      & hc,theta_b,theta_s)
@@ -560,6 +559,7 @@ c$$$
 # endif
 
 # ifdef NHMG
+
       call nhydro_coupling(
      & Lm, Mm, N,
      & z_r(0:Lm+1,0:Mm+1,1:N),
@@ -569,6 +569,7 @@ c$$$
      & u(1:Lm+1,0:Mm+1,1:N,nnew),
      & v(0:Lm+1,1:Mm+1,1:N,nnew),
      & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
+
 # endif
 
 !
@@ -586,7 +587,7 @@ c$$$
           do i=IU_RANGE
             DC(i,k)=0.5*(Hz(i,j,k)+Hz(i-1,j,k))*on_u(i,j)
             DC(i,0)=DC(i,0)+DC(i,k)                        
-            CF(i,0)=CF(i,0)+DC(i,k)*u(i,j,k,nnew)          !care this computation is not valid...
+            CF(i,0)=CF(i,0)+DC(i,k)*u(i,j,k,nnew)          !care this computation is not valid with our variables
           enddo
         enddo
         do i=IU_RANGE
@@ -644,7 +645,7 @@ c$$$
      &                                        +2.0*ust(i,j,k))
 #  else
             FC(i,k)=DELTA*Huon(i,j,k) +
-     &              EPSIL*DC(i,k)*(u(i,j,k,nstp)+u(i,j,k,nnew)) !care this computation is not valid...
+     &              EPSIL*DC(i,k)*(u(i,j,k,nstp)+u(i,j,k,nnew)) !care this computation is not valid with our variables
 #  endif
 # endif /* TR */
 
@@ -656,7 +657,7 @@ c$$$
         enddo
         do k=1,N,+1
           do i=IU_RANGE
-            Huon(i,j,k)=FC(i,k)-DC(i,k)*FC(i,0) !care this computation is not valid...
+            Huon(i,j,k)=FC(i,k)-DC(i,k)*FC(i,0) !care this computation is not valid with our variables
           enddo
         enddo
 !

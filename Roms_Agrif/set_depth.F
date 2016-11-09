@@ -281,6 +281,7 @@ C$    integer omp_get_thread_num
         enddo
       enddo
 #  else
+
       call nhydro_fluxes(
      & Lm, Mm, N,
      & z_r(0:Lm+1,0:Mm+1,1:N),
@@ -290,6 +291,7 @@ C$    integer omp_get_thread_num
      & wz(0:Lm+1,0:Mm+1,0:N,nrhs),
      & Huon(1:Lm+1,0:Mm+1,1:N),
      & Hvom(0:Lm+1,1:Mm+1,1:N) )
+
 #  endif
 
 #  undef IU_RANGE
@@ -431,6 +433,7 @@ C$    integer omp_get_thread_num
       subroutine set_HUV2_tile (Istr,Iend,Jstr,Jend,DC,FC)
 #ifdef NHMG
           USE nhydro, only : nhydro_coupling
+!          USE nhydro, only : nhydro_fluxes
 #endif
       implicit none
       integer Istr,Iend,Jstr,Jend, i,j,k
@@ -534,6 +537,7 @@ C$    integer omp_get_thread_num
         enddo
       enddo
 #  else
+
       call nhydro_coupling(
      & Lm, Mm, N,
      & z_r(0:Lm+1,0:Mm+1,1:N),
@@ -545,6 +549,17 @@ C$    integer omp_get_thread_num
      & wz(0:Lm+1,0:Mm+1,0:N,nrhs),
      & Huon(1:Lm+1,0:Mm+1,1:N),
      & Hvom(0:Lm+1,1:Mm+1,1:N) )
+
+!      call nhydro_fluxes(
+!     & Lm, Mm, N,
+!     & z_r(0:Lm+1,0:Mm+1,1:N),
+!     & z_w(0:Lm+1,0:Mm+1,0:N),
+!     & u(1:Lm+1,0:Mm+1,1:N,nrhs),
+!     & v(0:Lm+1,1:Mm+1,1:N,nrhs),
+!     & wz(0:Lm+1,0:Mm+1,0:N,nrhs),
+!     & Huon(1:Lm+1,0:Mm+1,1:N),
+!     & Hvom(0:Lm+1,1:Mm+1,1:N) )
+
 #  endif
 !
 #  undef IU_RANGE
