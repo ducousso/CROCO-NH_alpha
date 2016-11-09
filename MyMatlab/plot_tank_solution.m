@@ -3,11 +3,13 @@ clear all
 
 %% load files
 
-ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.001_0.5period_track_pb_modified_firststep/';
-ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.001_0.5period_track_pb_modified_firststep_long/';
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_1em3_0.5period_track_pb_modified_firststep_noUV_ADV_long/';
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_1em3_1period_track_pb_modified_firststep_noUV_ADV_long/';
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_1em3_2period_track_pb_modified_firststep_noUV_ADV_long/';
 
-ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.000001_0.5period_track_pb_modified_firststep/';
-ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.000001_0.5period_track_pb_modified_firststep_noUV_ADV/';
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_1.5em1_0.5period_track_pb_modified_firststep_noUV_ADV_long/';
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_1.5em1_1period_track_pb_modified_firststep_noUV_ADV_long/';
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_1.5em1_2period_track_pb_modified_firststep_noUV_ADV_long/';
 
 nx = 64;
 nz = 64;
@@ -79,8 +81,11 @@ z_w_pc = squeeze(z_w(2:end-1,32,:));
 z_w_pc = cat(1,cat(1,z_w_pc(1,:),z_w_pc),z_w_pc(end,:));
 u_pc = cat(2,cat(1,squeeze(double(u(1:end,32,:,step+1))),zeros(1,nz)),zeros(nx+2,1));
 pcolor(x_r_pc,z_w_pc,u_pc);shading flat;
+%u_pc_f = cat(2,cat(1,flipdim(squeeze(double(u(1:end,32,:,step+1))),1),zeros(1,nz)),zeros(nx+2,1));
+%pcolor(x_r_pc,z_w_pc,u_pc-u_pc_f);shading flat;
 axis xy;axis equal;xlim([0 L]);ylim([-H 0]);colorbar;title('croco u');
 clear x_r_pc z_w_pc u_pc
+%clear u_pc_f
 subplot(1,2,2);
 x_u_pc = repmat(x_u(:,32),[1 nz]);
 x_u_pc = cat(2,cat(2,x_u_pc,x_u_pc(:,1)),x_u_pc(:,end));
@@ -89,8 +94,11 @@ z_r_pc = cat(2,cat(2,-H*ones(nx,1),z_r_pc),zeros(nx,1));
 z_r_pc = cat(1,z_r_pc,z_r_pc(end,:));
 w_pc = cat(2,cat(1,squeeze(double(w(2:end-1,32,:,step+1))),zeros(1,nz+1)),zeros(nx+1,1));
 pcolor(x_u_pc,z_r_pc,w_pc);shading flat;
-clear x_u_pc z_r_pc w_pc
+%w_pc_f = cat(2,cat(1,flipdim(squeeze(double(w(2:end-1,32,:,step+1))),1),zeros(1,nz+1)),zeros(nx+1,1));
+%pcolor(x_u_pc,z_r_pc,w_pc+w_pc_f);shading flat;
 axis xy;axis equal;xlim([0 L]);ylim([-H 0]);colorbar;title('croco w');
+clear x_u_pc z_r_pc w_pc
+%clear w_pc_f
 
 figure;
 plot(squeeze(x_u(1:end,32)),squeeze(ubar(1:end,32,step+1)),'*');title('croco ubar');

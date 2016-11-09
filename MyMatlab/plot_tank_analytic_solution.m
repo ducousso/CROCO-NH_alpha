@@ -20,15 +20,19 @@ x_w = repmat(((1:1:nx)-0.5) * L/nx,[nz+1 1])';
 % z_u = repmat(((1:1:nz)-0.5) * H/nz,[nx+1 1]);
 % z_w = repmat((0:1:nz) * H/nz,[nx 1]);
 
-ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_0.001_0.5period_track_pb_modified_firststep/';
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_1em3_2period_track_pb_modified_firststep_noUV_ADV/';
+ncdir = '/local/tmp/1/ducousso/CROCO-NH/Tank_NHMG_1x1_1.5em1_2period_track_pb_modified_firststep_noUV_ADV/';
 sc_r = ncread([ncdir 'tank_his.nc'],'sc_r');
 sc_w = ncread([ncdir 'tank_his.nc'],'sc_w');
 Cs_r = ncread([ncdir 'tank_his.nc'],'Cs_r');
 Cs_w = ncread([ncdir 'tank_his.nc'],'Cs_w');
 hc = ncread([ncdir 'tank_his.nc'],'hc');
 h = ncread([ncdir 'tank_his.nc'],'h');
-
 h = squeeze(h(2:end-1,32));
+%zeta or not?
+zeta = h*0;
+%or
+zeta = ncread([ncdir 'tank_his.nc'],'zeta'); zeta = squeeze(zeta(2:end-1,32,1));
 
 hinv=1./h;
 h2=(h+hc);
@@ -37,60 +41,87 @@ h2inv=1./h2;
 cff=hc*sc_r;
 for k=1:nz
     z0=hc*sc_r(k)+Cs_r(k)*h;
-    z_r(:,k)=z0.*h./(h2); % + zeta.*(1.+z0.*h2inv);
+    z_r(:,k)=z0.*h./(h2) + zeta.*(1.+z0.*h2inv);
 end
 z_r = z_r+H;
 %z_w
 cff=hc*sc_w;
 for k=1:nz
     z0=hc*sc_w(k)+Cs_w(k)*h;
-    z_w(:,k)=z0.*h./(h2);% + zeta.*(1.+z0.*h2inv);
+    z_w(:,k)=z0.*h./(h2) + zeta.*(1.+z0.*h2inv);
 end
-z_w(:,nz+1)=h*0;
+z_w(:,nz+1)=zeta;
 z_w = z_w+H;
 
 z_u = cat(1,z_r,z_r(end,:));
 
 %% analytic solution
 
-k = 2*pi/(2*L); %half wavelength
-%k = 2*pi/L    ; % one wavelength
+%k = 2*pi/(2*L);   % half wavelength
+%k = 2*pi/L;       % one wavelength
+k = 2*pi/(0.5*L); % two wavelength
+k = 2*pi/(0.25*L); % four wavelength
 
-step = 0.5;
-step = 1;
+step = 1:900;
 t = step * 0.002;
 
 grav = 9.81;
-amp = 1e-6;    %0.15;
+%amp = 1e-3;
+amp = 1.5e-1;
 
 omega_nh = sqrt(grav*k*tanh(k*H));
 
-zeta_nh = amp * cos(k*x_r(:,1)) * cos(omega_nh*t);
-u_nh = amp * omega_nh/sinh(k*H) * sin(k*x_u).*cosh(k*z_u) * sin(omega_nh*t);
-w_nh =-amp * omega_nh/sinh(k*H) * cos(k*x_w).*sinh(k*z_w) * sin(omega_nh*t);
-%U_nh = amp * omega_nh/sinh(k*H) * sin(k*x_u(:,1))*sinh(k*H)/k * sin(omega_nh*t);
-%ubar_nh = amp * omega_nh/sinh(k*H) * sin(k*x_u(:,1))*sinh(k*H)/k/H * sin(omega_nh*t);
+for kt=1:length(step)
+   
+   zeta_nh(:,kt) = amp * cos(k*x_r(:,1)) * cos(omega_nh*t(kt));
+   zeta_nh(:,kt) = zeta_nh(:,kt) ...
+       + amp^2 * k * (2+cosh(k*H))/(4*sinh(k*H)^3) * cos(2*k*x_r(:,1)) * cos(2*omega_nh*t(kt));
+             
+   u_nh(:,:,kt) = amp * (cosh(k*z_u)/sinh(k*H)) .* sin(k*x_u) * sin(omega_nh*t(kt));
+   u_nh(:,:,kt) = u_nh(:,:,kt) ...
+       + 3/4 * amp^2 * k * omega_nh * (cosh(2*k*z_u))/(sinh(k*H)^4) .* sin(2*k*x_u) * sin(2*omega_nh*t(kt));
+            
+   w_nh(:,:,kt) =-amp * omega_nh/sinh(k*H) * cos(k*x_w).*sinh(k*z_w) * sin(omega_nh*t(kt));
+   
+   %U_nh = amp * omega_nh/sinh(k*H) * sin(k*x_u(:,1))*sinh(k*H)/k * sin(omega_nh*t);
+   %ubar_nh = amp * omega_nh/sinh(k*H) * sin(k*x_u(:,1))*sinh(k*H)/k/H * sin(omega_nh*t);
+   
+   dt_zeta_nh(:,kt) =-amp * omega_nh*cos(k*x_r(:,1)) * sin(omega_nh*t(kt));
+   dt_u_nh(:,:,kt) = amp * omega_nh^2/sinh(k*H) * sin(k*x_u).*cosh(k*z_u) * cos(omega_nh*t(kt));
+   dt_w_nh(:,:,kt) =-amp * omega_nh^2/sinh(k*H) * cos(k*x_w).*sinh(k*z_w) * cos(omega_nh*t(kt));
 
-dt_zeta_nh =-amp * omega_nh*cos(k*x_r(:,1)) * sin(omega_nh*t);
-dt_u_nh = amp * omega_nh^2/sinh(k*H) * sin(k*x_u).*cosh(k*z_u) * cos(omega_nh*t);
-dt_w_nh =-amp * omega_nh^2/sinh(k*H) * cos(k*x_w).*sinh(k*z_w) * cos(omega_nh*t);
-
+end
+  
 % omega_h = sqrt(grav*H*k^2);
 % zeta_h = amp * cos(k*x_r(:,1)) * cos(omega_h*t);
 % u_h = amp * grav*k/omega_h * sin(k*x_u).*(z_u./z_u) * sin(omega_h*t);
 % w_h =-amp * grav*k^2/omega_h * cos(k*x_w).*z_w * sin(omega_h*t);
 % U_h = amp * grav*k/omega_h * sin(k*x_u(:,1))*H * sin(omega_h*t);
 
-%% plot
+%% plot vertical grid
+
+figure;
+plot(1:nz,z_r(33,:)-H,'o');
+hold on
+plot((1:nz+1)-0.5,z_w(33,:)-H,'*');
+
+%% plot time serie
+
+figure;
+plot(t,squeeze(u_nh(33,64,:)),'o');title('analytic u');
+
+%% plot snapshot
 
 figure;
 plot(x_r(:,1),zeta_nh,'o');title('analytic zeta');
 
 figure;
 subplot(1,2,1);
-plot(squeeze(u_nh(33,:)),squeeze(z_u(33,:))-H,'o');title('analytic u');
+plot(x_u(:,1),squeeze(u_nh(:,end)),'o');title('analytic u');
+%plot(squeeze(u_nh(33,:)),squeeze(z_u(33,:))-H,'o');title('analytic u');
 subplot(1,2,2);
-plot(squeeze(w_nh(1,:)),squeeze(z_w(1,:))-H,'o');title('analytic w');
+plot(x_w(:,1),squeeze(w_nh(1,:)),'o');title('analytic w');
+%plot(squeeze(w_nh(1,:)),squeeze(z_w(1,:))-H,'o');title('analytic w');
 
 figure;
 subplot(1,2,1);
