@@ -290,15 +290,9 @@ C$OMP PARALLEL DO PRIVATE(tile)
 !
       call nhydro_init(
      & Lm,Mm,N,
-     & NP_XI,NP_ETA)
-
-      call nhydro_matrices(
-     & Lm,Mm,N,
+     & NP_XI,NP_ETA,
      & 1._8/pm(0:Lm+1,0:Mm+1),
-     & 1._8/pn(0:Lm+1,0:Mm+1),
-     & 0._8*h(0:Lm+1,0:Mm+1), !zeta set to zero
-     & h(0:Lm+1,0:Mm+1),
-     & hc,theta_b,theta_s)
+     & 1._8/pn(0:Lm+1,0:Mm+1))
 
 #endif
 !
