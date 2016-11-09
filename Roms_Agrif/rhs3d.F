@@ -1068,7 +1068,8 @@ ccc            dvde =0.5*( v(i,j-1,k,nrhs) -v(i,j+1,k,nrhs) )
 # ifdef NHMG
         do i=IstrU,Iend
           rufrc(i,j)=rufrc(i,j)
-     &              +rufrc_nhmg(i,j)*om_u(i,j)*on_u(i,j)
+!     &              +rufrc_nhmg(i,j)*om_u(i,j)*on_u(i,j)
+     &              +rufrc_nhmg(i,j)
         enddo
 # endif
         if (j.ge.JstrV) then
@@ -1089,7 +1090,8 @@ ccc            dvde =0.5*( v(i,j-1,k,nrhs) -v(i,j+1,k,nrhs) )
 # ifdef NHMG
           do i=Istr,Iend
             rvfrc(i,j)=rvfrc(i,j)
-     &                +rvfrc_nhmg(i,j)*om_v(i,j)*on_v(i,j)
+!     &                +rvfrc_nhmg(i,j)*om_v(i,j)*on_v(i,j)
+     &                +rvfrc_nhmg(i,j)
           enddo
 # endif
         endif
