@@ -128,6 +128,7 @@ contains
     integer(kind=ip), intent(in) :: npxg,npyg     ! Number of processes in x and y
     integer(kind=ip), intent(in) :: nxl, nyl, nzl ! Subdomain dimensions
 
+
     ! Number of matrix coefficient
     ! The matrix coefficient is symmetric and compact
     ! 2D : nd = 5

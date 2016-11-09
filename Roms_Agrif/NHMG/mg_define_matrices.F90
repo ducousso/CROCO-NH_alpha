@@ -27,20 +27,12 @@ module mg_define_matrices
 contains
 
   !-------------------------------------------------------------------------  
-  subroutine define_matrices_topo(dx, dy, zeta, h)
+  subroutine define_matrices_topo(zeta, h)
 
-    real(kind=rp), dimension(:,:), intent(in) :: dx
-    real(kind=rp), dimension(:,:), intent(in) :: dy
     real(kind=rp), dimension(:,:), intent(in) :: zeta
     real(kind=rp), dimension(:,:), intent(in) :: h
 
     integer(kind=ip)::  lev
-
-    real(kind=rp), dimension(:,:), pointer :: dxf
-    real(kind=rp), dimension(:,:), pointer :: dxc
-
-    real(kind=rp), dimension(:,:), pointer :: dyf
-    real(kind=rp), dimension(:,:), pointer :: dyc
 
     real(kind=rp), dimension(:,:), pointer :: zetaf
     real(kind=rp), dimension(:,:), pointer :: zetac
@@ -51,8 +43,8 @@ contains
     real(kind=rp), dimension(:,:,:), pointer :: zrc
     real(kind=rp), dimension(:,:,:), pointer :: zwc
 
-    integer(kind=ip) :: nz,ny,nx
-    integer(kind=ip) :: nzf,nyf,nxf
+    integer(kind=ip) :: ny,nx
+    integer(kind=ip) :: nyf,nxf
     integer(kind=ip) :: nyc,nxc
 
     if (myrank==0) write(*,*)'- define matrices from topography (h):'
@@ -63,14 +55,9 @@ contains
 
        nx=grid(lev)%nx
        ny=grid(lev)%ny
-       nz=grid(lev)%nz
 
        if (lev == 1) then
-
-          !NG: WARNING dx, dy and h model have to be defined 
-          !NG: on (ny,nx) and not on (nx,ny) !!
-          grid(lev)%dx(0:ny+1,0:nx+1) = dx
-          grid(lev)%dy(0:ny+1,0:nx+1) = dy
+     
           grid(lev)%zeta(0:ny+1,0:nx+1) = zeta
           grid(lev)%h (0:ny+1,0:nx+1) =  h
 
@@ -78,81 +65,47 @@ contains
 
           nxf =grid(lev-1)%nx
           nyf =grid(lev-1)%ny
-          nzf =grid(lev-1)%nz
 
-          dxf => grid(lev-1)%dx
-          dyf => grid(lev-1)%dy
           zetaf  => grid(lev-1)%zeta
           hf  => grid(lev-1)%h
 
           if (grid(lev)%gather == 1) then
              nxc= nx/grid(lev)%ngx
              nyc= ny/grid(lev)%ngy
-
-             allocate(dxc(0:nyc+1,0:nxc+1))
-             allocate(dyc(0:nyc+1,0:nxc+1))
              allocate(zetac(0:nyc+1,0:nxc+1))
              allocate( hc(0:nyc+1,0:nxc+1))
           else
              nxc = nx
-             nyc = ny
-             dxc => grid(lev)%dx
-             dyc => grid(lev)%dy
+             nyc = ny        
              zetac  => grid(lev)%zeta
              hc  => grid(lev)%h
           endif
 
-          if ((aggressive).and.(lev==1)) then
+          ! Coarsen zeta and h
 
-             write(*,*) ' define matrices (aggressive).and.(lev==1) not available !'
-             STOP
+          zetac(1:nyc,1:nxc)  = qrt      * ( &
+               zetaf(1:nyf  :2,1:nxf  :2)  + &
+               zetaf(2:nyf+1:2,1:nxf  :2)  + &
+               zetaf(1:nyf  :2,2:nxf+1:2)  + &
+               zetaf(2:nyf+1:2,2:nxf+1:2)  )
 
-          else
-
-             ! Coarsen dx, dy and h
-             dxc(1:nyc,1:nxc) = hlf      * ( &
-                  dxf(1:nyf  :2,1:nxf  :2) + &
-                  dxf(2:nyf+1:2,1:nxf  :2) + &
-                  dxf(1:nyf  :2,2:nxf+1:2) + &
-                  dxf(2:nyf+1:2,2:nxf+1:2) )
-
-             dyc(1:nyc,1:nxc) = hlf      * ( &
-                  dyf(1:nyf  :2,1:nxf  :2) + &
-                  dyf(2:nyf+1:2,1:nxf  :2) + &
-                  dyf(1:nyf  :2,2:nxf+1:2) + &
-                  dyf(2:nyf+1:2,2:nxf+1:2) )
-
-             zetac(1:nyc,1:nxc)  = qrt      * ( &
-                  zetaf(1:nyf  :2,1:nxf  :2)  + &
-                  zetaf(2:nyf+1:2,1:nxf  :2)  + &
-                  zetaf(1:nyf  :2,2:nxf+1:2)  + &
-                  zetaf(2:nyf+1:2,2:nxf+1:2)  )
-
-             hc(1:nyc,1:nxc)  = qrt      * ( &
-                  hf(1:nyf  :2,1:nxf  :2)  + &
-                  hf(2:nyf+1:2,1:nxf  :2)  + &
-                  hf(1:nyf  :2,2:nxf+1:2)  + &
-                  hf(2:nyf+1:2,2:nxf+1:2)  )
-
-          endif ! aggressive
+          hc(1:nyc,1:nxc)  = qrt      * ( &
+               hf(1:nyf  :2,1:nxf  :2)  + &
+               hf(2:nyf+1:2,1:nxf  :2)  + &
+               hf(1:nyf  :2,2:nxf+1:2)  + &
+               hf(2:nyf+1:2,2:nxf+1:2)  )
 
           if (grid(lev)%gather == 1) then
 
-             call gather(lev,dxc,grid(lev)%dx)
-             call gather(lev,dyc,grid(lev)%dy)
              call gather(lev,zetac,grid(lev)%zeta)
              call gather(lev, hc,grid(lev)%h)
 
-             deallocate(dxc)
-             deallocate(dyc)
              deallocate(zetac)
              deallocate( hc)
           endif
 
        endif ! lev == 1
 
-       call fill_halo(lev, grid(lev)%dx)
-       call fill_halo(lev, grid(lev)%dy)
        call fill_halo(lev, grid(lev)%zeta)
        call fill_halo(lev, grid(lev)%h)
 
@@ -161,35 +114,32 @@ contains
 
        ! Compute zr and zw
        call setup_zr_zw                    (  & 
-               nhhc,nhtheta_b,nhtheta_s,     &
-               grid(lev)%zeta,grid(lev)%h,   &  ! input args
-               grid(lev)%zr, grid(lev)%zw,   &  ! output args
-               coord_type='new_s_coord'      )    ! optional
+            nhhc,nhtheta_b,nhtheta_s,     &
+            grid(lev)%zeta,grid(lev)%h,   &  ! input args
+            grid(lev)%zr, grid(lev)%zw,   &  ! output args
+            coord_type='new_s_coord'      )    ! optional
 
        call fill_halo(lev,grid(lev)%zr) ! Special fill_halo nh = 2
        call fill_halo(lev,grid(lev)%zw) ! Special fill_halo nh = 2
 
        if (netcdf_output) then
-          call write_netcdf(grid(lev)%dx,vname='dx',netcdf_file_name='dx.nc',rank=myrank,iter=lev)
-          call write_netcdf(grid(lev)%dy,vname='dy',netcdf_file_name='dy.nc',rank=myrank,iter=lev)
           call write_netcdf(grid(lev)%zeta,vname='zeta',netcdf_file_name='zeta.nc',rank=myrank,iter=lev)
           call write_netcdf(grid(lev)%h ,vname='h' ,netcdf_file_name='h.nc' ,rank=myrank,iter=lev)
           call write_netcdf(grid(lev)%zr,vname='zr',netcdf_file_name='zr.nc',rank=myrank,iter=lev)
           call write_netcdf(grid(lev)%zw,vname='zw',netcdf_file_name='zw.nc',rank=myrank,iter=lev)
        endif
 
-       ! Define matrix coefficients from dx, dy, zr and zw coarsened
-       call define_matrix(lev, grid(lev)%dx, grid(lev)%dy, grid(lev)%zr, grid(lev)%zw)
+       ! Define matrix coefficients from zr and zw coarsened
+       call define_matrix(lev, grid(lev)%zr, grid(lev)%zw)
 
     enddo ! lev
 
   end subroutine define_matrices_topo
 
   !-----------------------------------------------------------------------------------
-  subroutine define_matrix(lev, dx, dy, zr, zw)
+  subroutine define_matrix(lev, zr, zw)
 
     integer(kind=ip),intent(in):: lev
-    real(kind=rp), dimension(:,:),   pointer, intent(in) :: dx, dy
     real(kind=rp), dimension(:,:,:), pointer, intent(in) :: zr, zw
 
     ! Define matrix coefficients cA
@@ -207,6 +157,7 @@ contains
     integer(kind=ip):: nx, ny, nz
 
     real(kind=rp) :: Arz
+    real(kind=rp), dimension(:,:),     pointer :: dx,dy
     real(kind=rp), dimension(:,:,:),   pointer :: dzw
     real(kind=rp), dimension(:,:,:),   pointer :: zydx,zxdy
     real(kind=rp), dimension(:,:,:),   pointer :: cw
@@ -215,6 +166,9 @@ contains
     nx = grid(lev)%nx
     ny = grid(lev)%ny
     nz = grid(lev)%nz
+
+    dx => grid(lev)%dx 
+    dy => grid(lev)%dy 
 
     cA => grid(lev)%cA 
 

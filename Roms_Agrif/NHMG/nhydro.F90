@@ -7,6 +7,7 @@ module nhydro
   use mg_namelist
   use mg_tictoc
   use mg_mpi_exchange
+  use mg_horiz_grids
   use mg_netcdf_out
   use mg_set_bbc
   use mg_compute_fluxes
@@ -22,10 +23,14 @@ module nhydro
 contains
 
   !--------------------------------------------------------------
-  subroutine nhydro_init(nx,ny,nz,npxg,npyg)
+  subroutine nhydro_init(nx,ny,nz,npxg,npyg,dxa,dya)
       
     integer(kind=ip), intent(in) :: nx, ny, nz
     integer(kind=ip), intent(in) :: npxg, npyg
+
+    real(kind=rp), dimension(0:nx+1,0:ny+1), intent(in) :: dxa, dya
+    real(kind=rp), dimension(0:ny+1,0:nx+1), target     :: dxb, dyb
+    real(kind=rp), dimension(:,:)          , pointer    :: dx, dy
 
     if (myrank==0) write(*,*)' nhydro_init:'
 
@@ -36,6 +41,12 @@ contains
     call define_grids(npxg,npyg,nx,ny,nz)
 
     call define_neighbours()
+
+    dxb = transpose(dxa)
+    dyb = transpose(dya)
+    dx => dxb
+    dy => dyb
+    call fill_horiz_grids(dx,dy) ! because horizontal grids do not depend on time
 
     call print_grids()
 
@@ -230,18 +241,18 @@ contains
 !    uf => ufa
 !    vf => vfa
 
-    if (check_output) then
-       call write_netcdf(u,vname='u',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
-       call write_netcdf(v,vname='v',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
-       call write_netcdf(w,vname='w',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
-    endif
+!    if (check_output) then
+!       call write_netcdf(u,vname='u',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
+!       call write_netcdf(v,vname='v',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
+!       call write_netcdf(w,vname='w',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
+!    endif
 
     call compute_fluxes(zr,zw,u,v,w,uf,vf)
 
-    if (check_output) then
-       call write_netcdf(uf,vname='uf',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
-       call write_netcdf(vf,vname='vf',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
-    endif
+!    if (check_output) then
+!       call write_netcdf(uf,vname='uf',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
+!       call write_netcdf(vf,vname='vf',netcdf_file_name='fl.nc',rank=myrank,iter=iter_fluxes)
+!    endif
 
 !!! dirty reshape arrays indexing kji -> ijk !!!
    do i = 1,nx+1
@@ -385,13 +396,13 @@ contains
 !    v => va
 !    w => wa
 
-       if (check_output) then
-          call write_netcdf(uf_bar,vname='uf_bar',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-          call write_netcdf(vf_bar,vname='vf_bar',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-          call write_netcdf(u,vname='uin',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-          call write_netcdf(v,vname='vin',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-          call write_netcdf(w,vname='win',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-       endif
+!       if (check_output) then
+!          call write_netcdf(uf_bar,vname='uf_bar',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+!          call write_netcdf(vf_bar,vname='vf_bar',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+!          call write_netcdf(u,vname='uin',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+!          call write_netcdf(v,vname='vin',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+!          call write_netcdf(w,vname='win',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+!       endif
 
     if ((present(ufa)).and.(present(vfa))) then
  
@@ -411,15 +422,15 @@ contains
 
     endif
 
-       if (check_output) then
-          call write_netcdf(u,vname='uout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-          call write_netcdf(v,vname='vout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-          call write_netcdf(w,vname='wout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-          if ((present(ufa)).and.(present(vfa))) then
-          call write_netcdf(uf,vname='uf',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-          call write_netcdf(vf,vname='vf',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-          endif
-       endif
+!       if (check_output) then
+!          call write_netcdf(u,vname='uout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+!          call write_netcdf(v,vname='vout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+!          call write_netcdf(w,vname='wout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+!          if ((present(ufa)).and.(present(vfa))) then
+!          call write_netcdf(uf,vname='uf',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+!          call write_netcdf(vf,vname='vf',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+!          endif
+!       endif
 
 !!! dirty reshape arrays indexing kji -> ijk !!!
     do i = 1,nx+1
@@ -475,29 +486,23 @@ contains
   end subroutine nhydro_coupling
 
   !--------------------------------------------------------------
-  subroutine nhydro_matrices(nx,ny,nz,dxa,dya,zetaa,ha,hc,theta_b,theta_s)
+  subroutine nhydro_matrices(nx,ny,nz,zetaa,ha,hc,theta_b,theta_s)
 
     integer(kind=ip), intent(in) :: nx, ny, nz
 
-    real(kind=rp), dimension(0:nx+1,0:ny+1), intent(in) :: dxa, dya, zetaa, ha
+    real(kind=rp), dimension(0:nx+1,0:ny+1), intent(in) :: zetaa, ha
     real(kind=rp),                           intent(in) :: hc, theta_b, theta_s
-
-    real(kind=rp), dimension(0:ny+1,0:nx+1), target :: dxb, dyb, zetab, hb
-
-    real(kind=rp), dimension(:,:)  , pointer :: dx, dy, zeta, h
+    real(kind=rp), dimension(0:ny+1,0:nx+1), target     :: zetab, hb
+    real(kind=rp), dimension(:,:)          , pointer    :: zeta, h
 
     integer(kind=ip), save :: iter_matrices=-1
     iter_matrices = iter_matrices + 1
 
     if (myrank==0) write(*,*)' nhydro_matrices:'
 
-    dxb = transpose(dxa)
-    dyb = transpose(dya)
     zetab = transpose(zetaa)
     hb = transpose(ha)
 
-    dx => dxb
-    dy => dyb
     zeta => zetab
     h => hb
 
@@ -505,10 +510,15 @@ contains
     nhtheta_b = theta_b
     nhtheta_s = theta_s
 
-    call define_matrices(dx,dy,zeta,h)
+    call define_matrices(zeta,h)
 
     if (check_output) then
+       if ((iter_matrices .EQ. 199) .OR. (iter_matrices .EQ. 200) .OR. &
+           (iter_matrices .EQ. 999) .OR. (iter_matrices .EQ. 1000) .OR. &
+           (iter_matrices .EQ. 1999) .OR. (iter_matrices .EQ. 2000) .OR. &
+           (iter_matrices .GE. 3499)) then
        call write_netcdf(grid(1)%cA,vname='cA',netcdf_file_name='so.nc',rank=myrank,iter=iter_matrices)
+       endif
     endif
 
   end subroutine nhydro_matrices
@@ -541,7 +551,7 @@ contains
 
     integer(kind=ip) :: i,j,k
 
-    integer(kind=ip), save :: iter_solve=0
+    integer(kind=ip), save :: iter_solve=-1
     iter_solve = iter_solve + 1
 
     if (myrank==0) write(*,*)' nhydro_solve:'
@@ -604,33 +614,53 @@ contains
 !    w => wa
 
        if (check_output) then
+       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+           (iter_solve .GE. 3499)) then
           call write_netcdf(u,vname='uin',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
           call write_netcdf(v,vname='vin',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
           call write_netcdf(w,vname='win',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+          endif
        endif
 
     !- step 1 - 
     call compute_rhs(zr,zw,u,v,w)
 
     if (check_output) then
+       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+           (iter_solve .GE. 3499)) then
        call write_netcdf(grid(1)%b,vname='b',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+       endif
     endif
 
     !- step 2 -
     call solve_p(tol,maxite)
 
     if (check_output) then
+       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+           (iter_solve .GE. 3499)) then
        call write_netcdf(grid(1)%p,vname='p',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
        call write_netcdf(grid(1)%r,vname='r',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+       endif
     endif
 
     !- step 3 -
     call correct_uvw(zr,zw,u,v,w)
 
        if (check_output) then
+       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+           (iter_solve .GE. 3499)) then
           call write_netcdf(u,vname='uout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
           call write_netcdf(v,vname='vout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
           call write_netcdf(w,vname='wout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+          endif
        endif
 
     !- step 4 -
@@ -642,8 +672,13 @@ contains
        call compute_barofrc(zr,zw,dt,ru,rv)
 
        if (check_output) then
+       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+           (iter_solve .GE. 3499)) then
           call write_netcdf(ru,vname='ru',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
           call write_netcdf(rv,vname='rv',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+          endif
        endif
 
     endif
@@ -652,7 +687,12 @@ contains
     call compute_rhs(zr,zw,u,v,w)
 
     if (check_output) then
+       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+           (iter_solve .GE. 3499)) then
        call write_netcdf(grid(1)%b,vname='bout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
+       endif
     endif
 
 !!! dirty reshape arrays indexing kji -> ijk !!!

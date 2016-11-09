@@ -135,6 +135,7 @@ include Makedefs
 	mg_grids.F90         \
 	mg_mpi_exchange.F90  \
 	mg_gather.F90        \
+	mg_horiz_grids.F90        \
 	mg_set_bbc.F90   \
 	mg_compute_fluxes.F90   \
 	mg_btbc_coupling.F90   \
