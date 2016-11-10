@@ -220,7 +220,7 @@ contains
     allocate(uf_tmp(1:nz,0:ny+1,0:nx+1))
     uf_tmp(:,1:ny,1:nx+1)=uf(:,1:ny,1:nx+1)
     call fill_halo(1,uf_tmp,lbc_null='u')
-    uf(:,1:ny,1:nx+1)=uf_tmp(:,1:ny,1:nx+1)
+    uf(:,0:ny+1,1:nx+1)=uf_tmp(:,0:ny+1,1:nx+1)
     deallocate(uf_tmp)
 
     !- vf -!
@@ -294,7 +294,7 @@ contains
     allocate(vf_tmp(1:nz,0:ny+1,0:nx+1))
     vf_tmp(:,1:ny+1,1:nx)=vf(:,1:ny+1,1:nx)
     call fill_halo(1,vf_tmp,lbc_null='v')
-    vf(:,1:ny+1,1:nx)=vf_tmp(:,1:ny+1,1:nx)
+    vf(:,1:ny+1,0:nx+1)=vf_tmp(:,1:ny+1,0:nx+1)
     deallocate(vf_tmp)
 
     deallocate(dz)

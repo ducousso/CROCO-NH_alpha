@@ -467,22 +467,13 @@
 
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # ifdef NHMG
-c$$$
+
       call nhydro_matrices(
      & Lm,Mm,N,
      & z_w(0:Lm+1,0:Mm+1,N),
      & h(0:Lm+1,0:Mm+1),
      & hc,theta_b,theta_s)
-c$$$
-c$$$#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
-c$$$      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        u(START_2D_ARRAY,1,nnew))
-c$$$      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        v(START_2D_ARRAY,1,nnew))
-c$$$      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        wz(START_2D_ARRAY,0,nnew))     
-c$$$#  endif
-c$$$
+
       call nhydro_solve(
      & Lm, Mm, N,
      & z_r(0:Lm+1,0:Mm+1,1:N),
@@ -493,17 +484,11 @@ c$$$
      & dt,
      & rufrc_nhmg(1:Lm+1,0:Mm+1),
      & rvfrc_nhmg(0:Lm+1,1:Mm+1) )
-c$$$
-c$$$      call nhydro_check_nondivergence(
-c$$$     & Lm, Mm, N,
-c$$$     & u(1:Lm+1,0:Mm+1,1:N,nnew),
-c$$$     & v(0:Lm+1,1:Mm+1,1:N,nnew),
-c$$$     & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
-c$$$
+
       call v3dbc_tile (Istr,Iend,Jstr,Jend, grad)   
       call u3dbc_tile (Istr,Iend,Jstr,Jend, grad)
       call w3dbc_tile (Istr,Iend,Jstr,Jend, grad)   
-c$$$
+
 # endif
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 

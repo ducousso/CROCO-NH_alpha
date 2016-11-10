@@ -565,11 +565,10 @@
         enddo   !<-- itrc  !--> discard DC
       enddo     !<-- j
 
-
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # ifdef NHMG
       if (FIRST_TIME_STEP) then
-c$$$
+
       call nhydro_matrices(
      & Lm,Mm,N,
      & z_w(0:Lm+1,0:Mm+1,N),
@@ -604,15 +603,6 @@ c$$$
      &                (Hz(i,j,N))
         enddo
       enddo
-
-c$$$#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
-c$$$      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        ru(START_2D_ARRAY,1))
-c$$$      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        rv(START_2D_ARRAY,1))
-c$$$      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        rw(START_2D_ARRAY,0))     
-c$$$#  endif
 
       call nhydro_solve(
      & Lm, Mm, N,
@@ -671,12 +661,12 @@ c$$$#  endif
             enddo
           enddo
         endif
-      enddo      !<-- j
-c$$$
+      enddo
+
 !      call v3dbc_tile (Istr,Iend,Jstr,Jend, WORK)   
 !      call u3dbc_tile (Istr,Iend,Jstr,Jend, WORK)
 !      call w3dbc_tile (Istr,Iend,Jstr,Jend, WORK) 
-c$$$
+
       endif
 # endif
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -1008,22 +998,13 @@ c$$$
 
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # ifdef NHMG
-c$$$
+
       call nhydro_matrices(
      & Lm,Mm,N,
      & z_w(0:Lm+1,0:Mm+1,N),
      & h(0:Lm+1,0:Mm+1),
      & hc,theta_b,theta_s)
-c$$$
-c$$$#  if defined EW_PERIODIC || defined NS_PERIODIC || defined MPI
-c$$$      call exchange_u3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        u(START_2D_ARRAY,1,nnew))
-c$$$      call exchange_v3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        v(START_2D_ARRAY,1,nnew))
-c$$$      call exchange_w3d_tile (Istr,Iend,Jstr,Jend,
-c$$$     &                        wz(START_2D_ARRAY,0,nnew))     
-c$$$#  endif
-c$$$
+
       call nhydro_solve(
      & Lm, Mm, N,
      & z_r(0:Lm+1,0:Mm+1,1:N),
@@ -1031,11 +1012,11 @@ c$$$
      & u(1:Lm+1,0:Mm+1,1:N,nnew),
      & v(0:Lm+1,1:Mm+1,1:N,nnew),
      & wz(0:Lm+1,0:Mm+1,0:N,nnew) )
-c$$$
-      call v3dbc_tile (Istr,Iend,Jstr,Jend, WORK)   
+
       call u3dbc_tile (Istr,Iend,Jstr,Jend, WORK)
+      call v3dbc_tile (Istr,Iend,Jstr,Jend, WORK)   
       call w3dbc_tile (Istr,Iend,Jstr,Jend, WORK) 
-c$$$
+
 # endif
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 

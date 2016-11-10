@@ -80,9 +80,10 @@ contains
 !!! dirty reshape arrays indexing ijk -> kji !!!
     allocate(zrb(1:nz,0:ny+1,0:nx+1))
     allocate(zwb(0:nz,0:ny+1,0:nx+1))
-    allocate(ub(1:nz,0:ny+1,  nx+1))
-    allocate(vb(1:nz,  ny+1,0:nx+1))
-    allocate(wb(0:nz,0:ny+1,0:nx+1))
+    allocate( ub(1:nz,0:ny+1,0:nx+1))
+    allocate( vb(1:nz,0:ny+1,0:nx+1))
+    allocate( wb(0:nz,0:ny+1,0:nx+1))
+    !-UB-!
     do i = 1,nx+1
       do j = 0,ny+1
         do k = 1,nz
@@ -90,6 +91,13 @@ contains
         enddo
       enddo
     enddo
+    i = 0
+    do j = 0,ny+1
+       do k = 1,nz
+          ub(k,j,i) = 0._rp
+       enddo
+    enddo
+    !-VB-!
     do i = 0,nx+1
       do j = 1,ny+1
         do k = 1,nz
@@ -97,6 +105,13 @@ contains
         enddo
       enddo
     enddo
+    j = 0
+    do i = 0,nx+1
+       do k = 1,nz
+          vb(k,j,i) = 0._rp
+       enddo
+    enddo
+    !-WB-!
     do i = 0,nx+1
       do j = 0,ny+1
         do k = 0,nz
@@ -124,6 +139,10 @@ contains
     v => vb
     w => wb
 !!!
+
+    call fill_halo(1,u,lbc_null='u')
+    call fill_halo(1,v,lbc_null='v')
+    call fill_halo(1,w)
 
     call set_bbc(zr,zw,u,v,w)
 
@@ -317,6 +336,8 @@ contains
     real(kind=rp), dimension(:,:,:), allocatable, target :: ufb,vfb
 !!! 
 
+    real(kind=rp), dimension(:,:,:), pointer :: Tmp3Darray
+
     integer(kind=ip) :: i,j,k
 
     integer(kind=ip), save :: iter_coupling=0
@@ -339,11 +360,21 @@ contains
           uf_barb(j,i) = uf_bara(i,j)
       enddo
     enddo
+    allocate(Tmp3Darray(1:nz,0:ny+1, 0:nx+1))
+    Tmp3Darray(:,:,:) = 0._rp
+    Tmp3Darray(1,0:ny+1,1:nx+1)=uf_barb(0:ny+1,1:nx+1)
+    call fill_halo(1,Tmp3Darray,lbc_null='u')
+    uf_barb(0:ny+1,1:nx+1)=Tmp3Darray(1,0:ny+1,1:nx+1)
     do i = 0,nx+1
       do j = 1,ny+1
           vf_barb(j,i) = vf_bara(i,j)
       enddo
     enddo
+    Tmp3Darray(:,:,:) = 0._rp
+    Tmp3Darray(1,1:ny+1,0:nx+1)=vf_barb(1:ny+1,0:nx+1)
+    call fill_halo(1,Tmp3Darray,lbc_null='v')
+    vf_barb(1:ny+1,0:nx+1)=Tmp3Darray(1,1:ny+1,0:nx+1)
+    deallocate(Tmp3Darray)
     do i = 0,nx+1
       do j = 0,ny+1
         do k = 1,nz
@@ -386,6 +417,8 @@ contains
     u => ub
     v => vb
     w => wb
+
+    call fill_halo(1,w)
 !!!
 
 !    zr => zra
@@ -396,13 +429,13 @@ contains
 !    v => va
 !    w => wa
 
-!       if (check_output) then
-!          call write_netcdf(uf_bar,vname='uf_bar',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-!          call write_netcdf(vf_bar,vname='vf_bar',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-!          call write_netcdf(u,vname='uin',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-!          call write_netcdf(v,vname='vin',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-!          call write_netcdf(w,vname='win',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-!       endif
+       if (check_output) then
+          call write_netcdf(uf_bar,vname='uf_bar',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(vf_bar,vname='vf_bar',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(u,vname='uin',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(v,vname='vin',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(w,vname='win',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+       endif
 
     if ((present(ufa)).and.(present(vfa))) then
  
@@ -422,15 +455,15 @@ contains
 
     endif
 
-!       if (check_output) then
-!          call write_netcdf(u,vname='uout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-!          call write_netcdf(v,vname='vout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-!          call write_netcdf(w,vname='wout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-!          if ((present(ufa)).and.(present(vfa))) then
-!          call write_netcdf(uf,vname='uf',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-!          call write_netcdf(vf,vname='vf',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
-!          endif
-!       endif
+       if (check_output) then
+          call write_netcdf(u,vname='uout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(v,vname='vout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(w,vname='wout',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          if ((present(ufa)).and.(present(vfa))) then
+          call write_netcdf(uf,vname='uf',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          call write_netcdf(vf,vname='vf',netcdf_file_name='co.nc',rank=myrank,iter=iter_coupling)
+          endif
+       endif
 
 !!! dirty reshape arrays indexing kji -> ijk !!!
     do i = 1,nx+1
@@ -564,9 +597,9 @@ contains
 !!! dirty reshape arrays indexing ijk -> kji !!!
     allocate(zrb(1:nz,0:ny+1,0:nx+1))
     allocate(zwb(0:nz,0:ny+1,0:nx+1))
-    allocate(ub(1:nz,0:ny+1,  nx+1))
-    allocate(vb(1:nz,  ny+1,0:nx+1))
-    allocate(wb(0:nz,0:ny+1,0:nx+1))
+    allocate( ub(1:nz,0:ny+1,0:nx+1))
+    allocate( vb(1:nz,0:ny+1,0:nx+1))
+    allocate( wb(0:nz,0:ny+1,0:nx+1))
     do i = 0,nx+1
       do j = 0,ny+1
         do k = 1,nz
@@ -588,6 +621,12 @@ contains
         enddo
       enddo
     enddo
+    i = 0
+    do j = 0,ny+1
+       do k = 1,nz
+          ub(k,j,i) = 0._rp
+       enddo
+    enddo
     do i = 0,nx+1
       do j = 1,ny+1
         do k = 1,nz
@@ -595,12 +634,18 @@ contains
         enddo
       enddo
     enddo
+    j = 0
     do i = 0,nx+1
-      do j = 0,ny+1
-        do k = 0,nz
-          wb(k,j,i) = wa(i,j,k)
-        enddo
-      enddo
+       do k = 1,nz
+          vb(k,j,i) = 0._rp
+       enddo
+    enddo
+    do i = 0,nx+1
+       do j = 0,ny+1
+          do k = 0,nz
+             wb(k,j,i) = wa(i,j,k)
+          enddo
+       enddo
     enddo
     zr => zrb
     zw => zwb
@@ -609,58 +654,61 @@ contains
     w => wb
 !!! 
 
-!    u => ua
-!    v => va
-!    w => wa
+    call fill_halo(1,u,lbc_null='u')
+    call fill_halo(1,v,lbc_null='v')
+    call fill_halo(1,w)
+    !    u => ua
+    !    v => va
+    !    w => wa
 
        if (check_output) then
-       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
-           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
-           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
-           (iter_solve .GE. 3499)) then
+!       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+!           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+!           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+!           (iter_solve .GE. 3499)) then
           call write_netcdf(u,vname='uin',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
           call write_netcdf(v,vname='vin',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
           call write_netcdf(w,vname='win',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
-          endif
+!          endif
        endif
 
     !- step 1 - 
     call compute_rhs(zr,zw,u,v,w)
 
     if (check_output) then
-       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
-           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
-           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
-           (iter_solve .GE. 3499)) then
+!       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+!           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+!           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+!           (iter_solve .GE. 3499)) then
        call write_netcdf(grid(1)%b,vname='b',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
-       endif
+!       endif
     endif
 
     !- step 2 -
     call solve_p(tol,maxite)
 
     if (check_output) then
-       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
-           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
-           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
-           (iter_solve .GE. 3499)) then
+!       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+!           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+!           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+!           (iter_solve .GE. 3499)) then
        call write_netcdf(grid(1)%p,vname='p',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
        call write_netcdf(grid(1)%r,vname='r',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
-       endif
+!       endif
     endif
 
     !- step 3 -
     call correct_uvw(zr,zw,u,v,w)
 
        if (check_output) then
-       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
-           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
-           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
-           (iter_solve .GE. 3499)) then
+!       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+!           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+!           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+!           (iter_solve .GE. 3499)) then
           call write_netcdf(u,vname='uout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
           call write_netcdf(v,vname='vout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
           call write_netcdf(w,vname='wout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
-          endif
+!          endif
        endif
 
     !- step 4 -
@@ -672,13 +720,13 @@ contains
        call compute_barofrc(zr,zw,dt,ru,rv)
 
        if (check_output) then
-       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
-           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
-           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
-           (iter_solve .GE. 3499)) then
+!       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+!           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+!           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+!           (iter_solve .GE. 3499)) then
           call write_netcdf(ru,vname='ru',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
           call write_netcdf(rv,vname='rv',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
-          endif
+!          endif
        endif
 
     endif
@@ -687,35 +735,35 @@ contains
     call compute_rhs(zr,zw,u,v,w)
 
     if (check_output) then
-       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
-           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
-           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
-           (iter_solve .GE. 3499)) then
+!       if ((iter_solve .EQ. 199) .OR. (iter_solve .EQ. 200) .OR. &
+!           (iter_solve .EQ. 999) .OR. (iter_solve .EQ. 1000) .OR. &
+!           (iter_solve .EQ. 1999) .OR. (iter_solve .EQ. 2000) .OR. &
+!           (iter_solve .GE. 3499)) then
        call write_netcdf(grid(1)%b,vname='bout',netcdf_file_name='so.nc',rank=myrank,iter=iter_solve)
-       endif
+!       endif
     endif
 
 !!! dirty reshape arrays indexing kji -> ijk !!!
-   do i = 1,nx+1
-      do j = 0,ny+1
-        do k = 1,nz
-          ua(i,j,k) = ub(k,j,i)
-        enddo
-      enddo
+    do i = 1,nx+1
+       do j = 0,ny+1
+          do k = 1,nz
+             ua(i,j,k) = ub(k,j,i)
+          enddo
+       enddo
     enddo
     do i = 0,nx+1
-      do j = 1,ny+1
-        do k = 1,nz
-          va(i,j,k) = vb(k,j,i)
-        enddo
-      enddo
+       do j = 1,ny+1
+          do k = 1,nz
+             va(i,j,k) = vb(k,j,i)
+          enddo
+       enddo
     enddo
     do i = 0,nx+1
-      do j = 0,ny+1
-        do k = 0,nz
-          wa(i,j,k) = wb(k,j,i)
-        enddo
-      enddo
+       do j = 0,ny+1
+          do k = 0,nz
+             wa(i,j,k) = wb(k,j,i)
+          enddo
+       enddo
     enddo
     deallocate(zrb)
     deallocate(zwb)
@@ -729,7 +777,7 @@ contains
     if (associated(w)) w => null()
 
     call toc(1,'nhydro_solve')	
- 
+
   end subroutine nhydro_solve
 
   !--------------------------------------------------------------

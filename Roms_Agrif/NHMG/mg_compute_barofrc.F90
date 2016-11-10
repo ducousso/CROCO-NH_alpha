@@ -99,10 +99,6 @@ contains
        do j = 0,ny+1 
 !       do j = 1,ny
 
-!          do k = 1,nz
-!             ru(i,j) = ru(i,j) - hlf*(dz(k,j,i)+dz(k,j,i-1)) / dxu(j,i) *(p(k,j,i)-p(k,j,i-1))
-!          enddo
-
           k = 1
 
              ru(i,j) = ru(i,j) &
@@ -152,10 +148,6 @@ contains
     do i = 0,nx+1
 !    do i = 1,nx
        do j = 1,ny+1 
-
-!          do k = 1,nz
-!             rv(i,j) = rv(i,j) - hlf*(dz(k,j,i)+dz(k,j-1,i)) / dyv(j,i) *(p(k,j,i)-p(k,j-1,i))
-!          enddo
 
           k = 1
 

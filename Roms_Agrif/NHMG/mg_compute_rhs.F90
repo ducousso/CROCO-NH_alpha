@@ -187,6 +187,7 @@ contains
     !- if (myrank==0) write(*,*)'- compute rhs: uf'
 
     uf => grid(1)%dummy3Dnz
+    uf(:,:,:) = zero
 
     k = 1 ! lower level
 
@@ -262,14 +263,14 @@ contains
 
     call fill_halo(1,uf,lbc_null='u')
 
-    if (check_output) then
+!    if (check_output) then
 !       if ((iter_rhs .EQ. 397) .OR. (iter_rhs .EQ. 399) .OR. &
 !           (iter_rhs .EQ. 1997) .OR. (iter_rhs .EQ. 1999) .OR. &
 !           (iter_rhs .EQ. 3997) .OR. (iter_rhs .EQ. 3999) .OR. &
 !           (iter_rhs .GE. 6997)) then
-       call write_netcdf(uf,vname='uf',netcdf_file_name='rhs.nc',rank=myrank,iter=iter_rhs)
+!       call write_netcdf(uf,vname='uf',netcdf_file_name='rhs.nc',rank=myrank,iter=iter_rhs)
 !       endif
-    endif
+!    endif
 
     do i = 1,nx
        do j = 1,ny 
@@ -289,6 +290,7 @@ contains
     !- if (myrank==0) write(*,*)'- compute rhs: vf'
 
     vf => grid(1)%dummy3Dnz
+    vf(:,:,:) = zero
 
     k = 1 !lower level
 
@@ -366,14 +368,14 @@ contains
 
     call fill_halo(1,vf,lbc_null='v')
 
-    if (check_output) then
+!    if (check_output) then
 !    if ((iter_rhs .EQ. 397) .OR. (iter_rhs .EQ. 399) .OR. &
 !           (iter_rhs .EQ. 1997) .OR. (iter_rhs .EQ. 1999) .OR. &
 !           (iter_rhs .EQ. 3997) .OR. (iter_rhs .EQ. 3999) .OR. &
 !           (iter_rhs .GE. 6997)) then
-       call write_netcdf(vf,vname='vf',netcdf_file_name='rhs.nc',rank=myrank,iter=iter_rhs)
+!       call write_netcdf(vf,vname='vf',netcdf_file_name='rhs.nc',rank=myrank,iter=iter_rhs)
 !       endif
-    endif
+!    endif
 
     do i = 1,nx
        do j = 1,ny 
@@ -393,6 +395,7 @@ contains
     !- if (myrank==0) write(*,*)'- compute rhs: wf'
 
     wf => grid(1)%dummy3Dnzp
+    wf(:,:,:) = zero
 
     k = 1 !bottom
 
@@ -441,14 +444,14 @@ contains
        enddo
     enddo
 
-    if (check_output) then
+!    if (check_output) then
 !       if ((iter_rhs .EQ. 397) .OR. (iter_rhs .EQ. 399) .OR. &
 !           (iter_rhs .EQ. 1997) .OR. (iter_rhs .EQ. 1999) .OR. &
 !           (iter_rhs .EQ. 3997) .OR. (iter_rhs .EQ. 3999) .OR. &
 !           (iter_rhs .GE. 6997)) then
-       call write_netcdf(wf,vname='wf',netcdf_file_name='rhs.nc',rank=myrank,iter=iter_rhs)
+!       call write_netcdf(wf,vname='wf',netcdf_file_name='rhs.nc',rank=myrank,iter=iter_rhs)
 !       endif
-    endif
+!    endif
 
     do i = 1,nx
        do j = 1,ny 

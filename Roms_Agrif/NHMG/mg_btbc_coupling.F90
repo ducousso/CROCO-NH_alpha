@@ -321,9 +321,10 @@ contains
 !!$    deallocate(uf_integr_tmp)
 
     allocate(uf_integr_tmp(1:nz,0:ny+1,0:nx+1))
+    uf_integr_tmp(:,:,:) = zero
     uf_integr_tmp(1,1:ny,1:nx+1)=uf_integr(1:ny,1:nx+1)
     call fill_halo(1,uf_integr_tmp,lbc_null='u')
-    uf_integr(1:ny,1:nx+1)=uf_integr_tmp(1,1:ny,1:nx+1)
+    uf_integr(0:ny+1,0:nx+1)=uf_integr_tmp(1,0:ny+1,0:nx+1)
     deallocate(uf_integr_tmp)
 
     if (check_output) then
@@ -471,9 +472,10 @@ contains
 !!$    deallocate(vf_integr_tmp)
 
     allocate(vf_integr_tmp(1:nz,0:ny+1,0:nx+1))
+    vf_integr_tmp(:,:,:) = zero
     vf_integr_tmp(1,1:ny+1,1:nx)=vf_integr(1:ny+1,1:nx)
     call fill_halo(1,vf_integr_tmp,lbc_null='v')
-    vf_integr(1:ny+1,1:nx)=vf_integr_tmp(1,1:ny+1,1:nx)
+    vf_integr(0:ny+1,0:nx+1)=vf_integr_tmp(1,0:ny+1,0:nx+1)
     deallocate(vf_integr_tmp)
 
     if (check_output) then
@@ -555,6 +557,11 @@ contains
        enddo
     enddo
 
+    call fill_halo(1,wc)
+    if (check_output) then
+       call write_netcdf(wc,vname='wcin',netcdf_file_name='coin.nc',rank=myrank,iter=iter_coupling_in)
+    endif
+
     do i = 1,nx+1  
        do j = 1,ny 
 !       do j = 0,ny+1
@@ -597,9 +604,10 @@ contains
     enddo
 
     allocate(uf_integr_tmp(1:nz,0:ny+1,0:nx+1))
+    uf_integr_tmp(:,:,:) = zero
     uf_integr_tmp(:,1:ny,1:nx+1)=u(:,1:ny,1:nx+1)
     call fill_halo(1,uf_integr_tmp,lbc_null='u')
-    u(:,1:ny,1:nx+1)=uf_integr_tmp(:,1:ny,1:nx+1)
+    u(:,0:ny+1,1:nx+1)=uf_integr_tmp(:,0:ny+1,1:nx+1)
     deallocate(uf_integr_tmp)
 
     do i = 1,nx
@@ -645,9 +653,10 @@ contains
     enddo
 
     allocate(vf_integr_tmp(1:nz,0:ny+1,0:nx+1))
+    vf_integr_tmp(:,:,:) = zero
     vf_integr_tmp(:,1:ny+1,1:nx)=v(:,1:ny+1,1:nx)
     call fill_halo(1,vf_integr_tmp,lbc_null='v')
-    v(:,1:ny+1,1:nx)=vf_integr_tmp(:,1:ny+1,1:nx)
+    v(:,1:ny+1,0:nx+1)=vf_integr_tmp(:,1:ny+1,0:nx+1)
     deallocate(vf_integr_tmp)
 
     do i = 1,nx
@@ -745,7 +754,7 @@ contains
     allocate(uf_tmp(1:nz,0:ny+1,0:nx+1))
     uf_tmp(:,1:ny,1:nx+1)=uf(:,1:ny,1:nx+1)
     call fill_halo(1,uf_tmp,lbc_null='u')
-    uf(:,1:ny,1:nx+1)=uf_tmp(:,1:ny,1:nx+1)
+    uf(:,0:ny+1,1:nx+1)=uf_tmp(:,0:ny+1,1:nx+1)
     deallocate(uf_tmp)
 
     do i = 1,nx
@@ -816,7 +825,7 @@ contains
     allocate(vf_tmp(1:nz,0:ny+1,0:nx+1))
     vf_tmp(:,1:ny+1,1:nx)=vf(:,1:ny+1,1:nx)
     call fill_halo(1,vf_tmp,lbc_null='v')
-    vf(:,1:ny+1,1:nx)=vf_tmp(:,1:ny+1,1:nx)
+    vf(:,1:ny+1,0:nx+1)=vf_tmp(:,1:ny+1,0:nx+1)
     deallocate(vf_tmp)
 
     !! check
